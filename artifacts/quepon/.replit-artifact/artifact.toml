@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "QUEPON — GGX Command System"
+version = "1.0.0"
+id = "artifacts/quepon"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19395
+
+[services.development]
+run = "pnpm --filter @workspace/quepon run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/quepon", "run", "build" ]
+publicDir = "artifacts/quepon/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19395"
+BASE_PATH = "/"

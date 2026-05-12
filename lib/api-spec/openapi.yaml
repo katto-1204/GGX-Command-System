@@ -1,22 +1,42 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: QUEPON GGX Command System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: pcs
+    description: PC management
+  - name: queue
+    description: Queue management
+  - name: sessions
+    description: Session management
+  - name: promos
+    description: Promos and announcements
+  - name: feedback
+    description: Feedback
+  - name: players
+    description: Player management (admin)
+  - name: wallet
+    description: Wallet operations
+  - name: orders
+    description: Menu orders
+  - name: dashboard
+    description: Dashboard stats
+  - name: menu
+    description: Menu items
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +44,833 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # --- AUTH ---
+  /auth/register:
+    post:
+      operationId: registerPlayer
+      tags: [auth]
+      summary: Register a new player account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login as player or admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  # --- PCs ---
+  /pcs:
+    get:
+      operationId: listPcs
+      tags: [pcs]
+      summary: List all PCs with their status
+      responses:
+        "200":
+          description: List of PCs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pc"
+
+  /pcs/{pcId}:
+    get:
+      operationId: getPc
+      tags: [pcs]
+      summary: Get a single PC detail
+      parameters:
+        - name: pcId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: PC detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pc"
+        "404":
+          description: Not found
+
+  /pcs/{pcId}/status:
+    patch:
+      operationId: updatePcStatus
+      tags: [pcs]
+      summary: Update PC status (admin)
+      parameters:
+        - name: pcId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PcStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pc"
+
+  # --- QUEUE ---
+  /queue:
+    get:
+      operationId: listQueueEntries
+      tags: [queue]
+      summary: List all active queue entries (admin)
+      responses:
+        "200":
+          description: Queue entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QueueEntry"
+
+    post:
+      operationId: joinQueue
+      tags: [queue]
+      summary: Join the queue (player)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueueInput"
+      responses:
+        "201":
+          description: Joined queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueEntry"
+        "400":
+          description: Already in queue or validation error
+
+  /queue/my:
+    get:
+      operationId: getMyQueueEntry
+      tags: [queue]
+      summary: Get the current player's active queue entry
+      responses:
+        "200":
+          description: My queue entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueEntry"
+        "404":
+          description: Not in queue
+
+  /queue/{queueId}/approve:
+    patch:
+      operationId: approveQueueEntry
+      tags: [queue]
+      summary: Approve a queue entry (admin)
+      parameters:
+        - name: queueId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueEntry"
+
+  /queue/{queueId}/remove:
+    patch:
+      operationId: removeQueueEntry
+      tags: [queue]
+      summary: Remove/cancel a queue entry (admin or player self)
+      parameters:
+        - name: queueId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueEntry"
+
+  /queue/{queueId}/assign:
+    patch:
+      operationId: assignQueueEntryToPc
+      tags: [queue]
+      summary: Assign queue entry to a PC and start session (admin)
+      parameters:
+        - name: queueId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignPcInput"
+      responses:
+        "200":
+          description: Assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  # --- SESSIONS ---
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List sessions (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+
+  /sessions/my:
+    get:
+      operationId: getMySession
+      tags: [sessions]
+      summary: Get the current player's active session
+      responses:
+        "200":
+          description: Active session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "404":
+          description: No active session
+
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get session detail (admin)
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{sessionId}/extend:
+    patch:
+      operationId: extendSession
+      tags: [sessions]
+      summary: Extend a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtendSessionInput"
+      responses:
+        "200":
+          description: Extended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{sessionId}/end:
+    patch:
+      operationId: endSession
+      tags: [sessions]
+      summary: End a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  # --- PROMOS ---
+  /promos:
+    get:
+      operationId: listPromos
+      tags: [promos]
+      summary: List all active promos
+      responses:
+        "200":
+          description: Promos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Promo"
+
+    post:
+      operationId: createPromo
+      tags: [promos]
+      summary: Create a promo (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromoInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Promo"
+
+  /promos/{promoId}:
+    patch:
+      operationId: updatePromo
+      tags: [promos]
+      summary: Update a promo (admin)
+      parameters:
+        - name: promoId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromoUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Promo"
+
+    delete:
+      operationId: deletePromo
+      tags: [promos]
+      summary: Delete a promo (admin)
+      parameters:
+        - name: promoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # --- ANNOUNCEMENTS ---
+  /announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [promos]
+      summary: List all active announcements
+      responses:
+        "200":
+          description: Announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+
+    post:
+      operationId: createAnnouncement
+      tags: [promos]
+      summary: Create an announcement (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+  /announcements/{announcementId}:
+    patch:
+      operationId: updateAnnouncement
+      tags: [promos]
+      summary: Update an announcement (admin)
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+    delete:
+      operationId: deleteAnnouncement
+      tags: [promos]
+      summary: Delete an announcement (admin)
+      parameters:
+        - name: announcementId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # --- FEEDBACK ---
+  /feedback:
+    get:
+      operationId: listFeedback
+      tags: [feedback]
+      summary: List all feedback (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Feedback
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feedback"
+
+    post:
+      operationId: submitFeedback
+      tags: [feedback]
+      summary: Submit feedback (player)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackInput"
+      responses:
+        "201":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+
+  /feedback/{feedbackId}/resolve:
+    patch:
+      operationId: resolveFeedback
+      tags: [feedback]
+      summary: Mark feedback as resolved (admin)
+      parameters:
+        - name: feedbackId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackResolveInput"
+      responses:
+        "200":
+          description: Resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+
+  # --- PLAYERS (admin) ---
+  /players:
+    get:
+      operationId: listPlayers
+      tags: [players]
+      summary: List all players (admin)
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /players/{userId}:
+    get:
+      operationId: getPlayer
+      tags: [players]
+      summary: Get player detail (admin)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Player
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /players/{userId}/status:
+    patch:
+      operationId: updatePlayerStatus
+      tags: [players]
+      summary: Update player status (admin)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlayerStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # --- WALLET ---
+  /wallet/topup:
+    post:
+      operationId: topUpWallet
+      tags: [wallet]
+      summary: Top up a player's wallet (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TopUpInput"
+      responses:
+        "200":
+          description: Topped up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletTransaction"
+
+  /wallet/transactions:
+    get:
+      operationId: listWalletTransactions
+      tags: [wallet]
+      summary: List wallet transactions for current player
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WalletTransaction"
+
+  # --- MENU ---
+  /menu:
+    get:
+      operationId: listMenuItems
+      tags: [menu]
+      summary: List available menu items
+      responses:
+        "200":
+          description: Menu items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItem"
+
+    post:
+      operationId: createMenuItem
+      tags: [menu]
+      summary: Create a menu item (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+
+  /menu/{itemId}:
+    patch:
+      operationId: updateMenuItem
+      tags: [menu]
+      summary: Update a menu item (admin)
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+
+    delete:
+      operationId: deleteMenuItem
+      tags: [menu]
+      summary: Delete a menu item (admin)
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # --- ORDERS ---
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders (admin sees all, player sees own)
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Place a menu order (player)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Order placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{orderId}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update order status (admin)
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # --- DASHBOARD ---
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get real-time dashboard stats (admin)
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/pc-summary:
+    get:
+      operationId: getPcSummary
+      tags: [dashboard]
+      summary: Get PC availability summary
+      responses:
+        "200":
+          description: PC summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PcSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent session/queue activity (admin)
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +881,673 @@ components:
       required:
         - status
 
+    # --- AUTH ---
+    RegisterInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+        password:
+          type: string
+          minLength: 6
+        displayName:
+          type: string
+        phone:
+          type: string
+
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user, token]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+
+    User:
+      type: object
+      required: [id, username, role, status, walletBalance, createdAt]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [player, admin, superAdmin]
+        status:
+          type: string
+          enum: [active, disabled, banned]
+        walletBalance:
+          type: number
+        totalSpent:
+          type: number
+        totalPlayTimeMinutes:
+          type: integer
+        sessionCount:
+          type: integer
+        createdAt:
+          type: string
+
+    # --- PCs ---
+    PcSpecs:
+      type: object
+      properties:
+        cpu:
+          type: string
+        gpu:
+          type: string
+        ram:
+          type: string
+        monitor:
+          type: string
+
+    Pc:
+      type: object
+      required: [id, number, label, status, tier, createdAt]
+      properties:
+        id:
+          type: string
+        number:
+          type: integer
+        label:
+          type: string
+        status:
+          type: string
+          enum: [available, inUse, maintenance, reserved, cleaning, offline]
+        tier:
+          type: string
+          enum: [standard, premium, vip]
+        specs:
+          $ref: "#/components/schemas/PcSpecs"
+        currentSessionId:
+          type: ["string", "null"]
+        currentUserId:
+          type: ["string", "null"]
+        currentUsername:
+          type: ["string", "null"]
+        remainingSeconds:
+          type: ["integer", "null"]
+        location:
+          type: string
+        maintenanceNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    PcStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [available, inUse, maintenance, reserved, cleaning, offline]
+        maintenanceNote:
+          type: ["string", "null"]
+
+    # --- QUEUE ---
+    QueueEntry:
+      type: object
+      required: [id, userId, username, status, position, joinedAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [waitingApproval, approved, waiting, assigned, cancelled, removed, noShow, completed]
+        position:
+          type: integer
+        requestedTier:
+          type: ["string", "null"]
+        preferredPcId:
+          type: ["string", "null"]
+        estimatedWaitMinutes:
+          type: ["integer", "null"]
+        approvedBy:
+          type: ["string", "null"]
+        assignedPcId:
+          type: ["string", "null"]
+        sessionId:
+          type: ["string", "null"]
+        joinedAt:
+          type: string
+        approvedAt:
+          type: ["string", "null"]
+        assignedAt:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    QueueInput:
+      type: object
+      properties:
+        requestedTier:
+          type: string
+        preferredPcId:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    AssignPcInput:
+      type: object
+      required: [pcId]
+      properties:
+        pcId:
+          type: string
+        durationMinutes:
+          type: integer
+
+    # --- SESSIONS ---
+    Session:
+      type: object
+      required: [id, userId, username, pcId, status, ratePerHour, durationMinutes, startedAt, endsAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        pcId:
+          type: string
+        pcLabel:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, active, locked, extended, completed, cancelled, abandoned]
+        ratePerHour:
+          type: number
+        durationMinutes:
+          type: integer
+        extendedMinutes:
+          type: integer
+        startedAt:
+          type: string
+        endsAt:
+          type: string
+        endedAt:
+          type: ["string", "null"]
+        remainingSeconds:
+          type: ["integer", "null"]
+        costSoFar:
+          type: number
+        finalCost:
+          type: ["number", "null"]
+        paymentSource:
+          type: string
+        queueId:
+          type: ["string", "null"]
+        isLocked:
+          type: boolean
+        createdAt:
+          type: string
+
+    ExtendSessionInput:
+      type: object
+      required: [additionalMinutes]
+      properties:
+        additionalMinutes:
+          type: integer
+          minimum: 15
+
+    # --- PROMOS ---
+    Promo:
+      type: object
+      required: [id, title, description, tag, isActive, displayPriority, createdAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        tag:
+          type: string
+          enum: [discount, announcement, event, loyalty, maintenance, pricing]
+        isActive:
+          type: boolean
+        displayPriority:
+          type: integer
+        startsAt:
+          type: ["string", "null"]
+        endsAt:
+          type: ["string", "null"]
+        createdBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    PromoInput:
+      type: object
+      required: [title, description, tag]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        tag:
+          type: string
+        isActive:
+          type: boolean
+        displayPriority:
+          type: integer
+        startsAt:
+          type: ["string", "null"]
+        endsAt:
+          type: ["string", "null"]
+
+    PromoUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        tag:
+          type: string
+        isActive:
+          type: boolean
+        displayPriority:
+          type: integer
+        startsAt:
+          type: ["string", "null"]
+        endsAt:
+          type: ["string", "null"]
+
+    # --- ANNOUNCEMENTS ---
+    Announcement:
+      type: object
+      required: [id, title, body, type, isActive, priority, createdAt]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        type:
+          type: string
+          enum: [general, maintenance, pricing, event, system]
+        isActive:
+          type: boolean
+        priority:
+          type: string
+          enum: [low, normal, high, urgent]
+        expiresAt:
+          type: ["string", "null"]
+        createdBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AnnouncementInput:
+      type: object
+      required: [title, body, type]
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        type:
+          type: string
+        isActive:
+          type: boolean
+        priority:
+          type: string
+        expiresAt:
+          type: ["string", "null"]
+
+    AnnouncementUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        type:
+          type: string
+        isActive:
+          type: boolean
+        priority:
+          type: string
+        expiresAt:
+          type: ["string", "null"]
+
+    # --- FEEDBACK ---
+    Feedback:
+      type: object
+      required: [id, category, message, status, isAnonymous, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        category:
+          type: string
+          enum: [issue, suggestion, general, complaint, featureRequest]
+        message:
+          type: string
+        relatedPcId:
+          type: ["string", "null"]
+        relatedSessionId:
+          type: ["string", "null"]
+        isAnonymous:
+          type: boolean
+        status:
+          type: string
+          enum: [open, reviewing, resolved, closed, escalated]
+        assignedTo:
+          type: ["string", "null"]
+        resolvedBy:
+          type: ["string", "null"]
+        resolutionNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        resolvedAt:
+          type: ["string", "null"]
+
+    FeedbackInput:
+      type: object
+      required: [category, message]
+      properties:
+        category:
+          type: string
+        message:
+          type: string
+        relatedPcId:
+          type: ["string", "null"]
+        relatedSessionId:
+          type: ["string", "null"]
+        isAnonymous:
+          type: boolean
+
+    FeedbackResolveInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+        resolutionNote:
+          type: ["string", "null"]
+
+    # --- PLAYERS ---
+    PlayerStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, disabled, banned]
+
+    # --- WALLET ---
+    WalletTransaction:
+      type: object
+      required: [id, userId, type, amount, previousBalance, newBalance, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [topUp, sessionCharge, orderCharge, refund, adjustment]
+        amount:
+          type: number
+        previousBalance:
+          type: number
+        newBalance:
+          type: number
+        paymentMethod:
+          type: ["string", "null"]
+        sessionId:
+          type: ["string", "null"]
+        orderId:
+          type: ["string", "null"]
+        processedBy:
+          type: ["string", "null"]
+        adminNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TopUpInput:
+      type: object
+      required: [userId, amount, paymentMethod]
+      properties:
+        userId:
+          type: string
+        amount:
+          type: number
+          minimum: 1
+        paymentMethod:
+          type: string
+          enum: [cash, gcash, maya, card, manualAdjustment]
+        adminNote:
+          type: ["string", "null"]
+
+    # --- MENU ---
+    MenuItem:
+      type: object
+      required: [id, name, category, price, isAvailable, displayOrder, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+          enum: [drinks, snacks, meals, services, others]
+        price:
+          type: number
+        imageUrl:
+          type: ["string", "null"]
+        isAvailable:
+          type: boolean
+        displayOrder:
+          type: integer
+        createdAt:
+          type: string
+
+    MenuItemInput:
+      type: object
+      required: [name, category, price]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+        price:
+          type: number
+        isAvailable:
+          type: boolean
+        displayOrder:
+          type: integer
+
+    MenuItemUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        category:
+          type: string
+        price:
+          type: number
+        isAvailable:
+          type: boolean
+        displayOrder:
+          type: integer
+
+    # --- ORDERS ---
+    OrderItem:
+      type: object
+      required: [itemId, name, quantity, price, subtotal]
+      properties:
+        itemId:
+          type: string
+        name:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+        subtotal:
+          type: number
+
+    Order:
+      type: object
+      required: [id, userId, username, status, items, totalAmount, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        sessionId:
+          type: ["string", "null"]
+        pcId:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, accepted, preparing, served, cancelled, rejected]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        totalAmount:
+          type: number
+        paymentSource:
+          type: string
+        acceptedBy:
+          type: ["string", "null"]
+        servedBy:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        acceptedAt:
+          type: ["string", "null"]
+        servedAt:
+          type: ["string", "null"]
+        cancelledAt:
+          type: ["string", "null"]
+
+    OrderInput:
+      type: object
+      required: [items]
+      properties:
+        sessionId:
+          type: ["string", "null"]
+        pcId:
+          type: ["string", "null"]
+        items:
+          type: array
+          items:
+            type: object
+            required: [itemId, quantity]
+            properties:
+              itemId:
+                type: string
+              quantity:
+                type: integer
+
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [accepted, preparing, served, cancelled, rejected]
+
+    # --- DASHBOARD ---
+    DashboardStats:
+      type: object
+      required: [totalPcs, availablePcs, inUsePcs, maintenancePcs, queueCount, activeSessions, openFeedbackCount, pendingOrdersCount]
+      properties:
+        totalPcs:
+          type: integer
+        availablePcs:
+          type: integer
+        inUsePcs:
+          type: integer
+        maintenancePcs:
+          type: integer
+        queueCount:
+          type: integer
+        activeSessions:
+          type: integer
+        openFeedbackCount:
+          type: integer
+        pendingOrdersCount:
+          type: integer
+        totalRevenueTodayCents:
+          type: number
+
+    PcSummary:
+      type: object
+      required: [available, inUse, maintenance, reserved, offline, total]
+      properties:
+        available:
+          type: integer
+        inUse:
+          type: integer
+        maintenance:
+          type: integer
+        reserved:
+          type: integer
+        offline:
+          type: integer
+        total:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, message, createdAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        username:
+          type: ["string", "null"]
+        pcLabel:
+          type: ["string", "null"]
+        createdAt:
+          type: string

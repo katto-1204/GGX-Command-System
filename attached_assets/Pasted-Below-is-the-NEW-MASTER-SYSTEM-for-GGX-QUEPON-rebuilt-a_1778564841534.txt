@@ -1,0 +1,1701 @@
+Below is the NEW MASTER SYSTEM for GGX / QUEPON, rebuilt as a stronger product system with PRD, MVP scope, full feature set, and Firebase database schema. It is based on your uploaded QUEPON paper, current Level 3 UI/UX system, and screen-by-screen design prompts.
+GGX / QUEPON NEW MASTER SYSTEM
+1. Product Requirements Document
+Product Name
+QUEPON
+Full Title
+QUEPON: A Web-Based Computer Shop Management System with Smart Queueing, AI Assistance, Real-Time PC Monitoring, Session Tracking, Wallet Credits, Menu Ordering, and Admin Control for GGX Computer Shop
+Product Vision
+QUEPON is a smart computer shop management system designed to make GGX more organized, transparent, and efficient. It replaces manual PC tracking, verbal queueing, and scattered communication with one centralized platform where players can check PC availability, join queues, manage sessions, view promos, order from the menu, and receive assistance.
+For administrators, QUEPON provides a real-time control center for PC monitoring, queue approval, session assignment, wallet top-ups, promo management, feedback handling, reports, and incident tracing.
+Product Goal
+To create a user-centered and admin-controlled system that improves the computer shop experience through real-time visibility, structured queueing, automated session handling, and simplified shop operations.
+Target Users
+Player
+A customer who uses GGX Computer Shop services.
+Main needs:
+See available PCs before asking staff
+Join the queue without confusion
+Know their queue position
+Check their assigned PC
+Track remaining session time
+Extend session when possible
+View promos and shop updates
+Order food or services
+Send feedback or report issues
+Administrator
+The staff or shop operator who manages GGX operations.
+Main needs:
+Monitor all PCs in real time
+Approve queue entries
+Assign players to PCs
+Start, extend, lock, or end sessions
+Set PCs as available, occupied, or maintenance
+Manage player accounts
+Add wallet credits
+Update promos and announcements
+View feedback and reports
+Investigate flagged incidents using logs
+Main Problem
+GGX currently faces problems caused by manual and informal shop management.
+User Problems
+Players do not know which PCs are available
+Players rely on staff for updates
+Queueing can feel unclear or unfair
+Session details are not easily visible
+Promos, rates, and updates are not centralized
+Admin Problems
+Staff manually monitor PCs and users
+Queue handling becomes harder during peak hours
+Repetitive questions consume staff time
+Session assignment can be inconsistent
+Records are harder to track without a central system
+System Problems
+No centralized management dashboard
+No real-time PC visibility
+No structured session flow
+No automated queue status
+No strong error prevention and feedback system
+Proposed Solution
+QUEPON introduces a centralized web-based platform with two main systems:
+Player App
+Designed for customers
+Mobile-first and kiosk-friendly
+Focused on availability, queueing, session tracking, wallet, menu, promos, and feedback
+Admin Panel
+Designed for GGX staff
+Desktop-first control center
+Focused on monitoring, approvals, PC assignment, wallet top-up, reports, promos, feedback, and incident tracing
+Product Principles
+1. Visibility First
+Users should always know what is happening.
+Examples:
+PC status is visible
+Queue count is visible
+Session timer is visible
+Remaining time is visible
+Wallet balance is visible
+Admin actions update in real time
+2. Reduce Staff Dependency
+Players should not need to ask staff for every basic question.
+Examples:
+Check PC status
+Join queue
+View queue position
+View rates
+View promos
+Ask AI assistant
+Submit feedback
+3. Admin Has Final Control
+The system gives freedom to users, but critical actions remain controlled by staff.
+Examples:
+Queue entries require admin approval
+PC assignment is admin-controlled
+Wallet credits are admin-loaded
+Session extensions can be approved or restricted
+Maintenance mode is admin-managed
+4. Real-Time System Behavior
+The system should update without needing manual refresh.
+Examples:
+PC availability changes live
+Queue movement updates live
+Session timers update live
+Admin dashboard updates live
+Feedback and orders appear live
+5. Error Prevention
+The system should prevent mistakes before they happen.
+Examples:
+Prevent duplicate queue entries
+Confirm session ending
+Warn before time expires
+Validate login and QR check-in
+Restrict admin-only actions
+Log important actions
+
+2. MVP Scope
+The MVP is the first usable version of QUEPON. It should focus only on the features needed to prove that the system works for GGX.
+MVP Objective
+To launch a functional system that allows players to view PC availability, join a queue, check session status, and allows admins to manage PCs, queues, and sessions in real time.
+MVP User Roles
+Player
+Register
+Login
+View home dashboard
+View PC availability
+Join queue
+Check queue position
+Check assigned PC
+View active session
+Submit feedback
+View promos and announcements
+Admin
+Login
+View dashboard
+Manage PC status
+View queue list
+Approve or remove queue entries
+Assign player to PC
+Start session
+End session
+Extend session
+View feedback
+Manage promos and announcements
+MVP Features
+Player MVP Features
+1. Authentication
+Players can create an account and log in.
+Included:
+Username
+Password
+Confirm password
+Remember me
+Forgot password placeholder
+Basic account profile
+2. Home Dashboard
+The player sees a simple control hub.
+Displays:
+Available PC count
+Queue count
+Active session status
+Promo banner
+Quick actions
+Quick actions:
+View PCs
+Join Queue
+My Session
+Promos
+3. PC Availability
+Players can view all PCs in a grid.
+PC statuses:
+Available
+In Use
+Maintenance
+Each PC card shows:
+PC number
+Status
+Remaining time if occupied
+Maintenance label if unavailable
+4. Queue System
+Players can join a digital queue.
+Includes:
+Join queue button
+Current number of people waiting
+Player queue position
+Queue status
+Queue statuses:
+Waiting for approval
+Approved
+Assigned
+Cancelled
+Completed
+5. Session Status
+Players can view their active session.
+Shows:
+Assigned PC
+Start time
+Duration
+Remaining time
+Session status
+Actions:
+Request extension
+End session request or logout
+6. Info and Promos
+Players can view:
+Pricing
+Promos
+Announcements
+Shop rules
+Maintenance notices
+7. Feedback
+Players can submit feedback.
+Fields:
+Category
+Message
+Optional image placeholder
+Anonymous option
+Categories:
+General feedback
+Report issue
+Feature request
+Admin MVP Features
+1. Admin Login
+Admin account access with role-based permission.
+2. Admin Dashboard
+Displays:
+Total PCs
+Available PCs
+In-use PCs
+Maintenance PCs
+Queue count
+Active sessions
+3. PC Management
+Admins can update PC status.
+Actions:
+Set available
+Set in use
+Set maintenance
+Reset PC state
+4. Queue Management
+Admins can manage queue entries.
+Actions:
+Approve player
+Remove player
+Mark no-show
+Assign to PC
+5. Session Management
+Admins can:
+Start session
+Extend session
+End session
+Lock session
+View session details
+6. Promo and Announcement Management
+Admins can:
+Create promo
+Edit promo
+Disable promo
+Post announcement
+7. Feedback Management
+Admins can:
+View feedback
+Mark as reviewed
+Mark as resolved
+MVP Exclusions
+These are not required in the first release:
+AI assistant
+Predictive wait time
+Wallet system
+Menu ordering
+Anti-theft investigation timeline
+Analytics reports
+Offline mode
+QR check-in
+Heatmap
+Advanced charts
+Push notifications
+Multi-branch support
+
+3. Full Feature Set
+The full system includes everything from the MVP plus advanced features.
+A. Player Features
+1. Splash Screen
+Purpose:
+Establish GGX branding
+Create a premium first impression
+Load app state
+Elements:
+GGX logo
+System subtitle
+Loading animation
+Dark background with purple glow
+2. Onboarding
+Purpose:
+Explain the system before login
+Slides:
+Real-time PC monitoring
+Smart queueing
+Session tracking
+3. Login Selection
+Player chooses:
+Player login
+Admin access
+4. Player Login
+Includes:
+Username
+Password
+Remember me
+Forgot password
+Sign in
+Register link
+5. Registration
+Includes:
+Username
+Password
+Confirm password
+Optional phone number
+Optional display name
+6. Home Control Hub
+Displays:
+Greeting
+Available PC count
+Queue count
+Active sessions
+Wallet balance
+Promo banner
+Quick actions
+AI suggestion strip
+Quick actions:
+View PCs
+Join Queue
+Scan QR
+My Session
+Wallet
+Menu
+Feedback
+7. PC Availability
+Displays all PCs with visual status indicators.
+Statuses:
+Available
+In Use
+Maintenance
+Reserved
+Cleaning
+Offline
+Card details:
+PC ID
+Status
+Current timer
+PC tier
+Estimated availability
+Spec label
+Interactions:
+Tap to view details
+Filter by status
+Filter by tier
+View recommended PC
+8. Queue System
+Allows player to join queue and track position.
+Features:
+Queue count
+User position
+Wait estimate
+Queue status
+Leave queue
+Queue movement animation
+Admin approval state
+Queue rules:
+One active queue entry per user
+Queue entry expires if not confirmed
+Admin can remove no-show players
+Priority queue can be admin-controlled
+9. QR Check-In
+Allows users to validate their presence.
+Methods:
+Scan QR code
+Enter session code manually
+States:
+Scanning
+Success
+Error
+Expired code
+Already checked in
+10. My Session
+Shows active session details.
+Displays:
+Assigned PC
+Start time
+End time
+Remaining time
+Rate
+Cost so far
+Wallet balance
+Session status
+Actions:
+Extend time
+Lock PC
+Order food
+Report issue
+End session
+Warnings:
+10-minute warning
+5-minute warning
+Low wallet warning
+Session ended alert
+11. Wallet
+Allows users to view credit balance.
+Displays:
+Wallet balance
+Playtime equivalent
+Transaction history
+Top-up history
+Session charges
+Player cannot directly add credits unless online payment is enabled.
+12. Menu Ordering
+Allows players to order items while in session.
+Features:
+Menu categories
+Item list
+Add to cart
+Floating cart
+Checkout
+Order status
+Order statuses:
+Pending
+Accepted
+Preparing
+Served
+Cancelled
+13. Info and Promos
+Displays:
+Standard pricing
+Happy hour promos
+Weekend deals
+Loyalty offers
+Announcements
+Shop rules
+Maintenance notices
+14. Profile
+Displays:
+Username
+Avatar
+Wallet balance
+Session history
+Total time played
+Total spent
+Settings
+Change password
+Logout
+15. Feedback
+Allows users to submit structured feedback.
+Categories:
+Issue
+Suggestion
+General
+Fields:
+Message
+Image attachment
+Anonymous toggle
+Related PC
+Related session
+16. AI Assistant
+A floating chat assistant for common shop questions.
+Can answer:
+Rates
+Available PCs
+Queue position
+Promo details
+Basic troubleshooting
+Session rules
+Wallet questions
+Limits:
+Cannot perform admin actions
+Cannot expose private user data
+Cannot override queue order
+Cannot assign PCs
+
+B. Admin Features
+1. Admin Dashboard
+Displays:
+Available PCs
+In-use PCs
+Maintenance PCs
+Queue count
+Active sessions
+Revenue summary
+Feedback count
+Orders count
+Widgets:
+KPI cards
+AI insight bar
+PC status chart
+Recent sessions table
+Queue preview
+Revenue chart
+2. PC Management
+Admins can view and control all PCs.
+Actions:
+Set available
+Set maintenance
+Reset PC
+Assign player
+End session
+Extend session
+Send warning
+Lock PC
+PC card details:
+PC ID
+Status
+Current user
+Time remaining
+Tier
+Last activity
+Maintenance notes
+3. Bulk PC Actions
+Admins can select multiple PCs.
+Bulk actions:
+Set maintenance
+Reset status
+Send warning
+Mark available
+Apply shop-wide notice
+4. PC Detail View
+Shows deep information per PC.
+Displays:
+Current user
+Session timer
+Wallet charge
+Activity log
+Recent warnings
+Maintenance history
+5. Queue Control
+Admins can manage queue flow.
+Actions:
+Approve queue entry
+Remove queue entry
+Mark no-show
+Assign priority
+Assign PC
+Pause queue
+Resume queue
+6. Assign PC Panel
+A split-screen admin workflow.
+Left side:
+Waiting players
+Right side:
+Available PCs
+Action:
+Select player
+Select PC
+Confirm assignment
+7. Session Management
+Admins can manage session lifecycle.
+Session actions:
+Start
+Pause
+Extend
+Lock
+End
+Mark completed
+Mark abandoned
+8. Player Management
+Admins can view player accounts.
+Features:
+Search players
+Filter by status
+View wallet
+View sessions
+View feedback history
+Top up wallet
+Disable account
+Reset password
+9. Top-Up Credits
+Admins can load wallet credits.
+Fields:
+Player
+Amount
+Payment method
+Admin note
+Payment methods:
+Cash
+GCash
+Maya
+Card
+Outputs:
+Receipt record
+Wallet transaction
+Admin log
+10. Reports and Analytics
+Displays operational insights.
+Reports:
+Daily revenue
+Weekly revenue
+Peak hours
+PC utilization
+Queue volume
+Average wait time
+Session duration
+Most used PCs
+Feedback trends
+11. Anti-Theft and Incident Timeline
+Admin-only investigation module.
+Purpose:
+Help reconstruct what happened during an incident
+Link PC usage, timestamps, user sessions, and admin notes
+Data shown:
+Session start
+Assigned PC
+Logged-in user
+Time activity
+Abrupt session end
+Admin flag
+Related CCTV timestamp reference
+Resolution note
+Important privacy rule:
+This feature must be accessible only to authorized admins.
+It should not publicly expose player information.
+It should only assist investigation using system logs and admin-entered references.
+12. Feedback Admin
+Admins can manage user feedback.
+Actions:
+View ticket
+Reply
+Resolve
+Escalate
+Link to PC
+Link to session
+13. Promo Manager
+Admins can create and control promos.
+Fields:
+Promo title
+Description
+Tag
+Start date
+End date
+Active status
+Display priority
+14. Content Manager
+Admins can update:
+Announcements
+Shop rules
+Pricing
+Available games
+Services
+Maintenance alerts
+15. Settings
+Admin can configure system rules.
+Session settings:
+Default session duration
+Low-time warning
+Auto-end behavior
+Extension rules
+Queue settings:
+Require admin approval
+Enable priority queue
+Auto-remove no-show
+Queue pause mode
+Notification settings:
+Session warning
+Queue update
+Feedback alert
+Order alert
+
+4. UI/UX Master System
+Design Direction
+QUEPON should feel like a premium gaming control system, not a basic school project dashboard.
+The interface should be:
+Dark
+Glass-like
+Clean
+Fast
+Mobile-first for players
+Desktop-first for admins
+Real-time
+Card-based
+Easy to scan
+Strong in visual feedback
+Visual Identity
+Main Style
+Dark futuristic glass UI with neon purple accents.
+Color System
+Background
+Main background: #07070D
+Deep background: #0A0A0F
+Panel background: rgba(255,255,255,0.04)
+Strong surface: rgba(255,255,255,0.07)
+Borders
+Default border: rgba(255,255,255,0.08)
+Active border: rgba(167,139,250,0.55)
+Accent Colors
+Primary purple: #7C3AED
+Light purple: #A78BFA
+Success green: #22C55E
+Danger red: #EF4444
+Warning yellow: #F59E0B
+Info blue: #38BDF8
+Typography
+Recommended Fonts
+Display font: Syne
+Interface font: Inter
+Type Scale
+Hero: 38 to 44px
+Page title: 28 to 32px
+Section title: 20 to 24px
+Card title: 16 to 18px
+Body: 14 to 16px
+Micro label: 10 to 12px
+Layout Rules
+Base Grid
+Use 8px spacing system
+Mobile
+Padding: 16px
+Single-column layout
+Bottom pill navigation
+Large touch targets
+Tablet
+Padding: 24px
+Two-column grids
+Adaptive cards
+Desktop
+Padding: 32 to 48px
+Admin sidebar
+Multi-panel layout
+Maximum width: 1440px
+Navigation
+Player Navigation
+Use bottom floating pill navigation.
+Tabs:
+Home
+PCs
+Queue
+Session
+Profile
+Behavior:
+Active tab expands
+Active tab shows label and icon
+Inactive tab shows icon only
+Active state uses purple glow
+Movement should feel smooth, not instant
+Admin Navigation
+Use fixed sidebar.
+Sections:
+Dashboard
+PCs
+Queue
+Assign PC
+Players
+Sessions
+Top-Up
+Orders
+Reports
+Anti-Theft
+Feedback
+Promos
+Settings
+Motion System
+Micro Interactions
+Duration: 150 to 200ms
+Used for:
+Button hover
+Card hover
+Input focus
+Status change
+Page Transitions
+Duration: 250 to 350ms
+Used for:
+Screen change
+Modal open
+Drawer open
+Login transition
+Motion Patterns
+Fade in
+Slide up
+Scale in
+Soft glow pulse
+Queue card movement
+Timer progress animation
+Modal blur background
+Component System
+Core Components
+Glass card
+Status pill
+Floating pill navigation
+PC card
+Queue card
+Session timer
+Wallet balance card
+Promo card
+Admin KPI card
+Data table
+Confirmation modal
+Bottom sheet
+Toast alert
+AI assistant drawer
+Status Design
+Available
+Green border
+Green dot
+Subtle pulse
+Label: Available
+In Use
+Red border
+Timer overlay
+Red dot
+Label: In Use
+Maintenance
+Yellow border
+Striped overlay
+Label: Maintenance
+Reserved
+Purple border
+Label: Reserved
+Offline
+Gray border
+Label: Offline
+
+5. Firebase Database Schema
+This schema uses:
+Firebase Authentication
+Cloud Firestore
+Firebase Storage
+Cloud Functions
+Firebase Hosting
+Firebase Cloud Messaging
+A. Firebase Authentication
+Used for:
+Player login
+Admin login
+Role validation
+Auth provider:
+Email and password
+Optional phone auth later
+Optional QR/session code validation later
+Each Firebase Auth user should have a matching document in:
+users/{userId}
+
+B. Firestore Collections
+1. users
+Path:
+users/{userId}
+Purpose:
+Stores player and admin profile data.
+{
+  uid: "user_001",
+  role: "player", 
+  username: "xander",
+  displayName: "Xander",
+  email: "xander@example.com",
+  phone: "09123456789",
+
+  avatarUrl: null,
+
+  status: "active",
+  isOnline: true,
+
+  walletBalance: 280,
+  totalSpent: 1250,
+  totalPlayTimeMinutes: 720,
+  sessionCount: 18,
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp,
+  lastLoginAt: Timestamp
+}
+
+Allowed roles:
+"player"
+"admin"
+"superAdmin"
+
+Allowed statuses:
+"active"
+"disabled"
+"banned"
+"deleted"
+
+
+2. pcs
+Path:
+pcs/{pcId}
+Purpose:
+Stores every computer unit in GGX.
+{
+  pcId: "PC-01",
+  number: 1,
+  label: "PC-01",
+
+  status: "available",
+  tier: "standard",
+
+  specs: {
+    cpu: "Intel i5",
+    gpu: "GTX 1660",
+    ram: "16GB",
+    monitor: "144Hz"
+  },
+
+  currentSessionId: null,
+  currentUserId: null,
+
+  location: "Main Area",
+  isKioskEnabled: true,
+
+  maintenanceNote: null,
+  lastMaintenanceAt: null,
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+Allowed PC statuses:
+"available"
+"inUse"
+"maintenance"
+"reserved"
+"cleaning"
+"offline"
+
+Allowed tiers:
+"standard"
+"premium"
+"vip"
+
+
+3. queueEntries
+Path:
+queueEntries/{queueId}
+Purpose:
+Stores player queue entries.
+{
+  queueId: "queue_001",
+  userId: "user_001",
+  username: "xander",
+
+  status: "waitingApproval",
+  position: 3,
+
+  requestedTier: "standard",
+  preferredPcId: null,
+
+  estimatedWaitMinutes: 15,
+  confidencePercent: 82,
+
+  approvedBy: null,
+  assignedPcId: null,
+  sessionId: null,
+
+  joinedAt: Timestamp,
+  approvedAt: null,
+  assignedAt: null,
+  cancelledAt: null,
+  completedAt: null,
+
+  noShowAt: null,
+  notes: null
+}
+
+Allowed queue statuses:
+"waitingApproval"
+"approved"
+"waiting"
+"assigned"
+"cancelled"
+"removed"
+"noShow"
+"completed"
+
+Indexes needed:
+status ASC, position ASC
+userId ASC, status ASC
+joinedAt DESC
+
+
+4. sessions
+Path:
+sessions/{sessionId}
+Purpose:
+Stores active and completed PC usage sessions.
+{
+  sessionId: "session_001",
+
+  userId: "user_001",
+  username: "xander",
+
+  pcId: "PC-07",
+
+  status: "active",
+
+  ratePerHour: 30,
+  durationMinutes: 60,
+  extendedMinutes: 0,
+
+  startedAt: Timestamp,
+  endsAt: Timestamp,
+  endedAt: null,
+
+  remainingSeconds: 3600,
+
+  costSoFar: 0,
+  finalCost: null,
+
+  paymentSource: "wallet",
+
+  queueId: "queue_001",
+
+  startedBy: "admin_001",
+  endedBy: null,
+
+  isLocked: false,
+  lockReason: null,
+
+  warningsSent: {
+    tenMinute: false,
+    fiveMinute: false,
+    expired: false
+  },
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+Allowed session statuses:
+"pending"
+"active"
+"locked"
+"extended"
+"completed"
+"cancelled"
+"abandoned"
+
+Indexes needed:
+userId ASC, startedAt DESC
+pcId ASC, status ASC
+status ASC, endsAt ASC
+
+
+5. sessionLogs
+Path:
+sessions/{sessionId}/logs/{logId}
+Purpose:
+Stores timeline events inside a session.
+{
+  logId: "log_001",
+  type: "sessionStarted",
+
+  message: "Session started on PC-07",
+  actorId: "admin_001",
+  actorRole: "admin",
+
+  metadata: {
+    pcId: "PC-07",
+    userId: "user_001"
+  },
+
+  createdAt: Timestamp
+}
+
+Allowed log types:
+"sessionStarted"
+"sessionExtended"
+"sessionLocked"
+"sessionUnlocked"
+"warningSent"
+"sessionEnded"
+"pcChanged"
+"adminNote"
+"systemAlert"
+
+
+6. walletTransactions
+Path:
+walletTransactions/{transactionId}
+Purpose:
+Tracks wallet top-ups and charges.
+{
+  transactionId: "wallet_txn_001",
+
+  userId: "user_001",
+  username: "xander",
+
+  type: "topUp",
+  amount: 100,
+
+  previousBalance: 180,
+  newBalance: 280,
+
+  paymentMethod: "cash",
+
+  sessionId: null,
+  orderId: null,
+
+  processedBy: "admin_001",
+  adminNote: "Cash top-up at counter",
+
+  createdAt: Timestamp
+}
+
+Allowed transaction types:
+"topUp"
+"sessionCharge"
+"orderCharge"
+"refund"
+"adjustment"
+
+Allowed payment methods:
+"cash"
+"gcash"
+"maya"
+"card"
+"wallet"
+"manualAdjustment"
+
+Indexes needed:
+userId ASC, createdAt DESC
+type ASC, createdAt DESC
+
+
+7. menuItems
+Path:
+menuItems/{itemId}
+Purpose:
+Stores food, drinks, and services.
+{
+  itemId: "item_001",
+
+  name: "Iced Coffee",
+  description: "Cold coffee drink",
+  category: "drinks",
+
+  price: 45,
+  imageUrl: null,
+
+  isAvailable: true,
+  displayOrder: 1,
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+Allowed categories:
+"drinks"
+"snacks"
+"meals"
+"services"
+"others"
+
+
+8. orders
+Path:
+orders/{orderId}
+Purpose:
+Stores player menu orders.
+{
+  orderId: "order_001",
+
+  userId: "user_001",
+  username: "xander",
+
+  sessionId: "session_001",
+  pcId: "PC-07",
+
+  status: "pending",
+
+  items: [
+    {
+      itemId: "item_001",
+      name: "Iced Coffee",
+      quantity: 1,
+      price: 45,
+      subtotal: 45
+    }
+  ],
+
+  totalAmount: 45,
+  paymentSource: "wallet",
+
+  acceptedBy: null,
+  servedBy: null,
+
+  createdAt: Timestamp,
+  acceptedAt: null,
+  servedAt: null,
+  cancelledAt: null
+}
+
+Allowed order statuses:
+"pending"
+"accepted"
+"preparing"
+"served"
+"cancelled"
+"rejected"
+
+Indexes needed:
+status ASC, createdAt DESC
+userId ASC, createdAt DESC
+sessionId ASC
+
+
+9. promos
+Path:
+promos/{promoId}
+Purpose:
+Stores promos and deals.
+{
+  promoId: "promo_001",
+
+  title: "Happy Hour",
+  description: "Discounted playtime from 1 PM to 4 PM",
+  tag: "discount",
+
+  isActive: true,
+  displayPriority: 1,
+
+  startsAt: Timestamp,
+  endsAt: Timestamp,
+
+  createdBy: "admin_001",
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+Allowed tags:
+"discount"
+"announcement"
+"event"
+"loyalty"
+"maintenance"
+"pricing"
+
+
+10. announcements
+Path:
+announcements/{announcementId}
+Purpose:
+Stores shop-wide messages.
+{
+  announcementId: "announce_001",
+
+  title: "Maintenance Notice",
+  body: "PC-05 will be unavailable today.",
+  type: "maintenance",
+
+  isActive: true,
+  priority: "normal",
+
+  createdBy: "admin_001",
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp,
+  expiresAt: Timestamp
+}
+
+Allowed announcement types:
+"general"
+"maintenance"
+"pricing"
+"event"
+"system"
+
+Allowed priorities:
+"low"
+"normal"
+"high"
+"urgent"
+
+
+11. feedback
+Path:
+feedback/{feedbackId}
+Purpose:
+Stores player feedback and issue reports.
+{
+  feedbackId: "feedback_001",
+
+  userId: "user_001",
+  username: "xander",
+
+  category: "issue",
+  message: "Mouse on PC-07 is not working properly.",
+
+  imageUrl: null,
+
+  relatedPcId: "PC-07",
+  relatedSessionId: "session_001",
+
+  isAnonymous: false,
+
+  status: "open",
+
+  assignedTo: null,
+  resolvedBy: null,
+  resolutionNote: null,
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp,
+  resolvedAt: null
+}
+
+Allowed categories:
+"issue"
+"suggestion"
+"general"
+"complaint"
+"featureRequest"
+
+Allowed statuses:
+"open"
+"reviewing"
+"resolved"
+"closed"
+"escalated"
+
+Indexes needed:
+status ASC, createdAt DESC
+category ASC, createdAt DESC
+userId ASC, createdAt DESC
+
+
+12. aiMessages
+Path:
+aiMessages/{messageId}
+Purpose:
+Stores AI assistant conversations if chat history is enabled.
+{
+  messageId: "ai_msg_001",
+
+  userId: "user_001",
+  role: "user",
+
+  message: "How many PCs are available?",
+  response: "There are 3 PCs currently available.",
+
+  context: {
+    availablePcCount: 3,
+    queueCount: 5
+  },
+
+  createdAt: Timestamp
+}
+
+Allowed roles:
+"user"
+"assistant"
+"system"
+
+
+13. incidentReports
+Path:
+incidentReports/{incidentId}
+Purpose:
+Stores admin-created incident cases.
+{
+  incidentId: "incident_001",
+
+  title: "Missing headset report",
+  description: "Headset reported missing near PC-07.",
+
+  status: "open",
+  severity: "medium",
+
+  relatedPcId: "PC-07",
+  relatedUserId: "user_001",
+  relatedSessionId: "session_001",
+
+  cctvReference: {
+    cameraId: "CAM-01",
+    startTime: Timestamp,
+    endTime: Timestamp,
+    note: "Check footage between 4:10 PM and 4:30 PM"
+  },
+
+  timeline: [
+    {
+      label: "Session started",
+      time: Timestamp,
+      type: "session"
+    },
+    {
+      label: "Item reported missing",
+      time: Timestamp,
+      type: "alert"
+    }
+  ],
+
+  createdBy: "admin_001",
+  resolvedBy: null,
+  resolutionNote: null,
+
+  createdAt: Timestamp,
+  updatedAt: Timestamp,
+  resolvedAt: null
+}
+
+Allowed incident statuses:
+"open"
+"investigating"
+"resolved"
+"closed"
+"falseAlarm"
+
+Allowed severity:
+"low"
+"medium"
+"high"
+"critical"
+
+
+14. auditLogs
+Path:
+auditLogs/{auditId}
+Purpose:
+Stores important admin and system actions.
+{
+  auditId: "audit_001",
+
+  actorId: "admin_001",
+  actorRole: "admin",
+
+  action: "assignedPc",
+  targetType: "session",
+  targetId: "session_001",
+
+  description: "Admin assigned user_001 to PC-07",
+
+  metadata: {
+    userId: "user_001",
+    pcId: "PC-07"
+  },
+
+  createdAt: Timestamp
+}
+
+Important tracked actions:
+"login"
+"logout"
+"createdQueueEntry"
+"approvedQueueEntry"
+"removedQueueEntry"
+"assignedPc"
+"startedSession"
+"extendedSession"
+"endedSession"
+"lockedSession"
+"topUpWallet"
+"createdPromo"
+"updatedPcStatus"
+"resolvedFeedback"
+"createdIncident"
+
+
+15. systemSettings
+Path:
+systemSettings/main
+Purpose:
+Stores global shop settings.
+{
+  shopName: "GGX Computer Shop",
+
+  defaultRatePerHour: 30,
+  defaultSessionMinutes: 60,
+
+  queueRequiresApproval: true,
+  allowPlayerExtensionRequest: true,
+  allowWalletPayments: true,
+  allowMenuOrders: true,
+
+  warningMinutesBeforeEnd: [10, 5],
+
+  noShowLimitMinutes: 5,
+
+  maintenanceMode: false,
+
+  updatedBy: "admin_001",
+  updatedAt: Timestamp
+}
+
+
+6. Firebase Storage Structure
+Used for uploaded files and images.
+/profileImages/{userId}/avatar.jpg
+/feedbackImages/{feedbackId}/{fileName}
+/menuItems/{itemId}/{fileName}
+/promoImages/{promoId}/{fileName}
+/incidentAttachments/{incidentId}/{fileName}
+
+
+7. Cloud Functions Needed
+Queue Functions
+onQueueCreated
+Purpose:
+Prevent duplicate queue entries
+Assign queue position
+Notify admins
+onQueueApproved
+Purpose:
+Move status to approved
+Recalculate queue order
+Notify player
+assignPcToPlayer
+Purpose:
+Create session
+Update PC status
+Update queue status
+Log audit action
+Session Functions
+onSessionStarted
+Purpose:
+Set PC to inUse
+Start timer
+Create session log
+onSessionEnded
+Purpose:
+Calculate final cost
+Deduct wallet if needed
+Set PC to available or cleaning
+Create wallet transaction
+Create audit log
+scheduledSessionWarnings
+Purpose:
+Send 10-minute warning
+Send 5-minute warning
+Send expired warning
+Wallet Functions
+topUpWallet
+Purpose:
+Add balance
+Create wallet transaction
+Create audit log
+chargeSessionCost
+Purpose:
+Deduct session cost
+Update transaction record
+Reports Functions
+generateDailyReport
+Purpose:
+Total revenue
+Total sessions
+Average session duration
+PC utilization
+Queue volume
+Incident Functions
+createIncidentTimeline
+Purpose:
+Gather related session logs
+Gather PC logs
+Gather queue record
+Structure incident timeline for admin review
+
+8. Firestore Security Rules Summary
+Main Rules
+Players can:
+Read their own user profile
+Update limited profile fields
+Read PC availability
+Create one queue entry
+Read their own queue entry
+Read their own session
+Create feedback
+Read promos and announcements
+Read menu items
+Create orders
+Players cannot:
+Assign PCs
+Change PC status
+Approve queues
+Edit wallet balance
+View other player private data
+View incident reports
+View audit logs
+Access admin dashboard data
+Admins can:
+Read and write PCs
+Manage queue entries
+Manage sessions
+Manage wallet transactions
+Manage promos
+Manage announcements
+Manage feedback
+View reports
+Create incident reports
+View audit logs
+Super Admins can:
+Manage admin accounts
+Update system settings
+Access all admin actions
+Disable users
+Change global system rules
+
+9. Recommended Build Order
+Phase 1: Core MVP
+Build first:
+Firebase Auth
+User roles
+Player home
+PC availability
+Admin PC management
+Queue system
+Admin queue approval
+PC assignment
+Session tracking
+Basic feedback
+Promo display
+Phase 2: Operational Features
+Build next:
+Wallet system
+Admin top-up
+Menu ordering
+Session extension
+Session warnings
+Player profile
+Session history
+Admin reports
+Phase 3: Smart System
+Build later:
+AI assistant
+Predictive queue
+Peak hour analytics
+PC utilization heatmap
+Smart recommendations
+Offline mode
+Phase 4: Security and Investigation
+Build last:
+Incident reports
+Anti-theft timeline
+CCTV timestamp references
+Advanced audit logs
+Admin activity monitoring
+Data export
+
+10. Final Master Feature List
+Player Side
+Splash screen
+Onboarding
+Login selection
+Player login
+Registration
+Home dashboard
+PC availability
+Queue system
+QR check-in
+My session
+Wallet
+Menu ordering
+Info and promos
+Profile
+Feedback
+AI assistant
+Notifications
+Session alerts
+Admin Side
+Admin login
+Dashboard
+PC management
+PC detail
+Bulk PC actions
+Queue control
+Assign PC
+Session management
+Player management
+Wallet top-up
+Orders
+Reports
+Feedback admin
+Promo manager
+Content manager
+Anti-theft timeline
+Incident reports
+Audit logs
+Settings
+System Side
+Firebase Authentication
+Firestore real-time database
+Firebase Storage
+Cloud Functions
+Role-based access
+Real-time listeners
+Audit logging
+Session automation
+Wallet transactions
+Queue validation
+Security rules
+Offline cache support
+
+11. Stronger System Name Options
+You can keep QUEPON, but for a stronger product identity, these are better master system labels:
+Best Option
+QUEPON Command System
+Why it works:
+Sounds like a complete control platform
+Fits admin dashboard and real-time monitoring
+Stronger than just “queue system”
+Other Options
+QUEPON Control Hub
+QUEPON SmartShop OS
+GGX Command Center
+GGX SmartQueue OS
+QUEPON Core System
+Recommended final naming:
+QUEPON Command System for GGX
+Full description:
+A real-time computer shop command system for PC monitoring, smart queueing, player sessions, wallet credits, menu ordering, feedback, and admin operations.
+
