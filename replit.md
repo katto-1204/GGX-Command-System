@@ -4,6 +4,7 @@ A full-stack web app for a computer shop: mobile-first player UI (PC availabilit
 
 ## Run & Operate
 
+- `pnpm run dev` — run both the API server (port 8080) and frontend (port 5174)
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080, served at /api)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
@@ -64,7 +65,7 @@ A full-stack web app for a computer shop: mobile-first player UI (PC availabilit
 ## Gotchas
 
 - Always run `pnpm --filter @workspace/api-spec run codegen` after editing `openapi.yaml`
-- Do not run `pnpm dev` or `pnpm run dev` at the workspace root — use workflow restart instead
+- Use `pnpm run dev` at the workspace root for local development; it starts both backend and frontend.
 - The API server uses plain `zod` import (not `zod/v4` subpath) — keep it that way
 - `useListSessions` and `useListPlayers` take `(params, options)` — params go first, options second
 - `useDeleteMenuItem` uses `itemId` (not `menuItemId`); `useUpdatePlayerStatus` uses `userId` (not `playerId`)

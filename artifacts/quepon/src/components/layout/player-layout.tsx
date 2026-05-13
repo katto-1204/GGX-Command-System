@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Home, Monitor, QrCode, UtensilsCrossed, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { motion } from "framer-motion";
 
 interface PlayerLayoutProps {
   children: React.ReactNode;
@@ -36,39 +37,45 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
   return (
     <div className="min-h-[100dvh] w-full flex flex-col bg-background text-foreground pb-24 transition-colors duration-300">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-white/5 px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           {backHref ? (
             <Link href={backHref}>
-              <button className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-                <ChevronLeft className="w-4 h-4" />
+              <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-muted border border-border hover:bg-primary hover:text-primary-foreground transition-all active:scale-90">
+                <ChevronLeft className="w-5 h-5" />
               </button>
             </Link>
           ) : location !== "/home" && (
             <Link href="/home">
-              <button className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-                <ChevronLeft className="w-4 h-4" />
+              <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-muted border border-border hover:bg-primary hover:text-primary-foreground transition-all active:scale-90">
+                <ChevronLeft className="w-5 h-5" />
               </button>
             </Link>
           )}
-          <span className="font-bold font-display text-lg">
-            {pageTitle || (pathParts[0]?.charAt(0).toUpperCase() + pathParts[0]?.slice(1)) || "GGX"}
-          </span>
+          
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-card border border-border flex items-center justify-center overflow-hidden p-1 shadow-sm">
+              <img src="/ggx logo.png" alt="GGX Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-black font-display text-base uppercase tracking-tighter italic">
+              {pageTitle || (pathParts[0]?.charAt(0).toUpperCase() + pathParts[0]?.slice(1)) || "GGX"}
+            </span>
+          </div>
         </div>
-        <ThemeToggle className="bg-white/5" />
+        <ThemeToggle className="bg-muted border-border" />
       </header>
 
       {showBreadcrumbs && location !== "/home" && (
-        <div className="px-4 py-2 border-b border-white/5 bg-white/2 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <nav className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
+        <div className="px-4 py-2.5 border-b border-border bg-muted/20 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 font-black">
             <Link href="/home" className="hover:text-primary transition-colors flex items-center gap-1">
               Home
             </Link>
             {breadcrumbs.map((crumb, i) => (
               <span key={i} className="flex items-center gap-2">
-                <ChevronRight className="w-2.5 h-2.5 opacity-50" />
+                <ChevronRight className="w-2.5 h-2.5 opacity-30" />
                 {i === breadcrumbs.length - 1 ? (
-                  <span className="text-primary font-bold">{crumb.label}</span>
+                  <span className="text-primary font-black">{crumb.label}</span>
                 ) : (
                   <Link href={crumb.href} className="hover:text-foreground transition-colors">
                     {crumb.label}
@@ -81,25 +88,32 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
       )}
 
       <main className="flex-1 w-full max-w-md mx-auto p-4 overflow-x-hidden">
-        {children}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          {children}
+        </motion.div>
       </main>
 
       {/* Bottom Pill Navigation */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-50">
-        <nav className="flex items-center justify-around bg-[rgba(10,10,20,0.88)] backdrop-blur-xl border border-[rgba(124,58,237,0.3)] rounded-full p-2 shadow-[0_0_30px_rgba(124,58,237,0.15)]">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-md z-50">
+        <nav className="flex items-center justify-around bg-card/80 backdrop-blur-2xl border border-border rounded-[2rem] p-2.5 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           {navItems.map((item) => {
             const active = isActive(item.href);
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href}>
                 <div className={cn(
-                  "flex items-center justify-center gap-2 px-3 py-2 rounded-full transition-all duration-300 cursor-pointer",
+                  "flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl transition-all duration-300 cursor-pointer relative",
                   active
-                    ? "bg-primary/20 text-primary border border-primary/50 shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
                     : "text-muted-foreground hover:text-foreground"
                 )}>
-                  <Icon className="w-5 h-5" />
-                  {active && <span className="text-sm font-medium">{item.label}</span>}
+                  <Icon className={cn("w-5 h-5", active ? "stroke-[3px]" : "stroke-[2px]")} />
+                  {active && <span className="text-[10px] font-black uppercase tracking-widest leading-none">{item.label}</span>}
                 </div>
               </Link>
             );
@@ -107,5 +121,6 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
         </nav>
       </div>
     </div>
+
   );
 }

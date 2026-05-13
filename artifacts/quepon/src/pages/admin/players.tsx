@@ -64,7 +64,7 @@ export default function AdminPlayers() {
                 placeholder="Search username..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-black/40 border-white/10"
+                className="pl-9 bg-muted/50 border-border"
               />
             </div>
 
@@ -74,29 +74,29 @@ export default function AdminPlayers() {
                   <UserPlus className="w-4 h-4" /> Add Player
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-[#0A0A0F] border-white/10">
+              <DialogContent className="bg-card border-border">
                 <DialogHeader>
                   <DialogTitle>Create New Player Account</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground uppercase tracking-widest">Username *</label>
-                    <Input value={newUser.username} onChange={e => setNewUser({ ...newUser, username: e.target.value })} placeholder="player_username" className="bg-black/30 border-white/10" />
+                    <Input value={newUser.username} onChange={e => setNewUser({ ...newUser, username: e.target.value })} placeholder="player_username" className="bg-muted/50 border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground uppercase tracking-widest">Password *</label>
-                    <Input type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} placeholder="Min 6 characters" className="bg-black/30 border-white/10" />
+                    <Input type="password" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} placeholder="Min 6 characters" className="bg-muted/50 border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground uppercase tracking-widest">Display Name</label>
-                    <Input value={newUser.displayName} onChange={e => setNewUser({ ...newUser, displayName: e.target.value })} placeholder="John Doe (optional)" className="bg-black/30 border-white/10" />
+                    <Input value={newUser.displayName} onChange={e => setNewUser({ ...newUser, displayName: e.target.value })} placeholder="John Doe (optional)" className="bg-muted/50 border-border" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs text-muted-foreground uppercase tracking-widest">Phone</label>
-                    <Input value={newUser.phone} onChange={e => setNewUser({ ...newUser, phone: e.target.value })} placeholder="09xxxxxxxxx (optional)" className="bg-black/30 border-white/10" />
+                    <Input value={newUser.phone} onChange={e => setNewUser({ ...newUser, phone: e.target.value })} placeholder="09xxxxxxxxx (optional)" className="bg-muted/50 border-border" />
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <Button variant="outline" className="flex-1 border-white/10" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                    <Button variant="outline" className="flex-1 border-border" onClick={() => setCreateOpen(false)}>Cancel</Button>
                     <Button className="flex-1 bg-primary" onClick={handleCreatePlayer} disabled={registerMutation.isPending}>
                       {registerMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
                     </Button>
@@ -107,17 +107,18 @@ export default function AdminPlayers() {
           </div>
         </div>
 
-        <Card className="bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)]">
+
+        <Card className="bg-card border-border rounded-2xl overflow-hidden shadow-xl">
           <CardContent className="p-0">
             <Table>
-              <TableHeader className="bg-black/20">
-                <TableRow className="border-white/5 hover:bg-transparent">
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Balance</TableHead>
-                  <TableHead>Total Played</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+              <TableHeader className="bg-muted/50">
+                <TableRow className="border-border hover:bg-transparent">
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">User</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Role</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Balance</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Played</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-right text-[10px] font-black uppercase tracking-widest text-muted-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -135,11 +136,12 @@ export default function AdminPlayers() {
                   </TableRow>
                 ) : (
                   players.map((player) => (
-                    <TableRow key={player.id} className="border-white/5 hover:bg-white/5">
+                    <TableRow key={player.id} className="border-border hover:bg-muted/30 transition-colors">
                       <TableCell>
-                        <div className="font-bold">{player.displayName || player.username}</div>
+                        <div className="font-bold text-foreground">{player.displayName || player.username}</div>
                         <div className="text-xs text-muted-foreground font-mono">@{player.username}</div>
                       </TableCell>
+
                       <TableCell>
                         <Badge variant="outline" className="capitalize text-xs border-white/20 text-muted-foreground">{player.role}</Badge>
                       </TableCell>

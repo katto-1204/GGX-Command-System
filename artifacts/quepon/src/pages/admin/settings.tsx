@@ -53,62 +53,62 @@ export default function AdminSettings() {
       <div className="space-y-8 max-w-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold font-display flex items-center gap-3">
+            <h1 className="text-3xl font-bold font-display flex items-center gap-3 text-foreground">
               <Settings className="w-8 h-8 text-primary" /> Settings
             </h1>
             <p className="text-muted-foreground">Configure shop parameters</p>
           </div>
-          <Button onClick={handleSave} disabled={updateMutation.isPending} className="bg-primary hover:bg-primary/80">
+          <Button onClick={handleSave} disabled={updateMutation.isPending} className="bg-primary hover:bg-primary/80 h-11 px-6 rounded-xl font-bold uppercase tracking-widest text-[10px]">
             {updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
             Save All
           </Button>
         </div>
 
         {/* Shop Info */}
-        <Card className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)]">
-          <CardHeader><CardTitle className="text-base">Shop Information</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground uppercase tracking-widest">Shop Name</label>
-              <Input value={form.shopName} onChange={e => setForm({ ...form, shopName: e.target.value })} className="bg-black/30 border-white/10" />
+        <Card className="bg-card border-border shadow-xl rounded-3xl overflow-hidden">
+          <CardHeader className="bg-muted/30 border-b border-border py-4"><CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Shop Information</CardTitle></CardHeader>
+          <CardContent className="space-y-6 pt-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Shop Brand Identity</label>
+              <Input value={form.shopName} onChange={e => setForm({ ...form, shopName: e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground uppercase tracking-widest">Opens</label>
-                <Input type="time" value={form.openTime} onChange={e => setForm({ ...form, openTime: e.target.value })} className="bg-black/30 border-white/10" />
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Activation Time</label>
+                <Input type="time" value={form.openTime} onChange={e => setForm({ ...form, openTime: e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold" />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground uppercase tracking-widest">Closes</label>
-                <Input type="time" value={form.closeTime} onChange={e => setForm({ ...form, closeTime: e.target.value })} className="bg-black/30 border-white/10" />
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Deactivation Time</label>
+                <Input type="time" value={form.closeTime} onChange={e => setForm({ ...form, closeTime: e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground uppercase tracking-widest">Max Session Hours</label>
-              <Input type="number" value={form.maxSessionHours} onChange={e => setForm({ ...form, maxSessionHours: +e.target.value })} className="bg-black/30 border-white/10" />
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Maximum Session Duration (Hours)</label>
+              <Input type="number" value={form.maxSessionHours} onChange={e => setForm({ ...form, maxSessionHours: +e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold" />
             </div>
           </CardContent>
         </Card>
 
         {/* Pricing */}
-        <Card className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)]">
-          <CardHeader><CardTitle className="text-base">Rates (PHP/hour)</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        <Card className="bg-card border-border shadow-xl rounded-3xl overflow-hidden">
+          <CardHeader className="bg-muted/30 border-b border-border py-4"><CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Pricing Matrix (PHP/HOUR)</CardTitle></CardHeader>
+          <CardContent className="space-y-4 pt-6">
             {[
-              { key: "standardRatePerHour", label: "Standard PC" },
-              { key: "premiumRatePerHour", label: "Premium PC" },
-              { key: "vipRatePerHour", label: "VIP PC" },
+              { key: "standardRatePerHour", label: "Standard Tier" },
+              { key: "premiumRatePerHour", label: "Premium Tier" },
+              { key: "vipRatePerHour", label: "VIP Tier" },
               { key: "overnightRate", label: "Overnight Flat Rate" },
-              { key: "studentDiscount", label: "Student Rate" },
+              { key: "studentDiscount", label: "Student Discount (%)" },
             ].map(({ key, label }) => (
-              <div key={key} className="flex items-center justify-between gap-4">
-                <label className="text-sm font-medium flex-1">{label}</label>
-                <div className="flex items-center gap-2 w-36">
-                  <span className="text-muted-foreground">₱</span>
+              <div key={key} className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-muted/20 border border-border/50 group hover:border-primary/30 transition-colors">
+                <label className="text-sm font-bold text-foreground/80">{label}</label>
+                <div className="flex items-center gap-3 w-40">
+                  <span className="text-primary font-black text-lg">₱</span>
                   <Input
                     type="number"
                     value={(form as any)[key]}
                     onChange={e => setForm({ ...form, [key]: +e.target.value })}
-                    className="bg-black/30 border-white/10"
+                    className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold text-right"
                   />
                 </div>
               </div>
@@ -117,21 +117,22 @@ export default function AdminSettings() {
         </Card>
 
         {/* Feature Toggles */}
-        <Card className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)]">
-          <CardHeader><CardTitle className="text-base">Feature Toggles</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        <Card className="bg-card border-border shadow-xl rounded-3xl overflow-hidden">
+          <CardHeader className="bg-muted/30 border-b border-border py-4"><CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">System Protocols</CardTitle></CardHeader>
+          <CardContent className="space-y-4 pt-6">
             {[
-              { key: "allowAnonymousFeedback", label: "Allow Anonymous Feedback", desc: "Players can submit feedback without showing username" },
-              { key: "maintenanceMode", label: "Maintenance Mode", desc: "Disable player logins during maintenance" },
+              { key: "allowAnonymousFeedback", label: "Anonymous Feedback", desc: "Permit subjects to submit data without identification" },
+              { key: "maintenanceMode", label: "Maintenance Lockdown", desc: "Restrict all player access to the grid" },
             ].map(({ key, label, desc }) => (
-              <div key={key} className="flex items-center justify-between gap-4 p-4 rounded-xl bg-black/20 border border-white/5">
+              <div key={key} className="flex items-center justify-between gap-4 p-5 rounded-2xl bg-muted/20 border border-border/50">
                 <div>
-                  <div className="font-medium text-sm">{label}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{desc}</div>
+                  <div className="font-bold text-sm text-foreground">{label}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{desc}</div>
                 </div>
                 <Switch
                   checked={(form as any)[key]}
                   onCheckedChange={v => setForm({ ...form, [key]: v })}
+                  className="data-[state=checked]:bg-primary"
                 />
               </div>
             ))}
@@ -139,22 +140,23 @@ export default function AdminSettings() {
         </Card>
 
         {/* Display */}
-        <Card className="bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)]">
-          <CardHeader><CardTitle className="text-base">Display</CardTitle></CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-black/20 border border-white/5">
+        <Card className="bg-card border-border shadow-xl rounded-3xl overflow-hidden">
+          <CardHeader className="bg-muted/30 border-b border-border py-4"><CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Visual Interface</CardTitle></CardHeader>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between p-5 rounded-2xl bg-muted/20 border border-border/50">
               <div>
-                <div className="font-medium text-sm">Color Theme</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Currently: {theme} mode</div>
+                <div className="font-bold text-sm text-foreground">Theme Engine</div>
+                <div className="text-xs text-muted-foreground mt-1">Status: {theme.toUpperCase()} MODE ACTIVE</div>
               </div>
-              <Button variant="outline" size="sm" onClick={toggleTheme} className="border-white/10 gap-2">
-                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                Switch to {theme === "dark" ? "Light" : "Dark"}
+              <Button variant="outline" size="sm" onClick={toggleTheme} className="h-12 border-border rounded-xl px-5 gap-2 font-bold hover:bg-primary/10 transition-all">
+                {theme === "dark" ? <Sun className="w-4 h-4 text-orange-500" /> : <Moon className="w-4 h-4 text-primary" />}
+                {theme === "dark" ? "IGNITE LIGHT" : "ENGAGE DARK"}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
     </AdminLayout>
+
   );
 }

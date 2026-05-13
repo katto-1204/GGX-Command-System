@@ -43,76 +43,96 @@ export default function AdminMenu() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-10">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-bold font-display">Menu Catalog</h1>
-            <p className="text-muted-foreground">Manage F&B offerings</p>
+            <div className="flex items-center gap-2 mb-2">
+              <Coffee className="w-4 h-4 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Logistics & Provisioning</span>
+            </div>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground uppercase">MENU <span className="text-primary">CATALOG</span></h1>
+            <p className="text-muted-foreground font-medium uppercase tracking-[0.1em] text-xs mt-1">Configure food and beverage inventory for active deployments.</p>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90">
-                <Plus className="w-4 h-4 mr-2" /> Add Item
+              <Button className="bg-primary hover:bg-primary/90 h-12 px-8 rounded-xl font-black uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(124,58,237,0.3)]">
+                <Plus className="w-4 h-4 mr-2" /> Add Resource
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#0A0A0F] border-white/10">
+            <DialogContent className="bg-card border-border backdrop-blur-2xl max-w-md rounded-[2rem]">
               <DialogHeader>
-                <DialogTitle>Create Menu Item</DialogTitle>
+                <DialogTitle className="text-xl font-black uppercase tracking-tight">Register New Item</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 pt-4">
+              <div className="space-y-6 pt-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Name</label>
-                  <Input value={formData.name} onChange={e => setFormData(p => ({...p, name: e.target.value}))} className="bg-black/40 border-white/10" />
+                  <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Item Designation</label>
+                  <Input value={formData.name} onChange={e => setFormData(p => ({...p, name: e.target.value}))} className="bg-muted border-border h-12 rounded-xl px-4 font-medium" placeholder="e.g. Energy Shot X" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Category</label>
+                    <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Category</label>
                     <Select value={formData.category} onValueChange={v => setFormData(p => ({...p, category: v}))}>
-                      <SelectTrigger className="bg-black/40 border-white/10"><SelectValue/></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="drinks">Drinks</SelectItem>
-                        <SelectItem value="snacks">Snacks</SelectItem>
-                        <SelectItem value="meals">Meals</SelectItem>
-                        <SelectItem value="services">Services</SelectItem>
+                      <SelectTrigger className="bg-muted border-border h-12 rounded-xl"><SelectValue/></SelectTrigger>
+                      <SelectContent className="bg-card border-border">
+                        <SelectItem value="drinks" className="font-black uppercase text-[10px] tracking-widest">Drinks</SelectItem>
+                        <SelectItem value="snacks" className="font-black uppercase text-[10px] tracking-widest">Snacks</SelectItem>
+                        <SelectItem value="meals" className="font-black uppercase text-[10px] tracking-widest">Meals</SelectItem>
+                        <SelectItem value="services" className="font-black uppercase text-[10px] tracking-widest">Services</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Price (₱)</label>
-                    <Input type="number" value={formData.price} onChange={e => setFormData(p => ({...p, price: parseFloat(e.target.value)||0}))} className="bg-black/40 border-white/10 font-mono" />
+                    <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Cost Unit (₱)</label>
+                    <Input type="number" value={formData.price} onChange={e => setFormData(p => ({...p, price: parseFloat(e.target.value)||0}))} className="bg-muted border-border h-12 rounded-xl font-mono font-bold" />
                   </div>
                 </div>
-                <Button className="w-full" onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Save Item
+                <Button className="w-full h-14 bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] text-xs rounded-xl mt-4" onClick={handleCreate} disabled={createMutation.isPending}>
+                  {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />} Initialize Resource
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* Menu Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 pb-10">
           {isLoading ? (
-            <div className="col-span-full flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+            <div className="col-span-full flex flex-col items-center justify-center py-24 gap-4">
+               <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                 <Loader2 className="w-10 h-10 text-primary/40" />
+               </motion.div>
+               <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">Synchronizing Manifest...</p>
+            </div>
           ) : !menu || menu.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground bg-[rgba(255,255,255,0.02)] rounded-xl border border-dashed border-white/10">
-              No menu items configured.
+            <div className="col-span-full flex flex-col items-center justify-center py-24 text-center bg-card border border-dashed border-border rounded-[2.5rem]">
+              <Coffee className="w-12 h-12 text-muted-foreground/20 mb-4" />
+              <p className="text-xs font-black text-muted-foreground/40 uppercase tracking-widest">Operational Manifest Empty</p>
             </div>
           ) : (
             menu.map(item => (
-              <Card key={item.id} className="bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)]">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-black/40 rounded-lg flex items-center justify-center border border-white/5">
-                    <Coffee className="w-6 h-6 text-muted-foreground" />
+              <Card key={item.id} className="bg-card border-border hover:border-primary/20 transition-all group rounded-2xl overflow-hidden">
+                <CardContent className="p-6 flex items-center gap-5">
+                  <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center border border-border group-hover:border-primary/20 group-hover:bg-primary/5 transition-all">
+                    <Coffee className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-sm leading-tight">{item.name}</h3>
-                      <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-red-400 -mt-1 -mr-2" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="w-3 h-3" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="font-black text-sm text-foreground uppercase tracking-tight truncate">{item.name}</h3>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 text-muted-foreground/20 hover:text-red-400 hover:bg-red-400/10 transition-all rounded-lg" 
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
-                    <Badge variant="outline" className="text-[10px] mt-1 bg-black/20 border-white/10 uppercase">{item.category}</Badge>
-                    <div className="font-mono text-green-400 font-bold mt-1 text-sm">₱{item.price.toFixed(2)}</div>
+                    <div className="flex items-center gap-2 mt-1.5">
+                       <Badge variant="outline" className="text-[8px] h-4 font-black uppercase tracking-widest bg-muted/50 border-border px-1.5">{item.category}</Badge>
+                       <div className="h-1 w-1 rounded-full bg-muted-foreground/20" />
+                       <div className="font-mono text-primary font-black text-xs tracking-tighter">₱{item.price.toFixed(2)}</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

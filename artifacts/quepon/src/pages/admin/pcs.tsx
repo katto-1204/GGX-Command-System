@@ -42,95 +42,181 @@ export default function AdminPcs() {
   };
 
   return (
-    <AdminLayout breadcrumbs={[{ label: "PC Management" }]}>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold font-display">PC Management</h1>
-            <p className="text-muted-foreground">Monitor and control hardware</p>
+    <AdminLayout breadcrumbs={[{ label: "FLEET MANAGEMENT" }]}>
+      <div className="space-y-10">
+        {/* Fleet Command Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-4 border-b border-border/50">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/60 italic">Hardware Grid</span>
+            </div>
+            <h1 className="text-5xl font-black font-display tracking-tight text-foreground italic uppercase leading-none">
+              FLEET <span className="text-primary">DEPLOYMENT</span>
+            </h1>
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 italic">
+              Real-time monitoring and administrative oversight of local network nodes.
+            </p>
           </div>
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[180px] bg-black/40 border-white/10">
-              <SelectValue placeholder="Filter Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="available">Available</SelectItem>
-              <SelectItem value="inUse">In Use</SelectItem>
-              <SelectItem value="maintenance">Maintenance</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-muted/50 border border-border/50 backdrop-blur-xl">
+                <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest italic">Filter:</span>
+                <Select value={filter} onValueChange={setFilter}>
+                  <SelectTrigger className="w-[160px] h-8 bg-transparent border-none text-[11px] font-black uppercase tracking-widest text-foreground focus:ring-0">
+                    <SelectValue placeholder="All Nodes" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border rounded-xl">
+                    <SelectItem value="all" className="text-[10px] font-black uppercase tracking-widest py-3">All Nodes</SelectItem>
+                    <SelectItem value="available" className="text-[10px] font-black uppercase tracking-widest py-3 text-green-500">Available</SelectItem>
+                    <SelectItem value="inUse" className="text-[10px] font-black uppercase tracking-widest py-3 text-red-500">In Use</SelectItem>
+                    <SelectItem value="maintenance" className="text-[10px] font-black uppercase tracking-widest py-3 text-yellow-500">Maintenance</SelectItem>
+                  </SelectContent>
+                </Select>
+             </div>
+             <Button variant="outline" className="h-14 px-8 rounded-2xl border-border bg-muted/30 hover:bg-muted transition-all font-black uppercase text-[10px] tracking-[0.3em] shadow-inner italic">
+                Export Log
+             </Button>
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          <div className="flex flex-col items-center justify-center py-40 gap-6">
+            <div className="relative">
+              <Loader2 className="w-16 h-16 animate-spin text-primary opacity-20" />
+              <Loader2 className="w-16 h-16 animate-spin text-primary absolute inset-0 blur-md" />
+            </div>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] animate-pulse italic">Synchronizing Nodes...</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-10">
             {filteredPcs.map(pc => (
-              <Card key={pc.id} className="bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)] hover:border-white/10 transition-colors">
-                <CardContent className="p-5">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-2">
-                      <Monitor className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-bold font-mono text-lg">{pc.label}</span>
-                    </div>
-                    <Badge className={getStatusColor(pc.status)} variant="outline">
-                      {pc.status}
-                    </Badge>
-                  </div>
+              <motion.div
+                key={pc.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className={cn(
+                  "bg-card border-2 transition-all duration-500 group relative overflow-hidden rounded-[2.5rem] shadow-xl",
+                  pc.status === "available" ? "border-green-500/10 hover:border-green-500/40 hover:shadow-green-500/10" :
+                  pc.status === "inUse" ? "border-red-500/10 hover:border-red-500/40 hover:shadow-red-500/10" :
+                  "border-border hover:border-primary/40 hover:shadow-primary/10"
+                )}>
+                  {/* Status Indicator Bar */}
+                  <div className={cn(
+                    "absolute top-0 left-0 w-full h-1.5 transition-all duration-500",
+                    pc.status === "available" ? "bg-green-500/40" :
+                    pc.status === "inUse" ? "bg-red-500/60 shadow-[0_0_15px_rgba(239,68,68,0.5)]" :
+                    "bg-border"
+                  )} />
 
-                  <div className="space-y-2 mb-6 h-20">
-                    <div className="text-xs text-muted-foreground flex justify-between">
-                      <span>Tier:</span> <span className="text-white capitalize">{pc.tier}</span>
+                  <CardContent className="p-8">
+                    <div className="flex justify-between items-start mb-8">
+                      <div className="flex items-center gap-4">
+                        <div className={cn(
+                          "w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-500 shadow-inner border border-white/5",
+                          pc.status === "available" ? "bg-green-500/10 text-green-500" :
+                          pc.status === "inUse" ? "bg-red-500/10 text-red-500" :
+                          "bg-muted text-muted-foreground"
+                        )}>
+                          <Monitor className={cn("w-8 h-8", pc.status === "inUse" && "animate-pulse")} />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-2xl font-black font-display tracking-tighter text-foreground italic uppercase block leading-none">{pc.label}</span>
+                          <span className={cn(
+                            "text-[10px] uppercase tracking-[0.3em] font-black italic opacity-60",
+                            pc.tier === "premium" ? "text-primary" : "text-muted-foreground"
+                          )}>
+                            {pc.tier} Tier Node
+                          </span>
+                        </div>
+                      </div>
+                      <Badge className={cn(
+                        "font-black uppercase tracking-widest text-[9px] py-1.5 px-4 rounded-full border-2 italic", 
+                        getStatusColor(pc.status)
+                      )} variant="outline">
+                        {pc.status}
+                      </Badge>
                     </div>
-                    {pc.status === "inUse" && pc.currentUsername ? (
-                      <>
-                        <div className="text-xs text-muted-foreground flex justify-between">
-                          <span>User:</span> <span className="text-primary font-medium">{pc.currentUsername}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground flex justify-between">
-                          <span>Timer:</span> <span className="text-red-400 font-mono font-bold">{Math.floor((pc.remainingSeconds||0)/60)}m left</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-xs text-muted-foreground/50 italic py-2">No active session</div>
-                    )}
-                  </div>
 
-                  <div className="flex gap-2 border-t border-white/5 pt-4">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="flex-1 border-green-500/20 hover:bg-green-500/10 hover:text-green-400"
-                      onClick={() => handleStatusUpdate(pc.id, "available")}
-                      disabled={pc.status === "available" || pc.status === "inUse"}
-                    >
-                      <CheckCircle className="w-3 h-3 mr-1.5" /> Ready
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="flex-1 border-yellow-500/20 hover:bg-yellow-500/10 hover:text-yellow-400"
-                      onClick={() => handleStatusUpdate(pc.id, "maintenance")}
-                      disabled={pc.status === "maintenance" || pc.status === "inUse"}
-                    >
-                      <Wrench className="w-3 h-3 mr-1.5" /> Maint
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="w-10 px-0 border-white/10 hover:bg-white/10"
-                      onClick={() => handleStatusUpdate(pc.id, "cleaning")}
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    {/* Operational Telemetry Card */}
+                    <div className="space-y-4 mb-8 bg-muted/40 rounded-[1.75rem] p-6 border border-border/50 shadow-inner group-hover:bg-muted/60 transition-colors">
+                      {pc.status === "inUse" && pc.currentUsername ? (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-end">
+                            <div className="space-y-1">
+                               <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Active Operator</p>
+                               <p className="text-base font-black text-foreground uppercase italic tracking-tighter">{pc.currentUsername}</p>
+                            </div>
+                            <div className="text-right space-y-1">
+                               <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Deployment</p>
+                               <p className="text-xs font-black font-mono text-primary italic">SESSION_LIVE</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-red-500 italic">
+                               <span>TIME DEPLETION</span>
+                               <span className="font-mono text-xs">{Math.floor((pc.remainingSeconds||0)/60)}:{(pc.remainingSeconds||0)%60 < 10 ? '0' : ''}{(pc.remainingSeconds||0)%60} REMAINING</span>
+                            </div>
+                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-white/5 p-0.5">
+                              <motion.div 
+                                className="h-full bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.4)]" 
+                                initial={{ width: "100%" }}
+                                animate={{ width: "65%" }} // Simulation
+                                transition={{ duration: 1 }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-[90px] flex flex-col items-center justify-center gap-3 opacity-40 group-hover:opacity-60 transition-opacity">
+                          <div className="flex gap-2">
+                             {[1,2,3].map(i => (
+                               <div key={i} className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
+                             ))}
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground italic">Node in Standby</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Admin Tactical Controls */}
+                    <div className="flex gap-3">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 rounded-2xl h-14 border-border bg-card hover:bg-green-500/10 hover:text-green-500 hover:border-green-500/30 font-black uppercase tracking-[0.2em] text-[10px] italic shadow-sm transition-all"
+                        onClick={() => handleStatusUpdate(pc.id, "available")}
+                        disabled={pc.status === "available" || pc.status === "inUse"}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" /> Release
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 rounded-2xl h-14 border-border bg-card hover:bg-yellow-500/10 hover:text-yellow-500 hover:border-yellow-500/30 font-black uppercase tracking-[0.2em] text-[10px] italic shadow-sm transition-all"
+                        onClick={() => handleStatusUpdate(pc.id, "maintenance")}
+                        disabled={pc.status === "maintenance" || pc.status === "inUse"}
+                      >
+                        <Wrench className="w-4 h-4 mr-2" /> Repair
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-14 h-14 rounded-2xl px-0 border-border bg-card hover:bg-primary/10 hover:text-primary transition-all group/btn shadow-sm"
+                        onClick={() => handleStatusUpdate(pc.id, "cleaning")}
+                      >
+                        <RefreshCw className="w-5 h-5 group-hover/btn:rotate-180 transition-transform duration-500" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         )}
       </div>
     </AdminLayout>
+
   );
 }
