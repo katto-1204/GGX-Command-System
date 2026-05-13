@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Monitor, Clock, Users, Coffee, Ticket, Settings, MessageSquare, LayoutDashboard, Wallet, CreditCard, ChevronRight, BarChart3, LogOut } from "lucide-react";
+import { Monitor, Clock, Users, Coffee, Ticket, Settings, MessageSquare, LayoutDashboard, Wallet, CreditCard, ChevronRight, ChevronLeft, BarChart3, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useLogoutUser } from "@workspace/api-client-react";
@@ -97,29 +97,57 @@ export function AdminLayout({ children, breadcrumbs }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 min-h-screen">
-        {breadcrumbs && breadcrumbs.length > 0 && (
-          <div className="px-8 pt-6 pb-0">
-            <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/admin/dashboard">
-                <span className="hover:text-foreground cursor-pointer">Dashboard</span>
-              </Link>
-              {breadcrumbs.map((crumb, i) => (
-                <span key={i} className="flex items-center gap-2">
-                  <ChevronRight className="w-3 h-3" />
-                  {crumb.href ? (
-                    <Link href={crumb.href}>
-                      <span className="hover:text-foreground cursor-pointer">{crumb.label}</span>
-                    </Link>
-                  ) : (
-                    <span className="text-foreground font-medium">{crumb.label}</span>
-                  )}
-                </span>
-              ))}
-            </nav>
+      <main className="flex-1 ml-64 min-h-screen flex flex-col">
+        <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-[rgba(255,255,255,0.08)] px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {location !== "/admin/dashboard" && (
+              <button 
+                onClick={() => window.history.back()}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            <div className="flex flex-col">
+              {breadcrumbs && breadcrumbs.length > 0 ? (
+                <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-0.5">
+                  <Link href="/admin/dashboard">
+                    <span className="hover:text-foreground cursor-pointer">Admin</span>
+                  </Link>
+                  {breadcrumbs.map((crumb, i) => (
+                    <span key={i} className="flex items-center gap-1.5">
+                      <ChevronRight className="w-3 h-3 opacity-50" />
+                      {crumb.href ? (
+                        <Link href={crumb.href}>
+                          <span className="hover:text-foreground cursor-pointer">{crumb.label}</span>
+                        </Link>
+                      ) : (
+                        <span>{crumb.label}</span>
+                      )}
+                    </span>
+                  ))}
+                </nav>
+              ) : (
+                <span className="text-xs text-muted-foreground mb-0.5">Admin Control</span>
+              )}
+              <h2 className="text-lg font-bold">
+                {breadcrumbs?.[breadcrumbs.length - 1]?.label || "Dashboard"}
+              </h2>
+            </div>
           </div>
-        )}
-        <div className="max-w-[1440px] mx-auto p-8">
+          
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex flex-col items-end mr-2">
+              <span className="text-sm font-medium">{user?.username}</span>
+              <span className="text-[10px] uppercase tracking-widest text-primary font-bold">System {user?.role}</span>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold shadow-[0_0_15px_rgba(124,58,237,0.2)]">
+              {user?.username?.[0]?.toUpperCase()}
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1 max-w-[1440px] w-full mx-auto p-8">
           {children}
         </div>
       </main>

@@ -39,7 +39,7 @@ export default function AdminQueue() {
   const activeQueue = queue?.filter(q => !["cancelled", "removed", "noShow", "completed", "assigned"].includes(q.status)) || [];
 
   return (
-    <AdminLayout>
+    <AdminLayout breadcrumbs={[{ label: "Queue Control" }]}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>

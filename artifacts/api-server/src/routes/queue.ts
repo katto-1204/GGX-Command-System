@@ -80,20 +80,29 @@ router.post("/queue", async (req, res): Promise<void> => {
 
   const activeEntries = await db.select().from(queueEntriesTable)
     .where(inArray(queueEntriesTable.status, ["waitingApproval", "approved", "waiting"]));
+  
+  const availablePcs = await db.select().from(pcsTable).where(eq(pcsTable.id, "available" as any)); // Status 'available'
+  // Correcting the query to actual status 'available'
+  const availablePcsActual = await db.select().from(pcsTable).where(eq(pcsTable.status, "available"));
+
   const position = activeEntries.length + 1;
   const estimatedWait = activeEntries.length * 30;
+
+  // Auto-approve if there are available PCs
+  const status = availablePcsActual.length > 0 ? "approved" : "waitingApproval";
 
   const [entry] = await db.insert(queueEntriesTable).values({
     id: crypto.randomUUID(),
     userId,
     username: user.username,
     displayName: user.displayName ?? null,
-    status: "waitingApproval",
+    status,
     position,
     requestedTier: parsed.data.requestedTier ?? null,
     preferredPcId: parsed.data.preferredPcId ?? null,
     estimatedWaitMinutes: estimatedWait,
     notes: parsed.data.notes ?? null,
+    approvedAt: status === "approved" ? new Date() : null,
   }).returning();
 
   res.status(201).json(serializeEntry(entry));

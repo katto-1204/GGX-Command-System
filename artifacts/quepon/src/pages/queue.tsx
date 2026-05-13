@@ -3,11 +3,11 @@ import { useGetMyQueueEntry, useJoinQueue, useListPcs, useRemoveQueueEntry, getG
 import { PlayerLayout } from "@/components/layout/player-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Monitor, X, Loader2, ChevronRight, AlertTriangle } from "lucide-react";
+import { Clock, Monitor, X, Loader2, ChevronRight, AlertTriangle, Home, ChevronLeft } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ export default function Queue() {
   const params = new URLSearchParams(location.includes("?") ? location.split("?")[1] : "");
   const preselectedTier = params.get("tier") || "standard";
 
-  const { data: queueEntry, isLoading: isLoadingQueue } = useGetMyQueueEntry({ query: { refetchInterval: 8000 } as any });
+  const { data: queueEntry, isLoading: isLoadingQueue } = useGetMyQueueEntry({ query: { refetchInterval: 5000 } as any });
   const { data: pcs } = useListPcs({ query: { refetchInterval: 10000 } as any });
   const joinQueueMutation = useJoinQueue();
   const leaveQueueMutation = useRemoveQueueEntry();
@@ -34,8 +34,12 @@ export default function Queue() {
 
   const handleJoinQueue = () => {
     joinQueueMutation.mutate({ data: { requestedTier: tier } }, {
-      onSuccess: () => {
-        toast({ title: "Joined queue!", description: "We'll notify you when a PC is ready." });
+      onSuccess: (data) => {
+        if (data.status === "approved") {
+          toast({ title: "Auto-Approved!", description: "There are available PCs. You've been approved immediately." });
+        } else {
+          toast({ title: "Joined queue!", description: "We'll notify you when a PC is ready." });
+        }
         queryClient.invalidateQueries({ queryKey: getGetMyQueueEntryQueryKey() });
       },
       onError: (err: any) => {
@@ -61,7 +65,7 @@ export default function Queue() {
   };
 
   return (
-    <PlayerLayout>
+    <PlayerLayout backHref="/home">
       <div className="space-y-6 pt-4">
         <div>
           <h1 className="text-2xl font-bold font-display">Queue</h1>

@@ -145,6 +145,70 @@ router.patch("/sessions/:sessionId/end", async (req, res): Promise<void> => {
   res.json(serializeSession(updated, pc?.label));
 });
 
+router.post("/sessions", async (req, res): Promise<void> => {
+  const userId = getSessionUser(req);
+  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const schema = z.object({
+    pcId: z.string(),
+    durationMinutes: z.number().min(15).max(1440),
+  });
+
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
+  const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, parsed.data.pcId)).limit(1);
+  if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
+  if (pc.status !== "available") { res.status(400).json({ error: "PC is not available" }); return; }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  // Check already active session
+  const [existing] = await db.select().from(sessionsTable)
+    .where(and(eq(sessionsTable.userId, userId), inArray(sessionsTable.status, ["active", "extended", "locked"])))
+    .limit(1);
+  if (existing) { res.status(400).json({ error: "You already have an active session" }); return; }
+
+  const durationMinutes = parsed.data.durationMinutes;
+  const now = new Date();
+  const endsAt = new Date(now.getTime() + durationMinutes * 60 * 1000);
+  const sessionId = crypto.randomUUID();
+
+  // Create session
+  const [session] = await db.insert(sessionsTable).values({
+    id: sessionId,
+    userId: userId,
+    username: user.username,
+    pcId: parsed.data.pcId,
+    status: "active",
+    ratePerHour: 30, // Default rate
+    durationMinutes,
+    extendedMinutes: 0,
+    startedAt: now,
+    endsAt,
+    costSoFar: 0,
+    paymentSource: "wallet",
+    startedBy: userId,
+    isLocked: false,
+  }).returning();
+
+  // Update PC
+  await db.update(pcsTable).set({
+    status: "inUse",
+    currentSessionId: sessionId,
+    currentUserId: userId,
+    updatedAt: now,
+  }).where(eq(pcsTable.id, parsed.data.pcId));
+
+  // Update user session count
+  await db.update(usersTable).set({
+    sessionCount: (user.sessionCount ?? 0) + 1,
+  }).where(eq(usersTable.id, userId));
+
+  res.status(201).json(serializeSession(session, pc.label));
+});
+
 router.post("/sessions/checkin", async (req, res): Promise<void> => {
   const { sessionCode } = req.body;
   if (!sessionCode) { res.status(400).json({ error: "sessionCode is required" }); return; }

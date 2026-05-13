@@ -42,7 +42,7 @@ export default function AdminPcs() {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout breadcrumbs={[{ label: "PC Management" }]}>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
