@@ -612,6 +612,64 @@ export interface ActivityItem {
   createdAt: string;
 }
 
+export type ReportStatsRevenueByTierItem = {
+  tier: string;
+  revenueCents: number;
+  sessions: number;
+};
+
+export type ReportStatsUtilizationByTierItem = {
+  tier: string;
+  total: number;
+  inUse: number;
+  pct: number;
+};
+
+export type ReportStatsPeakHoursItem = {
+  hour: number;
+  count: number;
+};
+
+export interface ReportStats {
+  totalRevenueCents: number;
+  sessionCount: number;
+  totalPcHours: number;
+  avgSessionMinutes: number;
+  revenueByTier: ReportStatsRevenueByTierItem[];
+  utilizationByTier: ReportStatsUtilizationByTierItem[];
+  peakHours: ReportStatsPeakHoursItem[];
+}
+
+export interface ShopSettings {
+  shopName?: string;
+  standardRatePerHour?: number;
+  premiumRatePerHour?: number;
+  vipRatePerHour?: number;
+  overnightRate?: number;
+  studentDiscount?: number;
+  openTime?: string;
+  closeTime?: string;
+  maxSessionHours?: number;
+  allowAnonymousFeedback?: boolean;
+  maintenanceMode?: boolean;
+}
+
+export interface CheckinInput {
+  sessionCode: string;
+}
+
+export interface CheckinResult {
+  found: boolean;
+  status: string;
+  /** @nullable */
+  sessionId?: string | null;
+  /** @nullable */
+  pcLabel?: string | null;
+  /** @nullable */
+  username?: string | null;
+  message?: string;
+}
+
 export type ListSessionsParams = {
   status?: string;
 };

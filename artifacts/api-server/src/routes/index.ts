@@ -9,6 +9,7 @@ import feedbackRouter from "./feedback";
 import playersRouter from "./players";
 import menuRouter from "./menu";
 import dashboardRouter from "./dashboard";
+import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(feedbackRouter);
 router.use(playersRouter);
 router.use(menuRouter);
 router.use(dashboardRouter);
+router.use(settingsRouter);
 
 export default router;

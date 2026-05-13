@@ -829,6 +829,59 @@ paths:
               schema:
                 $ref: "#/components/schemas/Order"
 
+  # --- SETTINGS ---
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get shop settings
+      responses:
+        "200":
+          description: Shop settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopSettings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update shop settings (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopSettings"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopSettings"
+
+  # --- CHECKIN ---
+  /sessions/checkin:
+    post:
+      operationId: checkinSession
+      tags: [sessions]
+      summary: Check in with session code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckinInput"
+      responses:
+        "200":
+          description: Checkin result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckinResult"
+        "404":
+          description: Session not found
+
   # --- DASHBOARD ---
   /dashboard/stats:
     get:
@@ -870,6 +923,19 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/reports:
+    get:
+      operationId: getReports
+      tags: [dashboard]
+      summary: Get revenue and utilization reports (admin)
+      responses:
+        "200":
+          description: Report stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportStats"
 
 components:
   schemas:
@@ -1550,4 +1616,103 @@ components:
         pcLabel:
           type: ["string", "null"]
         createdAt:
+          type: string
+
+    ReportStats:
+      type: object
+      required: [totalRevenueCents, sessionCount, totalPcHours, avgSessionMinutes, revenueByTier, utilizationByTier, peakHours]
+      properties:
+        totalRevenueCents:
+          type: number
+        sessionCount:
+          type: integer
+        totalPcHours:
+          type: number
+        avgSessionMinutes:
+          type: number
+        revenueByTier:
+          type: array
+          items:
+            type: object
+            required: [tier, revenueCents, sessions]
+            properties:
+              tier:
+                type: string
+              revenueCents:
+                type: number
+              sessions:
+                type: integer
+        utilizationByTier:
+          type: array
+          items:
+            type: object
+            required: [tier, total, inUse, pct]
+            properties:
+              tier:
+                type: string
+              total:
+                type: integer
+              inUse:
+                type: integer
+              pct:
+                type: number
+        peakHours:
+          type: array
+          items:
+            type: object
+            required: [hour, count]
+            properties:
+              hour:
+                type: integer
+              count:
+                type: integer
+
+    ShopSettings:
+      type: object
+      properties:
+        shopName:
+          type: string
+        standardRatePerHour:
+          type: number
+        premiumRatePerHour:
+          type: number
+        vipRatePerHour:
+          type: number
+        overnightRate:
+          type: number
+        studentDiscount:
+          type: number
+        openTime:
+          type: string
+        closeTime:
+          type: string
+        maxSessionHours:
+          type: integer
+        allowAnonymousFeedback:
+          type: boolean
+        maintenanceMode:
+          type: boolean
+
+    CheckinInput:
+      type: object
+      required: [sessionCode]
+      properties:
+        sessionCode:
+          type: string
+
+    CheckinResult:
+      type: object
+      required: [found, status]
+      properties:
+        found:
+          type: boolean
+        status:
+          type: string
+        sessionId:
+          type: ["string", "null"]
+        pcLabel:
+          type: ["string", "null"]
+        username:
+          type: ["string", "null"]
+        message:
           type: string

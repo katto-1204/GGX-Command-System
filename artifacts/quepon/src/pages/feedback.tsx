@@ -1,156 +1,179 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from "react";
 import { useSubmitFeedback } from "@workspace/api-client-react";
 import { PlayerLayout } from "@/components/layout/player-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, AlertCircle, Lightbulb, Star, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
-const feedbackSchema = z.object({
-  category: z.string().min(1, "Category is required"),
-  message: z.string().min(5, "Message must be at least 5 characters"),
-  relatedPcId: z.string().optional(),
-  isAnonymous: z.boolean().default(false)
-});
+const CATEGORIES = [
+  { id: "general", label: "General Feedback", icon: MessageSquare, color: "text-blue-400 bg-blue-400/10 border-blue-400/30" },
+  { id: "issue", label: "Report an Issue", icon: AlertCircle, color: "text-red-400 bg-red-400/10 border-red-400/30" },
+  { id: "featureRequest", label: "Feature Request", icon: Lightbulb, color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/30" },
+];
 
 export default function Feedback() {
   const { toast } = useToast();
   const submitFeedbackMutation = useSubmitFeedback();
+  const [submitted, setSubmitted] = useState(false);
 
-  const form = useForm<z.infer<typeof feedbackSchema>>({
-    resolver: zodResolver(feedbackSchema),
-    defaultValues: {
-      category: "general",
-      message: "",
-      isAnonymous: false
+  const [category, setCategory] = useState("general");
+  const [rating, setRating] = useState(0);
+  const [hoveredStar, setHoveredStar] = useState(0);
+  const [message, setMessage] = useState("");
+  const [relatedPcId, setRelatedPcId] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
+  const handleSubmit = () => {
+    if (message.trim().length < 5) {
+      toast({ title: "Message too short", description: "Please write at least 5 characters.", variant: "destructive" });
+      return;
     }
-  });
-
-  const onSubmit = (values: z.infer<typeof feedbackSchema>) => {
     submitFeedbackMutation.mutate({
-      data: {
-        category: values.category,
-        message: values.message,
-        isAnonymous: values.isAnonymous,
-        relatedPcId: values.relatedPcId || null
-      }
+      data: { category, message, isAnonymous, relatedPcId: relatedPcId || null }
     }, {
       onSuccess: () => {
-        toast({ title: "Feedback submitted. Thank you!" });
-        form.reset();
+        setSubmitted(true);
       },
       onError: (err: any) => {
-        toast({ title: "Failed to submit", description: err.message, variant: "destructive" });
+        toast({ title: "Failed to submit", description: err.message || "Try again.", variant: "destructive" });
       }
     });
   };
+
+  if (submitted) {
+    return (
+      <PlayerLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 pt-4">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}>
+            <div className="w-24 h-24 rounded-full bg-green-500/10 border-2 border-green-500/30 flex items-center justify-center">
+              <CheckCircle2 className="w-12 h-12 text-green-400" />
+            </div>
+          </motion.div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold font-display">Thank You!</h2>
+            <p className="text-muted-foreground text-sm max-w-[280px] mx-auto">
+              We've received your feedback. Your input helps us build a better experience for everyone. We'll look into this right away.
+            </p>
+          </div>
+          <Button onClick={() => { setSubmitted(false); setMessage(""); setRating(0); setRelatedPcId(""); setIsAnonymous(false); }} variant="outline" className="border-white/10">
+            Submit Another
+          </Button>
+        </div>
+      </PlayerLayout>
+    );
+  }
 
   return (
     <PlayerLayout>
       <div className="space-y-6 pt-4">
         <div>
           <h1 className="text-2xl font-bold font-display">Feedback</h1>
-          <p className="text-muted-foreground text-sm">Tell us how we're doing</p>
+          <p className="text-muted-foreground text-sm">Help us improve GGX. Your feedback goes directly to management.</p>
         </div>
 
-        <Card className="bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.08)] backdrop-blur-sm">
-          <CardContent className="p-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-black/20 border-white/10">
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="general">General</SelectItem>
-                          <SelectItem value="issue">Hardware/Software Issue</SelectItem>
-                          <SelectItem value="suggestion">Suggestion</SelectItem>
-                          <SelectItem value="complaint">Complaint</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+        {/* Category */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Category</label>
+          <div className="space-y-2">
+            {CATEGORIES.map(cat => {
+              const Icon = cat.icon;
+              const active = category === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategory(cat.id)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left",
+                    active
+                      ? cat.color
+                      : "bg-white/3 border-white/10 text-muted-foreground hover:bg-white/5"
                   )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Message</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="What's on your mind?" 
-                          className="min-h-[120px] bg-black/20 border-white/10 resize-none" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="relatedPcId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>PC Number (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. PC-01" {...field} className="bg-black/20 border-white/10" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="isAnonymous"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-xl border border-white/10 bg-black/20 p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Submit Anonymously</FormLabel>
-                        <p className="text-xs text-muted-foreground">Hide your username from staff</p>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-lg" 
-                  disabled={submitFeedbackMutation.isPending}
                 >
-                  {submitFeedbackMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquare className="w-4 h-4 mr-2" />}
-                  Send Feedback
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                  <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0", active ? "border-current" : "border-white/20")}>
+                    {active && <div className="w-2 h-2 rounded-full bg-current" />}
+                  </div>
+                  <Icon className="w-4 h-4" />
+                  <span className="font-medium text-sm">{cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Star Rating */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Rate Your Experience</label>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map(star => (
+              <button
+                key={star}
+                onMouseEnter={() => setHoveredStar(star)}
+                onMouseLeave={() => setHoveredStar(0)}
+                onClick={() => setRating(star)}
+                className="transition-transform hover:scale-110"
+              >
+                <Star className={cn(
+                  "w-8 h-8 transition-colors",
+                  star <= (hoveredStar || rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-white/20"
+                )} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Message */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Your Message</label>
+          <Textarea
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            placeholder="Tell us what's on your mind..."
+            className="min-h-[120px] bg-black/20 border-white/10 resize-none"
+          />
+        </div>
+
+        {/* PC Reference */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Attach PC # (Optional)</label>
+          <Input
+            value={relatedPcId}
+            onChange={e => setRelatedPcId(e.target.value)}
+            placeholder="e.g. PC-01, VIP-03"
+            className="bg-black/20 border-white/10"
+          />
+        </div>
+
+        {/* Anonymous */}
+        <button
+          onClick={() => setIsAnonymous(!isAnonymous)}
+          className={cn(
+            "w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left",
+            isAnonymous
+              ? "bg-primary/10 border-primary/30 text-primary"
+              : "bg-white/3 border-white/10 text-muted-foreground hover:bg-white/5"
+          )}
+        >
+          <div className={cn("w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0", isAnonymous ? "border-primary bg-primary" : "border-white/20")}>
+            {isAnonymous && <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12"><path d="M10 3L5 8L2 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/></svg>}
+          </div>
+          <span className="font-medium text-sm">Submit anonymously</span>
+        </button>
+
+        <Button
+          className="w-full h-12 text-lg shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+          onClick={handleSubmit}
+          disabled={submitFeedbackMutation.isPending || !message.trim()}
+        >
+          {submitFeedbackMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <MessageSquare className="w-4 h-4 mr-2" />}
+          Submit Feedback
+        </Button>
       </div>
     </PlayerLayout>
   );

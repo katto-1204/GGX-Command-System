@@ -3,6 +3,7 @@ import { db, pcsTable, queueEntriesTable, sessionsTable, feedbackTable, ordersTa
 import { eq, inArray, and, gte } from "drizzle-orm";
 import { getSessionUser } from "./auth";
 
+
 const router = Router();
 
 router.get("/dashboard/stats", async (req, res): Promise<void> => {
@@ -96,6 +97,58 @@ router.get("/dashboard/recent-activity", async (req, res): Promise<void> => {
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 15);
 
   res.json(activity);
+});
+
+router.get("/dashboard/reports", async (req, res): Promise<void> => {
+  const userId = getSessionUser(req);
+  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const [allSessions, allPcs] = await Promise.all([
+    db.select().from(sessionsTable).where(
+      inArray(sessionsTable.status, ["completed", "active", "extended"])
+    ),
+    db.select().from(pcsTable),
+  ]);
+
+  const totalRevenueCents = allSessions.reduce((sum, s) => sum + (s.finalCost ?? s.costSoFar ?? 0), 0);
+  const totalMinutes = allSessions.reduce((sum, s) => {
+    if (!s.startedAt || !s.endedAt) return sum + (s.durationMinutes ?? 0);
+    return sum + Math.ceil((s.endedAt.getTime() - s.startedAt.getTime()) / 60000);
+  }, 0);
+  const sessionCount = allSessions.length;
+  const totalPcHours = totalMinutes / 60;
+  const avgSessionMinutes = sessionCount > 0 ? totalMinutes / sessionCount : 0;
+
+  const tiers = ["standard", "premium", "vip"];
+  const revenueByTier = tiers.map(tier => {
+    const tierSessions = allSessions.filter(s => {
+      const pc = allPcs.find(p => p.id === s.pcId);
+      return pc?.tier === tier;
+    });
+    return {
+      tier,
+      revenueCents: tierSessions.reduce((sum, s) => sum + (s.finalCost ?? s.costSoFar ?? 0), 0),
+      sessions: tierSessions.length,
+    };
+  });
+
+  const utilizationByTier = tiers.map(tier => {
+    const tierPcs = allPcs.filter(p => p.tier === tier);
+    const inUse = tierPcs.filter(p => p.status === "inUse").length;
+    const total = tierPcs.length;
+    return { tier, total, inUse, pct: total > 0 ? Math.round((inUse / total) * 100) : 0 };
+  });
+
+  // Peak hours from today's sessions
+  const peakHours = Array.from({ length: 24 }, (_, hour) => {
+    const count = allSessions.filter(s => {
+      const h = new Date(s.startedAt).getHours();
+      return h === hour;
+    }).length;
+    return { hour, count };
+  });
+
+  res.json({ totalRevenueCents, sessionCount, totalPcHours, avgSessionMinutes, revenueByTier, utilizationByTier, peakHours });
 });
 
 export default router;

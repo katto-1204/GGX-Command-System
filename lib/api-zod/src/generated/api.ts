@@ -1093,6 +1093,70 @@ export const UpdateOrderStatusResponse = zod.object({
 });
 
 /**
+ * @summary Get shop settings
+ */
+export const GetSettingsResponse = zod.object({
+  shopName: zod.string().optional(),
+  standardRatePerHour: zod.number().optional(),
+  premiumRatePerHour: zod.number().optional(),
+  vipRatePerHour: zod.number().optional(),
+  overnightRate: zod.number().optional(),
+  studentDiscount: zod.number().optional(),
+  openTime: zod.string().optional(),
+  closeTime: zod.string().optional(),
+  maxSessionHours: zod.number().optional(),
+  allowAnonymousFeedback: zod.boolean().optional(),
+  maintenanceMode: zod.boolean().optional(),
+});
+
+/**
+ * @summary Update shop settings (admin)
+ */
+export const UpdateSettingsBody = zod.object({
+  shopName: zod.string().optional(),
+  standardRatePerHour: zod.number().optional(),
+  premiumRatePerHour: zod.number().optional(),
+  vipRatePerHour: zod.number().optional(),
+  overnightRate: zod.number().optional(),
+  studentDiscount: zod.number().optional(),
+  openTime: zod.string().optional(),
+  closeTime: zod.string().optional(),
+  maxSessionHours: zod.number().optional(),
+  allowAnonymousFeedback: zod.boolean().optional(),
+  maintenanceMode: zod.boolean().optional(),
+});
+
+export const UpdateSettingsResponse = zod.object({
+  shopName: zod.string().optional(),
+  standardRatePerHour: zod.number().optional(),
+  premiumRatePerHour: zod.number().optional(),
+  vipRatePerHour: zod.number().optional(),
+  overnightRate: zod.number().optional(),
+  studentDiscount: zod.number().optional(),
+  openTime: zod.string().optional(),
+  closeTime: zod.string().optional(),
+  maxSessionHours: zod.number().optional(),
+  allowAnonymousFeedback: zod.boolean().optional(),
+  maintenanceMode: zod.boolean().optional(),
+});
+
+/**
+ * @summary Check in with session code
+ */
+export const CheckinSessionBody = zod.object({
+  sessionCode: zod.string(),
+});
+
+export const CheckinSessionResponse = zod.object({
+  found: zod.boolean(),
+  status: zod.string(),
+  sessionId: zod.string().nullish(),
+  pcLabel: zod.string().nullish(),
+  username: zod.string().nullish(),
+  message: zod.string().optional(),
+});
+
+/**
  * @summary Get real-time dashboard stats (admin)
  */
 export const GetDashboardStatsResponse = zod.object({
@@ -1133,3 +1197,34 @@ export const GetRecentActivityResponseItem = zod.object({
 export const GetRecentActivityResponse = zod.array(
   GetRecentActivityResponseItem,
 );
+
+/**
+ * @summary Get revenue and utilization reports (admin)
+ */
+export const GetReportsResponse = zod.object({
+  totalRevenueCents: zod.number(),
+  sessionCount: zod.number(),
+  totalPcHours: zod.number(),
+  avgSessionMinutes: zod.number(),
+  revenueByTier: zod.array(
+    zod.object({
+      tier: zod.string(),
+      revenueCents: zod.number(),
+      sessions: zod.number(),
+    }),
+  ),
+  utilizationByTier: zod.array(
+    zod.object({
+      tier: zod.string(),
+      total: zod.number(),
+      inUse: zod.number(),
+      pct: zod.number(),
+    }),
+  ),
+  peakHours: zod.array(
+    zod.object({
+      hour: zod.number(),
+      count: zod.number(),
+    }),
+  ),
+});

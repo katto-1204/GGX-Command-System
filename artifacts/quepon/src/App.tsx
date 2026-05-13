@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/use-theme";
 
 import NotFound from "@/pages/not-found";
 import Splash from "@/pages/splash";
@@ -32,6 +33,8 @@ import AdminFeedback from "@/pages/admin/feedback";
 import AdminPromos from "@/pages/admin/promos";
 import AdminMenu from "@/pages/admin/menu";
 import AdminSettings from "@/pages/admin/settings";
+import AdminReports from "@/pages/admin/reports";
+import Checkin from "@/pages/checkin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +70,7 @@ function Router() {
       <Route path="/register" component={Register} />
 
       {/* Player Routes */}
+      <Route path="/checkin"><PlayerRoute component={Checkin} /></Route>
       <Route path="/home"><PlayerRoute component={Home} /></Route>
       <Route path="/pcs"><PlayerRoute component={Pcs} /></Route>
       <Route path="/queue"><PlayerRoute component={Queue} /></Route>
@@ -91,6 +95,7 @@ function Router() {
       <Route path="/admin/promos"><AdminRoute component={AdminPromos} /></Route>
       <Route path="/admin/menu"><AdminRoute component={AdminMenu} /></Route>
       <Route path="/admin/settings"><AdminRoute component={AdminSettings} /></Route>
+      <Route path="/admin/reports"><AdminRoute component={AdminReports} /></Route>
 
       <Route component={NotFound} />
     </Switch>
@@ -99,16 +104,18 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+              <Router />
+            </WouterRouter>
+            <Toaster />
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, sessionsTable, pcsTable, usersTable } from "@workspace/db";
+import { db, sessionsTable, pcsTable, usersTable, queueEntriesTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { getSessionUser } from "./auth";
@@ -143,6 +143,38 @@ router.patch("/sessions/:sessionId/end", async (req, res): Promise<void> => {
 
   const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, updated.pcId)).limit(1);
   res.json(serializeSession(updated, pc?.label));
+});
+
+router.post("/sessions/checkin", async (req, res): Promise<void> => {
+  const { sessionCode } = req.body;
+  if (!sessionCode) { res.status(400).json({ error: "sessionCode is required" }); return; }
+
+  const code = (sessionCode as string).trim().toUpperCase();
+
+  // Try to find an active session where the session ID starts with the code or matches
+  const sessions = await db.select().from(sessionsTable)
+    .where(inArray(sessionsTable.status, ["active", "extended"]));
+
+  const session = sessions.find(s =>
+    s.id.toUpperCase().startsWith(code) ||
+    s.id.toUpperCase().replace(/-/g, "").startsWith(code.replace(/-/g, ""))
+  );
+
+  if (!session) {
+    res.json({ found: false, status: "notFound", sessionId: null, pcLabel: null, username: null, message: "No active session found with that code." });
+    return;
+  }
+
+  const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, session.pcId)).limit(1);
+
+  res.json({
+    found: true,
+    status: session.status,
+    sessionId: session.id,
+    pcLabel: pc?.label ?? null,
+    username: session.username,
+    message: `Session confirmed on ${pc?.label ?? session.pcId}. Show QR at the front desk.`,
+  });
 });
 
 export default router;
