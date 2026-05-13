@@ -5,9 +5,8 @@ import process from "node:process";
 
 const root = process.cwd();
 const isWindows = process.platform === "win32";
-const appData = process.env.APPDATA ?? path.join(process.env.USERPROFILE ?? "", "AppData", "Roaming");
-const windowsPnpm = path.join(appData, "npm", "pnpm.cmd");
-const pnpmCommand = isWindows ? "powershell.exe" : "pnpm";
+const pnpmCommand = isWindows ? "powershell.exe" : "corepack";
+const pnpmArgsPrefix = ["pnpm@10.33.0"];
 
 loadDotEnv(path.join(root, ".env"));
 
@@ -24,7 +23,15 @@ const sharedEnv = {
 };
 
 if (!sharedEnv.DATABASE_URL) {
-  console.warn("[dev] DATABASE_URL is not set. The API server will exit until a Postgres connection string is provided.");
+  console.error(
+    [
+      "[dev] DATABASE_URL is not set.",
+      "      Add your Supabase Postgres connection string to .env before running npm run dev.",
+      "      Example:",
+      "      DATABASE_URL=postgresql://postgres:ggxquepon123@db.dbghdhebpsgwuntrfcnc.supabase.co:5432/postgres?sslmode=require",
+    ].join("\n"),
+  );
+  process.exit(1);
 }
 
 console.log("[dev] Building API server...");
@@ -79,15 +86,16 @@ function run(label, args, env) {
 }
 
 function start(label, args, env) {
+  const corepackArgs = [...pnpmArgsPrefix, ...args];
   const spawnArgs = isWindows
     ? [
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-Command",
-        ["&", quotePowerShell(windowsPnpm), ...args.map(quotePowerShell)].join(" "),
-      ]
-    : args;
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      ["corepack", ...corepackArgs.map(quotePowerShell)].join(" "),
+    ]
+    : corepackArgs;
 
   const child = spawn(pnpmCommand, spawnArgs, {
     cwd: root,
