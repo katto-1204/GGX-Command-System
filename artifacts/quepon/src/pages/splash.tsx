@@ -19,7 +19,7 @@ export default function SplashScreen() {
 
     const timer = window.setTimeout(() => {
       setLocation("/onboarding");
-    }, 3500);
+    }, 4500);
 
     return () => {
       clearInterval(interval);

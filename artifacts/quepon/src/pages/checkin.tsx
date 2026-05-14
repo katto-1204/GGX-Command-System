@@ -10,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
-  QrCode, 
   Monitor, 
   CheckCircle2, 
   XCircle, 
@@ -22,12 +21,12 @@ import {
   Zap,
   Info,
   Shield,
-  ScanLine,
   CameraOff
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { QrTrackingView } from "@/components/qr-tracking-view";
 
 // QR Scanner component using html5-qrcode
 function QRScanner({ onScan, enabled }: { onScan: (code: string) => void; enabled: boolean }) {
@@ -137,24 +136,37 @@ export default function Checkin() {
   const [code, setCode] = useState("");
   const [result, setResult] = useState<any>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const checkinMutation = useCheckinSession();
   const [, setLocation] = useLocation();
 
   const { data: pcSummary, isLoading: isLoadingSummary } = useGetPcSummary({ query: { refetchInterval: 5000 } as any });
   const { data: queueEntry, isLoading: isLoadingQueue } = useGetMyQueueEntry({ query: { refetchInterval: 5000 } as any });
-  const { data: mySession } = useGetMySession();
-  const activeSessionPcLabel = (mySession as { pcLabel?: string | null } | null | undefined)?.pcLabel ?? null;
+  const { data: mySession } = useGetMySession({ query: { refetchInterval: 5000 } as any });
 
-  const availablePcs = pcSummary?.available || 0;
+  // Sync remaining time from session
+  useEffect(() => {
+    if (mySession?.remainingSeconds != null) {
+      setRemainingTime(mySession.remainingSeconds);
+    }
+  }, [mySession?.remainingSeconds]);
 
-  // Queue-gated access rules:
-  // Can scan ONLY if:
-  // 1. Has an active session (already booked), OR
-  // 2. Is in queue and position is #1 (next in line) / status is approved/assigned
+  // Local countdown
+  useEffect(() => {
+    if (remainingTime === null || remainingTime <= 0 || mySession?.status !== "active") return;
+    
+    const interval = setInterval(() => {
+      setRemainingTime(prev => prev ? prev - 1 : 0);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [remainingTime, mySession?.status]);
+
+  // Session state detection
+  const hasActiveSession = !!mySession && ["active", "extended", "pending"].includes(mySession.status);
   const isInQueue = !!queueEntry && !["cancelled", "removed", "noShow", "completed"].includes(queueEntry.status);
   const isNextInLine = isInQueue && (queueEntry.position === 1 || queueEntry.status === "approved" || queueEntry.status === "assigned");
-  const hasActiveSession = !!mySession;
-  const canScan = hasActiveSession || isNextInLine;
+  const canScan = isNextInLine;
 
   const handleCheckin = (sessionCode?: string) => {
     const codeToUse = (sessionCode || code).trim();
@@ -189,7 +201,18 @@ export default function Checkin() {
     );
   }
 
-  // LOCKED STATE: Not next in queue
+  // ACTIVE SESSION STATE: Show QR Tracking Dashboard
+  if (hasActiveSession) {
+    return (
+      <PlayerLayout>
+        <div className="pt-4 pb-20">
+          <QrTrackingView session={mySession} remainingSeconds={remainingTime} />
+        </div>
+      </PlayerLayout>
+    );
+  }
+
+  // LOCKED STATE: Not next in queue and no active session
   if (!canScan) {
     return (
       <PlayerLayout>
@@ -202,38 +225,14 @@ export default function Checkin() {
 
             <div className="space-y-2">
               <h1 className="text-2xl font-black font-display text-foreground tracking-tight uppercase leading-none italic">
-                {hasActiveSession ? "SESSION ACTIVE" : "SCANNER LOCKED"}
+                SCANNER LOCKED
               </h1>
               <p className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
-                {hasActiveSession 
-                  ? "You already have an active session. Navigate to your session details."
-                  : "Join the queue and wait for your turn to scan."}
+                Join the queue and wait for your turn to scan.
               </p>
             </div>
 
-            {hasActiveSession ? (
-              <Card className="bg-card/50 border-border shadow-lg rounded-2xl max-w-sm mx-auto overflow-hidden">
-                <CardContent className="p-5 space-y-4">
-                  <div className="flex items-center gap-3 text-left">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                      <Monitor className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-black text-[10px] text-foreground uppercase tracking-wider mb-0.5">Active Deployment</h4>
-                      <p className="text-[8px] text-muted-foreground uppercase tracking-widest font-bold leading-normal">
-                        Station {activeSessionPcLabel ?? "Unknown"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <Link href="/session">
-                    <Button variant="outline" className="w-full h-11 rounded-xl border-border bg-card font-black uppercase tracking-widest text-[9px] hover:bg-muted transition-colors">
-                      View Session
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ) : isInQueue ? (
+            {isInQueue ? (
               // In queue but NOT next in line
               <Card className="bg-card/50 border-border shadow-lg rounded-2xl max-w-sm mx-auto overflow-hidden">
                 <CardContent className="p-5 space-y-4">

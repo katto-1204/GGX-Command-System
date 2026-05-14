@@ -44,11 +44,14 @@ export default function AdminMenu() {
 
   const getIconForItem = (item: any) => {
     const name = item.name.toLowerCase();
+    const category = item.category.toLowerCase();
+    
     if (name.includes("print")) return Printer;
-    if (name.includes("tech") || name.includes("assist")) return UserCog;
-    if (item.category === "drinks") return Coffee;
-    if (item.category === "snacks") return Cookie;
-    if (item.category === "meals") return UtensilsCrossed;
+    if (name.includes("tech") || name.includes("assist") || category === "services") return UserCog;
+    if (name.includes("coffee") || name.includes("drink") || name.includes("water") || name.includes("soda") || category === "drinks") return Coffee;
+    if (name.includes("snack") || name.includes("chips") || name.includes("candy") || category === "snacks") return Cookie;
+    if (name.includes("meal") || name.includes("food") || name.includes("rice") || name.includes("burger") || category === "meals") return UtensilsCrossed;
+    
     return Package;
   };
 

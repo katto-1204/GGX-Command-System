@@ -52,8 +52,8 @@ export default function Profile() {
           <Card className="bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.08)] backdrop-blur-sm">
             <CardContent className="p-4 flex flex-col items-center text-center">
               <Wallet className="w-6 h-6 text-green-400 mb-2" />
-              <div className="text-2xl font-bold font-mono">₱{(user?.totalSpent || 0).toFixed(0)}</div>
-              <div className="text-xs text-muted-foreground uppercase">Total Spent</div>
+              <div className="text-2xl font-bold font-mono">₱{Number(user?.totalSpent || 0).toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground uppercase">Overall Spent</div>
             </CardContent>
           </Card>
         </div>
