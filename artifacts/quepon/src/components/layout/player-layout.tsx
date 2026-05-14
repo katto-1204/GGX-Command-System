@@ -38,7 +38,9 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
     <div className="min-h-[100dvh] w-full flex flex-col bg-background text-foreground transition-colors duration-300 relative overflow-hidden" 
       style={{ 
         paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)"
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
+        paddingRight: "env(safe-area-inset-right)"
       }}
     >
       {/* Top Header */}

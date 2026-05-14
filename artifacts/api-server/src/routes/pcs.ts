@@ -97,7 +97,7 @@ router.patch("/pcs/:pcId/status", async (req, res): Promise<void> => {
 const pcInputSchema = z.object({
   number: z.number().int(),
   label: z.string(),
-  tier: z.enum(["standard", "premium", "vip"]),
+  tier: z.enum(["standard", "vip"]),
   status: z.enum(["available", "inUse", "maintenance", "reserved", "cleaning", "offline"]).optional().default("available"),
   location: z.string().optional().default("Main Area"),
   specs: z.any().optional(),

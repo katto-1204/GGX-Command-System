@@ -110,7 +110,7 @@ export default function Queue() {
                 </div>
 
                 <div className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.4em] mb-2 italic">System Rank</div>
-                <div className="text-7xl font-black font-mono text-foreground mb-3 tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(124,58,237,0.4)] italic">
+                <div className="text-5xl md:text-6xl font-black font-mono text-foreground mb-3 tracking-tighter leading-none drop-shadow-[0_0_30px_rgba(124,58,237,0.4)] italic">
                   #{queueEntry.position}
                 </div>
 
@@ -125,13 +125,13 @@ export default function Queue() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="bg-background/40 border border-border/50 rounded-xl p-4 text-left">
-                    <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Est. Wait</div>
-                    <div className="text-lg font-black text-primary font-mono tracking-tighter italic">~{queueEntry.estimatedWaitMinutes || 5}M</div>
+                  <div className="bg-background/40 border border-border/50 rounded-xl p-3 md:p-4 text-left overflow-hidden">
+                     <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em] mb-1 truncate">Est. Wait</div>
+                    <div className="text-sm md:text-base font-black text-primary font-mono tracking-tighter italic truncate">~{queueEntry.estimatedWaitMinutes || 5}M</div>
                   </div>
-                  <div className="bg-background/40 border border-border/50 rounded-xl p-4 text-left">
-                    <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Requested</div>
-                    <div className="text-lg font-black text-foreground font-mono tracking-tighter uppercase italic truncate">{queueEntry.requestedTier}</div>
+                  <div className="bg-background/40 border border-border/50 rounded-xl p-3 md:p-4 text-left overflow-hidden">
+                     <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.1em] mb-1 truncate">Requested</div>
+                    <div className="text-sm md:text-base font-black text-foreground font-mono tracking-tighter uppercase italic truncate">{queueEntry.requestedTier}</div>
                   </div>
                 </div>
 

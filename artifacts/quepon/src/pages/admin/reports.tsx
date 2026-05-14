@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { BarChart3, Monitor, Clock, TrendingUp, Loader2, Shield, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-const TIER_COLORS: Record<string, string> = { standard: "#60a5fa", premium: "#c084fc", vip: "#fbbf24" };
+const TIER_LABELS: Record<string, string> = { standard: "Regular", vip: "VIP" };
 
 export default function AdminReports() {
   const { data: report, isLoading } = useGetReports({ query: { refetchInterval: 30000 } as any });
@@ -87,7 +87,7 @@ export default function AdminReports() {
                   <div key={tier.tier} className="space-y-3">
                     <div className="flex justify-between text-xs items-end">
                       <div className="space-y-1">
-                        <span className="capitalize font-black tracking-widest text-foreground">{tier.tier} Cluster</span>
+                        <span className="font-black tracking-widest text-foreground">{TIER_LABELS[tier.tier] ?? tier.tier} Cluster</span>
                         <p className="text-[10px] text-muted-foreground/40 uppercase font-black">{tier.sessions} Deployments</p>
                       </div>
                       <span className="font-mono font-black text-primary">₱{(tier.revenueCents / 100).toFixed(0)}</span>
@@ -117,7 +117,7 @@ export default function AdminReports() {
                 <div key={tier.tier} className="space-y-3">
                   <div className="flex justify-between text-xs items-end">
                     <div className="space-y-1">
-                      <span className="capitalize font-black tracking-widest text-foreground">{tier.tier} Utilization</span>
+                      <span className="font-black tracking-widest text-foreground">{TIER_LABELS[tier.tier] ?? tier.tier} Utilization</span>
                       <p className="text-[10px] text-muted-foreground/40 uppercase font-black">{tier.inUse} of {tier.total} Active</p>
                     </div>
                     <span className="font-mono font-black text-foreground">{tier.pct}%</span>

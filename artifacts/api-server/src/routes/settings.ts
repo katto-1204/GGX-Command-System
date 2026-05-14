@@ -6,7 +6,6 @@ const router = Router();
 const defaultSettings = {
   shopName: "GGX Gaming Center",
   standardRatePerHour: 25,
-  premiumRatePerHour: 35,
   vipRatePerHour: 50,
   overnightRate: 99,
   studentDiscount: 20,

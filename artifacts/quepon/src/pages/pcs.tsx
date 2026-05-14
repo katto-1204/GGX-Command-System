@@ -247,16 +247,16 @@ export default function Pcs() {
                     <div className="absolute top-0 left-0 w-4 h-4 bg-primary/20 -rotate-45 -translate-x-2 -translate-y-2" />
 
                     {/* Header: Status (L) and Number (R) */}
-                    <div className="flex justify-between items-start mb-0.5 relative z-10">
+                    <div className="flex justify-between items-start mb-0.5 relative z-10 gap-1">
                       <div className={cn(
-                        "flex items-center gap-0.5 px-1 py-0.5 rounded-sm bg-black/40 backdrop-blur-sm border border-white/5",
+                        "flex items-center gap-0.5 px-1 py-0.5 rounded-sm bg-black/40 backdrop-blur-sm border border-white/5 min-w-0 max-w-[65%]",
                         cfg.color
                       )}>
-                        <div className={cn("w-0.5 h-0.5 rounded-full", cfg.dot, isAvailable && "animate-pulse")} />
-                        <span className="text-[5px] font-black tracking-widest uppercase">{cfg.label}</span>
+                        <div className={cn("w-0.5 h-0.5 rounded-full shrink-0", cfg.dot, isAvailable && "animate-pulse")} />
+                        <span className="text-[5px] font-black tracking-widest uppercase truncate">{cfg.label}</span>
                       </div>
                       <div className={cn(
-                        "text-lg font-black font-display tracking-tighter italic leading-none opacity-50",
+                        "text-lg font-black font-display tracking-tighter italic leading-none opacity-50 shrink-0",
                         isVip ? "text-yellow-500" : "text-foreground"
                       )}>
                         {pc.label.replace(/[^0-9]/g, '')}
@@ -264,8 +264,8 @@ export default function Pcs() {
                     </div>
 
                     {/* Centered PC Icon - Maximized for visibility */}
-                    <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-                      <div className="w-full h-full max-w-[4.5rem] max-h-[4.5rem] flex items-center justify-center group-hover:scale-110 transition-all duration-700 ease-out">
+                    <div className="flex-1 flex flex-col items-center justify-center relative z-10 overflow-hidden py-1">
+                      <div className="w-full h-full max-w-[4.5rem] max-h-[4.5rem] flex items-center justify-center group-hover:scale-110 transition-all duration-700 ease-out shrink-0">
                         <img
                           src="/pc svg (2).png"
                           alt="PC"
@@ -273,9 +273,9 @@ export default function Pcs() {
                         />
                       </div>
 
-                      <div className="mt-0.5 text-center">
+                      <div className="mt-0.5 text-center w-full px-1">
                         <span className={cn(
-                          "text-[7px] font-black uppercase tracking-[0.2em] opacity-80 italic",
+                          "text-[7px] font-black uppercase tracking-[0.2em] opacity-80 italic block truncate w-full",
                           isVip ? "text-yellow-500" : tierCfg.color
                         )}>
                           {tierCfg.label}

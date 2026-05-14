@@ -6,6 +6,12 @@ import { z } from "zod";
 import { logger } from "../lib/logger";
 
 const router = Router();
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+if (!SESSION_SECRET) {
+  throw new Error("SESSION_SECRET is required.");
+}
 
 function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password + "quepon_salt_2024").digest("hex");
@@ -40,14 +46,45 @@ function serializeUser(user: typeof usersTable.$inferSelect) {
   };
 }
 
-declare module "express" {
-  interface Request {
-    session?: { userId: string };
+type SessionTokenPayload = {
+  userId: string;
+  exp: number;
+};
+
+function createSessionToken(userId: string): string {
+  const payload: SessionTokenPayload = {
+    userId,
+    exp: Date.now() + SESSION_TTL_MS,
+  };
+  const encodedPayload = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const signature = signPayload(encodedPayload);
+  return `${encodedPayload}.${signature}`;
+}
+
+function verifySessionToken(token: string): string | null {
+  const [encodedPayload, signature] = token.split(".");
+  if (!encodedPayload || !signature) return null;
+
+  const expectedSignature = signPayload(encodedPayload);
+  const signatureBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSignature);
+
+  if (signatureBuffer.length !== expectedBuffer.length) return null;
+  if (!crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) return null;
+
+  try {
+    const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8")) as SessionTokenPayload;
+    if (!payload?.userId || typeof payload.exp !== "number") return null;
+    if (payload.exp < Date.now()) return null;
+    return payload.userId;
+  } catch {
+    return null;
   }
 }
 
-// Simple in-memory session store (replace with Redis in production)
-export const sessionStore = new Map<string, { userId: string; expiresAt: number }>();
+function signPayload(encodedPayload: string): string {
+  return crypto.createHmac("sha256", SESSION_SECRET!).update(encodedPayload).digest("base64url");
+}
 
 export function getSessionUser(req: import("express").Request): string | null {
   // Support both x-session-token and Authorization: Bearer <token>
@@ -59,13 +96,7 @@ export function getSessionUser(req: import("express").Request): string | null {
     }
   }
   if (!token) return null;
-  const session = sessionStore.get(token);
-  if (!session) return null;
-  if (session.expiresAt < Date.now()) {
-    sessionStore.delete(token);
-    return null;
-  }
-  return session.userId;
+  return verifySessionToken(token);
 }
 
 router.post("/auth/register", async (req, res): Promise<void> => {
@@ -100,8 +131,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     sessionCount: 0,
   }).returning();
 
-  const token = generateId();
-  sessionStore.set(token, { userId: id, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 });
+  const token = createSessionToken(id);
 
   req.log.info({ userId: id }, "User registered");
   res.status(201).json({ user: serializeUser(user), token });
@@ -127,16 +157,13 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 
   await db.update(usersTable).set({ lastLoginAt: new Date() }).where(eq(usersTable.id, user.id));
 
-  const token = generateId();
-  sessionStore.set(token, { userId: user.id, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 });
+  const token = createSessionToken(user.id);
 
   req.log.info({ userId: user.id }, "User logged in");
   res.json({ user: serializeUser(user), token });
 });
 
 router.post("/auth/logout", async (req, res): Promise<void> => {
-  const token = req.headers["x-session-token"] as string | undefined;
-  if (token) sessionStore.delete(token);
   res.json({ ok: true });
 });
 

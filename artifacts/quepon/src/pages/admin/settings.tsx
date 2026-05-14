@@ -19,7 +19,6 @@ export default function AdminSettings() {
   const [form, setForm] = useState({
     shopName: "GGX Gaming Center",
     standardRatePerHour: 25,
-    premiumRatePerHour: 35,
     vipRatePerHour: 50,
     overnightRate: 99,
     studentDiscount: 20,
@@ -120,8 +119,7 @@ export default function AdminSettings() {
             </CardHeader>
             <CardContent className="space-y-3 p-8">
               {[
-                { key: "standardRatePerHour", label: "Standard Tier" },
-                { key: "premiumRatePerHour", label: "Premium Tier" },
+                { key: "standardRatePerHour", label: "Regular Tier" },
                 { key: "vipRatePerHour", label: "VIP Tier" },
                 { key: "overnightRate", label: "Overnight Flat" },
                 { key: "studentDiscount", label: "Student Disc. (%)" },

@@ -44,7 +44,7 @@ This repository is a pnpm workspace with four core packages plus the app artifac
 - All API routes are served under `/api`
 - The frontend stores the session token in `localStorage` under `quepon_token`
 - The client sends the token on requests through `Authorization: Bearer <token>` or `x-session-token`
-- Sessions in the current implementation are stored in memory on the server and expire after 7 days
+- Auth tokens are signed and stateless, with a 7-day lifetime
 
 ## Main Features
 
@@ -235,6 +235,7 @@ Notes:
 From the repository root:
 
 - `pnpm run dev` - run the backend and frontend in development
+- `pnpm run build:vercel` - build the Vite frontend for Vercel
 - `pnpm run build` - typecheck and build all workspace packages
 - `pnpm run typecheck` - run TypeScript checks across the workspace
 - `pnpm run typecheck:libs` - typecheck shared libraries only
@@ -248,6 +249,29 @@ Package-level scripts:
 - `pnpm --filter @workspace/api-spec run codegen`
 - `pnpm --filter @workspace/db run push`
 - `pnpm --filter @workspace/db run push-force`
+
+## Vercel Deployment
+
+This repository is deployment-ready for Vercel as a single project:
+
+- the frontend builds into `artifacts/quepon/dist/public`
+- `/api/*` is served by a serverless Express handler from `api/[...path].ts`
+- client routes fall back to `index.html` through `vercel.json`
+
+Set these environment variables in the Vercel project settings:
+
+- `DATABASE_URL`
+- `SESSION_SECRET`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Deployment flow:
+
+1. Import the repository into Vercel.
+2. Keep the root directory at the repository root.
+3. Add the environment variables in Vercel, not in the repo.
+4. Deploy using the default Vercel Git integration or `vercel --prod`.
+5. Verify `/api/healthz` and a client route such as `/home`.
 
 ## Frontend Routes
 
@@ -295,7 +319,7 @@ Package-level scripts:
 - The frontend uses auth guards to redirect users into the correct role-specific area.
 - The API uses JSON request bodies and CORS is enabled.
 - Generated API client and schema files should be regenerated from the OpenAPI spec instead of editing generated output directly.
-- The current auth implementation uses a simple hash-and-session approach suitable for local development, not production hardening.
+- The current auth implementation uses signed bearer tokens and is compatible with Vercel serverless execution.
 - Session and queue logic are tied to PC availability and active session state, so changing a PC or session can affect several related tables.
 
 ## Security Notes

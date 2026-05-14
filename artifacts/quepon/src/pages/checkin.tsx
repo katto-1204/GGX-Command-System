@@ -143,18 +143,18 @@ export default function Checkin() {
   const { data: pcSummary, isLoading: isLoadingSummary } = useGetPcSummary({ query: { refetchInterval: 5000 } as any });
   const { data: queueEntry, isLoading: isLoadingQueue } = useGetMyQueueEntry({ query: { refetchInterval: 5000 } as any });
   const { data: mySession } = useGetMySession();
+  const activeSessionPcLabel = (mySession as { pcLabel?: string | null } | null | undefined)?.pcLabel ?? null;
 
   const availablePcs = pcSummary?.available || 0;
 
   // Queue-gated access rules:
   // Can scan ONLY if:
   // 1. Has an active session (already booked), OR
-  // 2. Is in queue and position is #1 (next in line) / status is approved/assigned, OR
-  // 3. PCs are available (no queue needed)
+  // 2. Is in queue and position is #1 (next in line) / status is approved/assigned
   const isInQueue = !!queueEntry && !["cancelled", "removed", "noShow", "completed"].includes(queueEntry.status);
   const isNextInLine = isInQueue && (queueEntry.position === 1 || queueEntry.status === "approved" || queueEntry.status === "assigned");
   const hasActiveSession = !!mySession;
-  const canScan = hasActiveSession || isNextInLine || availablePcs > 0;
+  const canScan = hasActiveSession || isNextInLine;
 
   const handleCheckin = (sessionCode?: string) => {
     const codeToUse = (sessionCode || code).trim();
@@ -189,7 +189,7 @@ export default function Checkin() {
     );
   }
 
-  // LOCKED STATE: All PCs full AND not next in queue AND no active session
+  // LOCKED STATE: Not next in queue
   if (!canScan) {
     return (
       <PlayerLayout>
@@ -202,14 +202,38 @@ export default function Checkin() {
 
             <div className="space-y-2">
               <h1 className="text-2xl font-black font-display text-foreground tracking-tight uppercase leading-none italic">
-                SCANNER <span className="text-red-500">LOCKED</span>
+                {hasActiveSession ? "SESSION ACTIVE" : "SCANNER LOCKED"}
               </h1>
               <p className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
-                All stations engaged. Join the queue and wait for your turn to scan.
+                {hasActiveSession 
+                  ? "You already have an active session. Navigate to your session details."
+                  : "Join the queue and wait for your turn to scan."}
               </p>
             </div>
 
-            {isInQueue ? (
+            {hasActiveSession ? (
+              <Card className="bg-card/50 border-border shadow-lg rounded-2xl max-w-sm mx-auto overflow-hidden">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                      <Monitor className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-[10px] text-foreground uppercase tracking-wider mb-0.5">Active Deployment</h4>
+                      <p className="text-[8px] text-muted-foreground uppercase tracking-widest font-bold leading-normal">
+                        Station {activeSessionPcLabel ?? "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link href="/session">
+                    <Button variant="outline" className="w-full h-11 rounded-xl border-border bg-card font-black uppercase tracking-widest text-[9px] hover:bg-muted transition-colors">
+                      View Session
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : isInQueue ? (
               // In queue but NOT next in line
               <Card className="bg-card/50 border-border shadow-lg rounded-2xl max-w-sm mx-auto overflow-hidden">
                 <CardContent className="p-5 space-y-4">

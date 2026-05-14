@@ -119,7 +119,7 @@ router.get("/dashboard/reports", async (req, res): Promise<void> => {
   const totalPcHours = totalMinutes / 60;
   const avgSessionMinutes = sessionCount > 0 ? totalMinutes / sessionCount : 0;
 
-  const tiers = ["standard", "premium", "vip"];
+  const tiers = ["standard", "vip"];
   const revenueByTier = tiers.map(tier => {
     const tierSessions = allSessions.filter(s => {
       const pc = allPcs.find(p => p.id === s.pcId);
