@@ -86,10 +86,19 @@ export function MembershipCard({ user, className }: MembershipCardProps) {
             </div>
           </div>
           
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-3 shadow-lg flex flex-col items-end">
-            <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Credits</span>
-            <div className="text-2xl font-black text-white font-mono tracking-tighter leading-none italic">
-              ₱{(user?.walletBalance || 0).toFixed(2)}
+          <div className="flex gap-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2 shadow-lg flex flex-col items-end">
+              <span className="text-[7px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Spent</span>
+              <div className="text-sm font-black text-white font-mono tracking-tighter leading-none italic">
+                ₱{(user?.totalSpent || 0).toFixed(0)}
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-5 py-3 shadow-lg flex flex-col items-end">
+              <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Credits</span>
+              <div className="text-2xl font-black text-white font-mono tracking-tighter leading-none italic">
+                ₱{(user?.walletBalance || 0).toFixed(2)}
+              </div>
             </div>
           </div>
         </div>

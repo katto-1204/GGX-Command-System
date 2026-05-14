@@ -4,7 +4,7 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Monitor, Wrench, RefreshCw, Loader2, CheckCircle, Plus, Trash2 } from "lucide-react";
+import { Monitor, Wrench, RefreshCw, Loader2, CheckCircle, Plus, Trash2, QrCode } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { QRCodeSVG } from "qrcode.react";
 export default function AdminPcs() {
   const { data: pcs, isLoading } = useListPcs({ query: { refetchInterval: 10000 } as any });
   const updatePcMutation = useUpdatePcStatus();

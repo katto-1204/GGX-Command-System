@@ -70,7 +70,7 @@ export function PcSpecsSection() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <SpecItem icon={Cpu} label="CPU" value={pc.specs?.cpu || "N/A"} isVip={pc.tier === "vip"} />
+              <SpecItem icon={Cpu} label="CPU" value={pc.tier === "vip" ? "Ryzen 7" : (pc.specs?.cpu || "N/A")} isVip={pc.tier === "vip"} />
               <SpecItem icon={LayoutGrid} label="GPU" value={pc.specs?.gpu || "N/A"} isVip={pc.tier === "vip"} />
               <SpecItem icon={Zap} label="RAM" value={pc.specs?.ram || "N/A"} isVip={pc.tier === "vip"} />
               <SpecItem icon={Monitor} label="DISPLAY" value={pc.specs?.monitor || "N/A"} isVip={pc.tier === "vip"} />
@@ -95,7 +95,7 @@ export function PcSpecsSection() {
 
               <div className="px-8 pb-10 space-y-6">
                 <div className="grid grid-cols-1 gap-4">
-                  <DetailItem icon={Cpu} label="Processor" value={selectedPc.specs?.cpu || "N/A"} subValue="High Performance Core" />
+                  <DetailItem icon={Cpu} label="Processor" value={selectedPc.tier === "vip" ? "Ryzen 7" : (selectedPc.specs?.cpu || "N/A")} subValue="High Performance Core" />
                   <DetailItem icon={Zap} label="Graphics Card" value={selectedPc.specs?.gpu || "N/A"} subValue="High Fidelity Visuals" />
                   <DetailItem icon={LayoutGrid} label="Memory" value={selectedPc.specs?.ram || "N/A"} subValue="Low Latency DDR" />
                   <DetailItem icon={Monitor} label="Visual Output" value={selectedPc.specs?.monitor || "N/A"} subValue="High Refresh Rate" />

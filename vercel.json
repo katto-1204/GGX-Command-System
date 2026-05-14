@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "corepack pnpm run build:vercel",
+  "buildCommand": "corepack pnpm -w run build:vercel",
   "outputDirectory": "artifacts/quepon/dist/public",
   "rewrites": [
     {

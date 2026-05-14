@@ -14,7 +14,7 @@ const slides = [
   {
     title: "Skip the Waiting Confusion",
     subtitle: "See your queue position in real time and know when its your turn.",
-    image: "/gaming_home_hero_1778711412356.png",
+    image: "/skipthewait.png",
     accent: "from-purple-500 to-fuchsia-500",
   },
   {

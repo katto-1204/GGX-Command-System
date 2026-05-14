@@ -113,9 +113,9 @@ export default function Home() {
               <h2 className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">Popular Games</h2>
             </div>
           </div>
-          <div className="flex overflow-x-auto space-x-4 snap-x hide-scrollbar px-1 pb-4">
+          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 px-1 pb-4">
             {RECENT_GAMES.map((game) => (
-              <div key={game.id} className="min-w-[90%] snap-center flex-shrink-0 group cursor-pointer">
+              <div key={game.id} className="min-w-full snap-center flex-shrink-0 group cursor-pointer">
                 <div className="relative aspect-[16/9] rounded-3xl overflow-hidden border border-border mb-2 shadow-sm">
                   <img src={game.image} alt={game.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
@@ -132,38 +132,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 4. OFFERS */}
-        {activePromos.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center px-1">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-1 bg-primary rounded-full" />
-                <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Offers</h2>
-              </div>
-              <Link href="/promos" className="text-[9px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-1.5 hover:translate-x-1 transition-transform">
-                VIEW ALL <ChevronRight className="w-3 h-3" />
-              </Link>
-            </div>
-            <div className="flex overflow-x-auto space-x-4 snap-x hide-scrollbar px-1">
-              {activePromos.slice(0, 3).map(promo => (
-                <div key={promo.id} className="min-w-[85%] snap-center bg-card border-2 border-border rounded-[2rem] p-6 flex-shrink-0 relative overflow-hidden group shadow-xl">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative z-10">
-                    <div className="inline-flex items-center px-2 py-1 rounded-lg bg-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 border border-primary/20">{promo.tag || "MISSION"}</div>
-                    <h3 className="font-black text-2xl mb-2 leading-none text-foreground italic tracking-tighter uppercase line-clamp-1">{promo.title}</h3>
-                    <p className="text-[10px] text-muted-foreground line-clamp-2 font-bold leading-relaxed mb-6 uppercase tracking-wide">{promo.description}</p>
-                    <Button variant="default" size="sm" className="rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest px-6 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all text-[9px] h-10">Execute Now</Button>
-                  </div>
-                  <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-all group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
-                    <Ticket className="w-24 h-24" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Command HUB (Moved down) */}
+        {/* Command HUB (Moved up) */}
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-8 h-1 bg-primary rounded-full" />
@@ -188,6 +157,37 @@ export default function Home() {
             })}
           </div>
         </div>
+
+        {/* 4. OFFERS (Moved down) */}
+        {activePromos.length > 0 && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center px-1">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-1 bg-primary rounded-full" />
+                <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Offers</h2>
+              </div>
+              <Link href="/promos" className="text-[9px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-1.5 hover:translate-x-1 transition-transform">
+                VIEW ALL <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 px-1">
+              {activePromos.slice(0, 3).map(promo => (
+                <div key={promo.id} className="min-w-full snap-center bg-card border-2 border-border rounded-[2rem] p-6 flex-shrink-0 relative overflow-hidden group shadow-xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative z-10">
+                    <div className="inline-flex items-center px-2 py-1 rounded-lg bg-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 border border-primary/20">{promo.tag || "MISSION"}</div>
+                    <h3 className="font-black text-2xl mb-2 leading-none text-foreground italic tracking-tighter uppercase line-clamp-1">{promo.title}</h3>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2 font-bold leading-relaxed mb-6 uppercase tracking-wide">{promo.description}</p>
+                    <Button variant="default" size="sm" className="rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest px-6 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all text-[9px] h-10">Execute Now</Button>
+                  </div>
+                  <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-all group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+                    <Ticket className="w-24 h-24" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* PC SPECS SECTION */}
         <PcSpecsSection />
