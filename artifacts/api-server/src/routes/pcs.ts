@@ -3,6 +3,7 @@ import { db, pcsTable, sessionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getSessionUser } from "./auth";
+import { randomUUID } from "crypto";
 
 const router = Router();
 
@@ -91,6 +92,83 @@ router.patch("/pcs/:pcId/status", async (req, res): Promise<void> => {
 
   if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
   res.json(serializePc(pc, null, null));
+});
+
+const pcInputSchema = z.object({
+  number: z.number().int(),
+  label: z.string(),
+  tier: z.enum(["standard", "premium", "vip"]),
+  status: z.enum(["available", "inUse", "maintenance", "reserved", "cleaning", "offline"]).optional().default("available"),
+  location: z.string().optional().default("Main Area"),
+  specs: z.any().optional(),
+});
+
+router.post("/pcs", async (req, res): Promise<void> => {
+  const userId = getSessionUser(req);
+  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const parsed = pcInputSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
+  try {
+    const [pc] = await db.insert(pcsTable)
+      .values({
+        id: randomUUID(),
+        number: parsed.data.number,
+        label: parsed.data.label,
+        tier: parsed.data.tier,
+        status: parsed.data.status,
+        location: parsed.data.location,
+        specs: parsed.data.specs,
+      })
+      .returning();
+
+    res.status(201).json(serializePc(pc));
+  } catch (err: any) {
+    if (err.code === '23505') { // unique violation
+      res.status(400).json({ error: "PC number must be unique" });
+      return;
+    }
+    res.status(500).json({ error: "Failed to create PC" });
+  }
+});
+
+const pcUpdateSchema = pcInputSchema.partial();
+
+router.patch("/pcs/:pcId/details", async (req, res): Promise<void> => {
+  const userId = getSessionUser(req);
+  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const { pcId } = req.params;
+  const parsed = pcUpdateSchema.safeParse(req.body);
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
+  try {
+    const [pc] = await db.update(pcsTable)
+      .set({ ...parsed.data, updatedAt: new Date() })
+      .where(eq(pcsTable.id, pcId))
+      .returning();
+
+    if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
+    res.json(serializePc(pc));
+  } catch (err: any) {
+    if (err.code === '23505') {
+      res.status(400).json({ error: "PC number must be unique" });
+      return;
+    }
+    res.status(500).json({ error: "Failed to update PC" });
+  }
+});
+
+router.delete("/pcs/:pcId/delete", async (req, res): Promise<void> => {
+  const userId = getSessionUser(req);
+  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const { pcId } = req.params;
+  const [pc] = await db.delete(pcsTable).where(eq(pcsTable.id, pcId)).returning();
+  
+  if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
+  res.json({ success: true });
 });
 
 export default router;

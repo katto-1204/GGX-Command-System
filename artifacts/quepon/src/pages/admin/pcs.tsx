@@ -1,17 +1,55 @@
 import { useState } from "react";
-import { useListPcs, useUpdatePcStatus, getListPcsQueryKey } from "@workspace/api-client-react";
+import { useListPcs, useUpdatePcStatus, useCreatePc, useDeletePc, getListPcsQueryKey } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Monitor, Wrench, RefreshCw, Loader2, CheckCircle } from "lucide-react";
+import { Monitor, Wrench, RefreshCw, Loader2, CheckCircle, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { QRCodeSVG } from "qrcode.react";
 export default function AdminPcs() {
+  const { data: pcs, isLoading } = useListPcs({ query: { refetchInterval: 10000 } as any });
+  const updatePcMutation = useUpdatePcStatus();
+  const createMutation = useCreatePc();
+  const deleteMutation = useDeletePc();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const [filter, setFilter] = useState("all");
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [newPc, setNewPc] = useState({ number: 1, label: "", tier: "standard" as "standard"|"premium"|"vip" });
+
+  const filteredPcs = pcs?.filter(pc => filter === "all" || pc.status === filter) || [];
+
+  const handleAddPc = () => {
+    createMutation.mutate({ data: { ...newPc, status: "available", location: "Main Area" } }, {
+      onSuccess: () => {
+        toast({ title: "PC Added Successfully" });
+        setIsAddOpen(false);
+        setNewPc(prev => ({ ...prev, number: prev.number + 1, label: `PC ${String(prev.number + 1).padStart(2, '0')}` }));
+        queryClient.invalidateQueries({ queryKey: getListPcsQueryKey() });
+      },
+      onError: (err: any) => {
+        toast({ title: "Failed to add PC", description: err.message, variant: "destructive" });
+      }
+    });
+  };
+
+  const handleDeletePc = (pcId: string) => {
+    if (!confirm("Are you sure you want to delete this PC?")) return;
+    deleteMutation.mutate({ pcId }, {
+      onSuccess: () => {
+        toast({ title: "PC Deleted" });
+        queryClient.invalidateQueries({ queryKey: getListPcsQueryKey() });
+      }
+    });
+  };
   const { data: pcs, isLoading } = useListPcs({ query: { refetchInterval: 10000 } as any });
   const updatePcMutation = useUpdatePcStatus();
   const { toast } = useToast();
@@ -60,25 +98,61 @@ export default function AdminPcs() {
               Manage shop terminals
             </p>
           </div>
-          <div className="flex items-center gap-4">
-             <div className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-muted/50 border border-border/50 backdrop-blur-xl">
-                <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest italic">Filter:</span>
-                <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-[160px] h-8 bg-transparent border-none text-[11px] font-black uppercase tracking-widest text-foreground focus:ring-0">
-                    <SelectValue placeholder="All Nodes" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-border rounded-xl">
-                    <SelectItem value="all" className="text-[10px] font-black uppercase tracking-widest py-3">All Nodes</SelectItem>
-                    <SelectItem value="available" className="text-[10px] font-black uppercase tracking-widest py-3 text-green-500">Available</SelectItem>
-                    <SelectItem value="inUse" className="text-[10px] font-black uppercase tracking-widest py-3 text-red-500">In Use</SelectItem>
-                    <SelectItem value="maintenance" className="text-[10px] font-black uppercase tracking-widest py-3 text-yellow-500">Maintenance</SelectItem>
-                  </SelectContent>
-                </Select>
-             </div>
-             <Button variant="outline" className="h-14 px-8 rounded-2xl border-border bg-muted/30 hover:bg-muted transition-all font-black uppercase text-[10px] tracking-[0.3em] shadow-inner italic">
-                Export Log
-             </Button>
-          </div>
+             <div className="flex items-center gap-4">
+              <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(124,58,237,0.3)] italic">
+                    <Plus className="w-4 h-4 mr-2" /> Add Station
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-card border-border backdrop-blur-2xl max-w-md rounded-[2rem]">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-black uppercase tracking-tight italic">New Station</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6 pt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">PC Number</label>
+                        <Input type="number" value={newPc.number} onChange={e => setNewPc(p => ({...p, number: parseInt(e.target.value)||1}))} className="bg-muted border-border h-12 rounded-xl px-4 font-mono font-bold" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Label</label>
+                        <Input value={newPc.label} onChange={e => setNewPc(p => ({...p, label: e.target.value}))} className="bg-muted border-border h-12 rounded-xl px-4 font-mono font-bold" placeholder="e.g. PC 01" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Tier</label>
+                      <Select value={newPc.tier} onValueChange={(v: any) => setNewPc(p => ({...p, tier: v}))}>
+                        <SelectTrigger className="bg-muted border-border h-12 rounded-xl"><SelectValue/></SelectTrigger>
+                        <SelectContent className="bg-card border-border">
+                          <SelectItem value="standard" className="font-black uppercase text-[10px] tracking-widest">Standard</SelectItem>
+                          <SelectItem value="premium" className="font-black uppercase text-[10px] tracking-widest">Premium</SelectItem>
+                          <SelectItem value="vip" className="font-black uppercase text-[10px] tracking-widest">VIP</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button className="w-full h-14 bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] text-xs rounded-xl mt-4 italic shadow-[0_0_20px_rgba(124,58,237,0.3)]" onClick={handleAddPc} disabled={createMutation.isPending}>
+                      {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Monitor className="w-4 h-4 mr-2" />} Deploy Station
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <div className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-muted/50 border border-border/50 backdrop-blur-xl">
+                 <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest italic">Filter:</span>
+                 <Select value={filter} onValueChange={setFilter}>
+                   <SelectTrigger className="w-[160px] h-8 bg-transparent border-none text-[11px] font-black uppercase tracking-widest text-foreground focus:ring-0">
+                     <SelectValue placeholder="All Nodes" />
+                   </SelectTrigger>
+                   <SelectContent className="bg-card border-border rounded-xl">
+                     <SelectItem value="all" className="text-[10px] font-black uppercase tracking-widest py-3">All Nodes</SelectItem>
+                     <SelectItem value="available" className="text-[10px] font-black uppercase tracking-widest py-3 text-green-500">Available</SelectItem>
+                     <SelectItem value="inUse" className="text-[10px] font-black uppercase tracking-widest py-3 text-red-500">In Use</SelectItem>
+                     <SelectItem value="maintenance" className="text-[10px] font-black uppercase tracking-widest py-3 text-yellow-500">Maintenance</SelectItem>
+                   </SelectContent>
+                 </Select>
+              </div>
+           </div>
         </div>
 
         {isLoading ? (
@@ -160,9 +234,21 @@ export default function AdminPcs() {
                                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Active Operator</p>
                                <p className="text-base font-black text-foreground uppercase italic tracking-tighter">{pc.currentUsername}</p>
                             </div>
-                            <div className="text-right space-y-1">
-                               <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Deployment</p>
-                               <p className="text-xs font-black font-mono text-primary italic">SESSION_LIVE</p>
+                            <div className="flex items-center gap-2 mb-2 w-full justify-between">
+                              <Badge variant="outline" className={cn("text-[9px] font-black uppercase tracking-widest border-2", getStatusColor(pc.status))}>
+                                {pc.status}
+                              </Badge>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="h-6 w-6 text-muted-foreground/40 hover:text-red-500 hover:bg-red-500/10"
+                                  onClick={(e) => { e.stopPropagation(); handleDeletePc(pc.id); }}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                                <div className="text-3xl font-black font-display text-foreground italic leading-none">{String(pc.number).padStart(2, '0')}</div>
+                              </div>
                             </div>
                           </div>
 

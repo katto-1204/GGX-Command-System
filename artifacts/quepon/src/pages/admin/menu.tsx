@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Coffee, Pizza, Loader2, Zap, Trash2 } from "lucide-react";
+import { Plus, Coffee, Pizza, Loader2, Zap, Trash2, Printer, UserCog, Cookie, UtensilsCrossed, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,6 +40,16 @@ export default function AdminMenu() {
         queryClient.invalidateQueries({ queryKey: getListMenuItemsQueryKey() });
       }
     });
+  };
+
+  const getIconForItem = (item: any) => {
+    const name = item.name.toLowerCase();
+    if (name.includes("print")) return Printer;
+    if (name.includes("tech") || name.includes("assist")) return UserCog;
+    if (item.category === "drinks") return Coffee;
+    if (item.category === "snacks") return Cookie;
+    if (item.category === "meals") return UtensilsCrossed;
+    return Package;
   };
 
   return (
@@ -111,11 +121,13 @@ export default function AdminMenu() {
               <p className="text-xs font-black text-muted-foreground/40 uppercase tracking-widest">The menu is empty</p>
             </div>
           ) : (
-            menu.map(item => (
+            menu.map(item => {
+              const ItemIcon = getIconForItem(item);
+              return (
               <Card key={item.id} className="bg-card border-border hover:border-primary/20 transition-all group rounded-2xl overflow-hidden">
                 <CardContent className="p-6 flex items-center gap-5">
                   <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center border border-border group-hover:border-primary/20 group-hover:bg-primary/5 transition-all">
-                    <Coffee className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                    <ItemIcon className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
@@ -137,7 +149,7 @@ export default function AdminMenu() {
                   </div>
                 </CardContent>
               </Card>
-            ))
+            )})
           )}
         </div>
       </div>

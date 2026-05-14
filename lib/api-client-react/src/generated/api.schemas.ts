@@ -139,6 +139,64 @@ export interface PcStatusUpdate {
   maintenanceNote?: string | null;
 }
 
+export type PcInputTier = (typeof PcInputTier)[keyof typeof PcInputTier];
+
+export const PcInputTier = {
+  standard: "standard",
+  premium: "premium",
+  vip: "vip",
+} as const;
+
+export type PcInputStatus = (typeof PcInputStatus)[keyof typeof PcInputStatus];
+
+export const PcInputStatus = {
+  available: "available",
+  inUse: "inUse",
+  maintenance: "maintenance",
+  reserved: "reserved",
+  cleaning: "cleaning",
+  offline: "offline",
+} as const;
+
+export interface PcInput {
+  number: number;
+  label: string;
+  tier: PcInputTier;
+  status?: PcInputStatus;
+  location?: string;
+  specs?: PcSpecs;
+}
+
+export type PcUpdateInputTier =
+  (typeof PcUpdateInputTier)[keyof typeof PcUpdateInputTier];
+
+export const PcUpdateInputTier = {
+  standard: "standard",
+  premium: "premium",
+  vip: "vip",
+} as const;
+
+export type PcUpdateInputStatus =
+  (typeof PcUpdateInputStatus)[keyof typeof PcUpdateInputStatus];
+
+export const PcUpdateInputStatus = {
+  available: "available",
+  inUse: "inUse",
+  maintenance: "maintenance",
+  reserved: "reserved",
+  cleaning: "cleaning",
+  offline: "offline",
+} as const;
+
+export interface PcUpdateInput {
+  number?: number;
+  label?: string;
+  tier?: PcUpdateInputTier;
+  status?: PcUpdateInputStatus;
+  location?: string;
+  specs?: PcSpecs;
+}
+
 export type QueueEntryStatus =
   (typeof QueueEntryStatus)[keyof typeof QueueEntryStatus];
 

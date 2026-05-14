@@ -36,8 +36,7 @@ export function AdminLayout({ children, breadcrumbs }: AdminLayoutProps) {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
         localStorage.removeItem("quepon_token");
-        setLocation("/admin/login");
-        window.location.reload();
+        setLocation("/role-selection");
       }
     });
   };

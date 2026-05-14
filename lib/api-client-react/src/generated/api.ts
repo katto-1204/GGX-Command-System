@@ -42,8 +42,10 @@ import type {
   OrderInput,
   OrderStatusUpdate,
   Pc,
+  PcInput,
   PcStatusUpdate,
   PcSummary,
+  PcUpdateInput,
   PlayerStatusUpdate,
   Promo,
   PromoInput,
@@ -533,6 +535,92 @@ export function useListPcs<
 }
 
 /**
+ * @summary Create a new PC (admin)
+ */
+export const getCreatePcUrl = () => {
+  return `/api/pcs`;
+};
+
+export const createPc = async (
+  pcInput: PcInput,
+  options?: RequestInit,
+): Promise<Pc> => {
+  return customFetch<Pc>(getCreatePcUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(pcInput),
+  });
+};
+
+export const getCreatePcMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPc>>,
+    TError,
+    { data: BodyType<PcInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createPc>>,
+  TError,
+  { data: BodyType<PcInput> },
+  TContext
+> => {
+  const mutationKey = ["createPc"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createPc>>,
+    { data: BodyType<PcInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createPc(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreatePcMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createPc>>
+>;
+export type CreatePcMutationBody = BodyType<PcInput>;
+export type CreatePcMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a new PC (admin)
+ */
+export const useCreatePc = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createPc>>,
+    TError,
+    { data: BodyType<PcInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createPc>>,
+  TError,
+  { data: BodyType<PcInput> },
+  TContext
+> => {
+  return useMutation(getCreatePcMutationOptions(options));
+};
+
+/**
  * @summary Get a single PC detail
  */
 export const getGetPcUrl = (pcId: string) => {
@@ -692,6 +780,177 @@ export const useUpdatePcStatus = <
   TContext
 > => {
   return useMutation(getUpdatePcStatusMutationOptions(options));
+};
+
+/**
+ * @summary Update PC details (admin)
+ */
+export const getUpdatePcUrl = (pcId: string) => {
+  return `/api/pcs/${pcId}/details`;
+};
+
+export const updatePc = async (
+  pcId: string,
+  pcUpdateInput: PcUpdateInput,
+  options?: RequestInit,
+): Promise<Pc> => {
+  return customFetch<Pc>(getUpdatePcUrl(pcId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(pcUpdateInput),
+  });
+};
+
+export const getUpdatePcMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updatePc>>,
+    TError,
+    { pcId: string; data: BodyType<PcUpdateInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updatePc>>,
+  TError,
+  { pcId: string; data: BodyType<PcUpdateInput> },
+  TContext
+> => {
+  const mutationKey = ["updatePc"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updatePc>>,
+    { pcId: string; data: BodyType<PcUpdateInput> }
+  > = (props) => {
+    const { pcId, data } = props ?? {};
+
+    return updatePc(pcId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdatePcMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updatePc>>
+>;
+export type UpdatePcMutationBody = BodyType<PcUpdateInput>;
+export type UpdatePcMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update PC details (admin)
+ */
+export const useUpdatePc = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updatePc>>,
+    TError,
+    { pcId: string; data: BodyType<PcUpdateInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updatePc>>,
+  TError,
+  { pcId: string; data: BodyType<PcUpdateInput> },
+  TContext
+> => {
+  return useMutation(getUpdatePcMutationOptions(options));
+};
+
+/**
+ * @summary Delete a PC (admin)
+ */
+export const getDeletePcUrl = (pcId: string) => {
+  return `/api/pcs/${pcId}/delete`;
+};
+
+export const deletePc = async (
+  pcId: string,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeletePcUrl(pcId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeletePcMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deletePc>>,
+    TError,
+    { pcId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deletePc>>,
+  TError,
+  { pcId: string },
+  TContext
+> => {
+  const mutationKey = ["deletePc"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deletePc>>,
+    { pcId: string }
+  > = (props) => {
+    const { pcId } = props ?? {};
+
+    return deletePc(pcId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeletePcMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deletePc>>
+>;
+
+export type DeletePcMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a PC (admin)
+ */
+export const useDeletePc = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deletePc>>,
+    TError,
+    { pcId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deletePc>>,
+  TError,
+  { pcId: string },
+  TContext
+> => {
+  return useMutation(getDeletePcMutationOptions(options));
 };
 
 /**

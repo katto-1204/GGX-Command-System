@@ -18,7 +18,7 @@ export default function Profile() {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
         clearAuthenticatedUser(queryClient);
-        setLocation("/login");
+        setLocation("/role-selection");
       }
     });
   };

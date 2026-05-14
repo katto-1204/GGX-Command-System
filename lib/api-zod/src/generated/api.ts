@@ -118,6 +118,34 @@ export const ListPcsResponseItem = zod.object({
 export const ListPcsResponse = zod.array(ListPcsResponseItem);
 
 /**
+ * @summary Create a new PC (admin)
+ */
+export const CreatePcBody = zod.object({
+  number: zod.number(),
+  label: zod.string(),
+  tier: zod.enum(["standard", "premium", "vip"]),
+  status: zod
+    .enum([
+      "available",
+      "inUse",
+      "maintenance",
+      "reserved",
+      "cleaning",
+      "offline",
+    ])
+    .optional(),
+  location: zod.string().optional(),
+  specs: zod
+    .object({
+      cpu: zod.string().optional(),
+      gpu: zod.string().optional(),
+      ram: zod.string().optional(),
+      monitor: zod.string().optional(),
+    })
+    .optional(),
+});
+
+/**
  * @summary Get a single PC detail
  */
 export const GetPcParams = zod.object({
@@ -205,6 +233,77 @@ export const UpdatePcStatusResponse = zod.object({
   maintenanceNote: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string().optional(),
+});
+
+/**
+ * @summary Update PC details (admin)
+ */
+export const UpdatePcParams = zod.object({
+  pcId: zod.coerce.string(),
+});
+
+export const UpdatePcBody = zod.object({
+  number: zod.number().optional(),
+  label: zod.string().optional(),
+  tier: zod.enum(["standard", "premium", "vip"]).optional(),
+  status: zod
+    .enum([
+      "available",
+      "inUse",
+      "maintenance",
+      "reserved",
+      "cleaning",
+      "offline",
+    ])
+    .optional(),
+  location: zod.string().optional(),
+  specs: zod
+    .object({
+      cpu: zod.string().optional(),
+      gpu: zod.string().optional(),
+      ram: zod.string().optional(),
+      monitor: zod.string().optional(),
+    })
+    .optional(),
+});
+
+export const UpdatePcResponse = zod.object({
+  id: zod.string(),
+  number: zod.number(),
+  label: zod.string(),
+  status: zod.enum([
+    "available",
+    "inUse",
+    "maintenance",
+    "reserved",
+    "cleaning",
+    "offline",
+  ]),
+  tier: zod.enum(["standard", "premium", "vip"]),
+  specs: zod
+    .object({
+      cpu: zod.string().optional(),
+      gpu: zod.string().optional(),
+      ram: zod.string().optional(),
+      monitor: zod.string().optional(),
+    })
+    .optional(),
+  currentSessionId: zod.string().nullish(),
+  currentUserId: zod.string().nullish(),
+  currentUsername: zod.string().nullish(),
+  currentSessionCode: zod.string().nullish(),
+  remainingSeconds: zod.number().nullish(),
+  location: zod.string().optional(),
+  maintenanceNote: zod.string().nullish(),
+  createdAt: zod.string(),
+  updatedAt: zod.string().optional(),
+});
+
+/**
+ * @summary Delete a PC (admin)
+ */
+export const DeletePcParams = zod.object({
+  pcId: zod.coerce.string(),
 });
 
 /**
