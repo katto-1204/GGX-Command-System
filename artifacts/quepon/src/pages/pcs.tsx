@@ -104,8 +104,8 @@ export default function Pcs() {
             </h1>
             <p className="text-xs font-black uppercase tracking-[0.1em]">
               {hasAvailable
-                ? <span className="text-green-500">{availablePcs.length} STATIONS READY FOR UPLINK</span>
-                : <span className="text-primary">STATIONS FULLY DEPLOYED — JOIN WAITLIST</span>}
+                ? <span className="text-green-500">{availablePcs.length} AVAILABLE</span>
+                : <span className="text-primary">FULL CAPACITY</span>}
             </p>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function Pcs() {
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="SEARCH STATION ID / SPECS..."
+              placeholder="SEARCH..."
               className="h-16 pl-14 bg-card border-border rounded-[1.5rem] focus:border-primary/50 focus:ring-primary/10 transition-all uppercase text-[11px] tracking-[0.2em] font-black shadow-inner"
             />
           </div>
@@ -157,7 +157,7 @@ export default function Pcs() {
                     : "bg-card text-muted-foreground border-border hover:bg-muted hover:text-foreground"
                 )}
               >
-                {f === "all" ? "TOTAL FLEET" : f === "inUse" ? "ACTIVE PLAY" : f}
+                {f === "all" ? "TOTAL" : f === "inUse" ? "BUSY" : f}
                 <span className={cn("ml-3 px-2 py-0.5 rounded-lg text-[9px]", filter === f ? "bg-white/20 text-white" : "bg-muted text-muted-foreground")}>
                   {pcs ? pcs.filter(p => f === "all" ? true : p.status === f).length : 0}
                 </span>
@@ -168,6 +168,7 @@ export default function Pcs() {
 
         {/* PC Grid */}
         <div className="grid grid-cols-2 gap-5">
+          {/* @ts-ignore */}
           <AnimatePresence mode="popLayout">
             {filtered.map((pc, i) => {
               const cfg = STATUS_CONFIG[pc.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.offline;
@@ -192,7 +193,7 @@ export default function Pcs() {
                       "relative p-5 rounded-[2rem] border-2 transition-all active:scale-95 group overflow-hidden shadow-sm h-full flex flex-col",
                       isAvailable 
                         ? (isVip 
-                            ? "cursor-pointer bg-gradient-to-br from-yellow-500/10 to-transparent border-yellow-500/40 hover:border-yellow-500/80 shadow-[0_0_20px_rgba(234,179,8,0.1)]" 
+                            ? "cursor-pointer bg-gradient-to-br from-yellow-500/20 via-yellow-500/5 to-transparent border-yellow-500/50 hover:border-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.15)] bg-[#1a1608]" 
                             : "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/30") 
                         : "bg-muted/40 opacity-70 border-border grayscale-[0.5]"
                     )}

@@ -8,10 +8,10 @@ function Model() {
 }
 
 export function PCModel() {
-  const CanvasComp = Canvas as any;
   return (
     <div className="w-full h-full min-h-[300px]">
-      <CanvasComp dpr={[1, 2]} shadows camera={{ position: [0, 0, 8], fov: 45 }}>
+      {/* @ts-ignore */}
+      <Canvas dpr={[1, 2]} shadows camera={{ position: [0, 0, 8], fov: 45 }}>
         <Suspense fallback={null}>
           <Stage intensity={0.5} environment="city" adjustCamera={1.2}>
             <Model />
@@ -23,12 +23,11 @@ export function PCModel() {
             enablePan={false}
             minPolarAngle={Math.PI / 4}
             maxPolarAngle={Math.PI / 1.5}
+            makeDefault
           />
         </Suspense>
         <Environment preset="city" />
-      </CanvasComp>
+      </Canvas>
     </div>
   );
 }
-
-useGLTF.preload("/ggx3d.glb");

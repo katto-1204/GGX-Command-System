@@ -86,7 +86,7 @@ export function PcSpecsSection() {
               <div className="h-2 bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
               <DialogHeader className="p-8 pb-4">
                 <DialogTitle className="text-3xl font-black font-display italic uppercase tracking-tighter text-foreground">
-                  {selectedPc.label} <span className="text-primary">CORE SPEC</span>
+                  {selectedPc.label} <span className="text-primary">SPECIFICATIONS</span>
                 </DialogTitle>
                 <DialogDescription className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mt-2">
                   Hardware Specifications
@@ -96,7 +96,7 @@ export function PcSpecsSection() {
               <div className="px-8 pb-10 space-y-6">
                 <div className="grid grid-cols-1 gap-4">
                   <DetailItem icon={Cpu} label="Processor" value={selectedPc.specs?.cpu || "N/A"} subValue="High Performance Core" />
-                  <DetailItem icon={Zap} label="Graphics Card" value={selectedPc.specs?.gpu || "N/A"} subValue="RTX Enabled Tech" />
+                  <DetailItem icon={Zap} label="Graphics Card" value={selectedPc.specs?.gpu || "N/A"} subValue="High Fidelity Visuals" />
                   <DetailItem icon={LayoutGrid} label="Memory" value={selectedPc.specs?.ram || "N/A"} subValue="Low Latency DDR" />
                   <DetailItem icon={Monitor} label="Visual Output" value={selectedPc.specs?.monitor || "N/A"} subValue="High Refresh Rate" />
                   <DetailItem icon={HardDrive} label="Storage" value={selectedPc.specs?.storage || "NVMe Gen4 SSD"} subValue="Extreme Read/Write" />

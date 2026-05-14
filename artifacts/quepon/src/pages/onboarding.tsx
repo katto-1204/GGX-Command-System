@@ -60,6 +60,7 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-[100dvh] w-full bg-background relative overflow-hidden text-white">
+      {/* @ts-ignore */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={slideIndex}
@@ -111,6 +112,7 @@ export default function Onboarding() {
         </header>
 
         <main className="flex flex-1 items-end pb-36">
+          {/* @ts-ignore */}
           <AnimatePresence mode="wait">
             <motion.div
               key={slideIndex}
