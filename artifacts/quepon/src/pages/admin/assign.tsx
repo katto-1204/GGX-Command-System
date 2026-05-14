@@ -33,14 +33,14 @@ export default function AdminAssign() {
       data: { pcId: selectedPcId, durationMinutes: parseInt(duration) }
     }, {
       onSuccess: () => {
-        toast({ title: "SQUAD DEPLOYED", description: "Station assignment broadcast successful." });
+        toast({ title: "Station Assigned", description: "The player has been assigned to the station." });
         setSelectedQueueId(null);
         setSelectedPcId(null);
         queryClient.invalidateQueries({ queryKey: getListQueueEntriesQueryKey() });
         queryClient.invalidateQueries({ queryKey: getListPcsQueryKey() });
       },
       onError: (err: any) => {
-        toast({ title: "DEPLOYMENT FAILED", description: err.message, variant: "destructive" });
+        toast({ title: "Assignment Failed", description: err.message, variant: "destructive" });
       }
     });
   };
@@ -55,19 +55,19 @@ export default function AdminAssign() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary">
               <Target className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Matchmaking Engine</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Queue Management</span>
             </div>
-            <h1 className="text-4xl font-black font-display tracking-tight text-foreground">UNIT <span className="text-primary">ASSIGNMENT</span></h1>
-            <p className="text-muted-foreground font-medium text-sm">Deploy authorized players to operational hardware stations.</p>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground">ASSIGN <span className="text-primary">STATION</span></h1>
+            <p className="text-muted-foreground font-medium text-sm">Assign players to available stations.</p>
           </div>
 
           <div className="flex gap-4">
              <div className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 flex flex-col">
-                <span className="text-[8px] font-black text-primary uppercase tracking-widest">Awaiting Ops</span>
+                <span className="text-[8px] font-black text-primary uppercase tracking-widest">In Queue</span>
                 <span className="text-xl font-black font-mono text-foreground">{approvedEntries.length}</span>
              </div>
              <div className="px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20 flex flex-col">
-                <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">Available Units</span>
+                <span className="text-[8px] font-black text-green-500 uppercase tracking-widest">Available Stations</span>
                 <span className="text-xl font-black font-mono text-foreground">{availablePcs.length}</span>
              </div>
           </div>
@@ -77,7 +77,7 @@ export default function AdminAssign() {
           {/* Left Side: Queue */}
           <div className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Verified Personnel</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Players in Queue</h3>
               <Badge variant="outline" className="bg-primary/20 text-primary border-primary/30 font-mono">{approvedEntries.length}</Badge>
             </div>
             
@@ -87,7 +87,7 @@ export default function AdminAssign() {
               ) : approvedEntries.length === 0 ? (
                 <div className="bg-card border border-border rounded-3xl p-12 text-center">
                   <User className="w-12 h-12 mx-auto mb-4 text-muted-foreground/20" />
-                  <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">No personnel cleared for deployment</p>
+                  <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">No players in queue</p>
                 </div>
               ) : (
                 approvedEntries.map(entry => (
@@ -131,7 +131,7 @@ export default function AdminAssign() {
           {/* Right Side: Available PCs */}
           <div className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Operational Stations</h3>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Available Stations</h3>
               <Badge variant="outline" className="bg-green-500/20 text-green-500 border-green-500/30 font-mono">{availablePcs.length}</Badge>
             </div>
 
@@ -141,7 +141,7 @@ export default function AdminAssign() {
               ) : availablePcs.length === 0 ? (
                 <div className="col-span-full bg-card border border-border rounded-3xl p-12 text-center">
                   <Monitor className="w-12 h-12 mx-auto mb-4 text-muted-foreground/20" />
-                  <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">All hardware units currently in use</p>
+                  <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">All stations are occupied</p>
                 </div>
               ) : (
                 availablePcs.map(pc => (
@@ -191,7 +191,7 @@ export default function AdminAssign() {
                       <ArrowRight className="text-primary w-5 h-5" />
                     </div>
                     <div className="text-center">
-                      <div className="text-[8px] font-black text-green-500 uppercase tracking-widest mb-1">Target Station</div>
+                      <div className="text-[8px] font-black text-green-500 uppercase tracking-widest mb-1">Station</div>
                       <div className="font-black font-mono text-foreground">{selectedPc?.label}</div>
                     </div>
                   </div>
@@ -220,7 +220,7 @@ export default function AdminAssign() {
                       disabled={assignMutation.isPending}
                     >
                       {assignMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
-                      Authorize Deployment
+                      Confirm Assignment
                     </Button>
 
                     <Button 

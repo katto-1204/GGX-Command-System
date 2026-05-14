@@ -27,7 +27,7 @@ export function RulesSection() {
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-3">
           <div className="w-8 h-1 bg-orange-500 rounded-full" />
-          <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">General Rules</h2>
+          <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Rules</h2>
         </div>
       </div>
 

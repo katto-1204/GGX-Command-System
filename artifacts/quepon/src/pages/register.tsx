@@ -55,7 +55,8 @@ export default function Register() {
         setLocation("/home");
       },
       onError: (err: any) => {
-        setErrorMessage(err.message || "Could not create account. Please check your info.");
+        const message = err.response?.data?.error || err.error || err.message || "Could not create account. Please check your info.";
+        setErrorMessage(message);
         setShowErrorModal(true);
       }
     });
@@ -88,9 +89,9 @@ export default function Register() {
             <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
           </div>
           <h1 className="text-4xl font-black font-display text-foreground tracking-tighter mb-2 uppercase">
-            Join <span className="text-primary">GGX</span>
+            REGISTER
           </h1>
-          <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Initialize your player identity</p>
+          <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Create your player account</p>
         </div>
 
         <div className="bg-card backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl relative overflow-hidden">
@@ -125,7 +126,7 @@ export default function Register() {
                 name="birthDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Birth Date *</FormLabel>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Birthday *</FormLabel>
                     <FormControl>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
@@ -216,7 +217,7 @@ export default function Register() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Security Key *</FormLabel>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Password *</FormLabel>
                     <FormControl>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
@@ -239,7 +240,7 @@ export default function Register() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Confirm Security Key *</FormLabel>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Confirm Password *</FormLabel>
                     <FormControl>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
@@ -267,7 +268,7 @@ export default function Register() {
                   {registerMutation.isPending ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
-                    "Authorize & Join"
+                    "Register"
                   )}
                 </span>
               </Button>

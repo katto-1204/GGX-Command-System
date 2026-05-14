@@ -22,9 +22,8 @@ const STATUS_CONFIG = {
 };
 
 const TIER_CONFIG = {
-  standard: { label: "CORE", color: "text-blue-400", bg: "bg-blue-400/10", icon: Monitor, rate: 25 },
-  premium: { label: "ELITE", color: "text-purple-400", bg: "bg-purple-400/10", icon: Zap, rate: 35 },
-  vip: { label: "LEGEND", color: "text-yellow-400", bg: "bg-yellow-400/10", icon: Star, rate: 50 },
+  standard: { label: "REGULAR", color: "text-blue-400", bg: "bg-blue-400/10", icon: Monitor, rate: 25 },
+  vip: { label: "VVIP", color: "text-yellow-400", bg: "bg-yellow-400/10", icon: Star, rate: 50 },
 };
 
 export default function Pcs() {
@@ -98,10 +97,10 @@ export default function Pcs() {
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Deployment Matrix</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Hardware Status</span>
             </div>
             <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
-              HARDWARE <span className="text-primary">FLEET</span>
+              STATIONS
             </h1>
             <p className="text-xs font-black uppercase tracking-[0.1em]">
               {hasAvailable
@@ -176,6 +175,8 @@ export default function Pcs() {
               const isAvailable = pc.status === "available";
               const TierIcon = tierCfg.icon;
 
+              const isVip = pc.tier === "vip";
+
               return (
                 <motion.div 
                   key={pc.id} 
@@ -188,51 +189,44 @@ export default function Pcs() {
                   <div 
                     onClick={() => isAvailable && setSelectedPc(pc)}
                     className={cn(
-                      "relative p-6 rounded-[2.5rem] border-2 transition-all active:scale-95 group overflow-hidden shadow-sm h-full flex flex-col",
+                      "relative p-5 rounded-[2rem] border-2 transition-all active:scale-95 group overflow-hidden shadow-sm h-full flex flex-col",
                       isAvailable 
-                        ? "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/30" 
+                        ? (isVip 
+                            ? "cursor-pointer bg-gradient-to-br from-yellow-500/10 to-transparent border-yellow-500/40 hover:border-yellow-500/80 shadow-[0_0_20px_rgba(234,179,8,0.1)]" 
+                            : "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/30") 
                         : "bg-muted/40 opacity-70 border-border grayscale-[0.5]"
                     )}
                   >
                     {/* Status Indicator */}
-                    <div className="flex justify-between items-start mb-8">
+                    <div className="flex justify-between items-start mb-4">
                       <div className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/50 border border-border backdrop-blur-sm",
+                        "flex items-center gap-1.5 px-2 py-1 rounded-lg bg-background/50 border border-border backdrop-blur-sm",
                         cfg.color
                       )}>
-                        <div className={cn("w-2 h-2 rounded-full", cfg.dot, isAvailable && "animate-pulse")} />
-                        <span className="text-[9px] font-black tracking-[0.2em]">{cfg.label}</span>
+                        <div className={cn("w-1.5 h-1.5 rounded-full", cfg.dot, isAvailable && "animate-pulse")} />
+                        <span className="text-[8px] font-black tracking-[0.1em]">{cfg.label}</span>
                       </div>
-                      <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center shadow-inner", tierCfg.bg, tierCfg.color)}>
-                        <TierIcon className="w-5 h-5" />
+                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shadow-inner", isVip ? "bg-yellow-500/20 text-yellow-400" : tierCfg.bg, tierCfg.color)}>
+                        <TierIcon className="w-4 h-4" />
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 mb-8 flex-1">
-                      <h3 className="text-2xl font-black text-foreground font-mono tracking-tighter uppercase italic">{pc.label}</h3>
+                    <div className="space-y-1 mb-4 flex-1">
+                      <h3 className={cn(
+                        "text-xl font-black font-mono tracking-tighter uppercase italic",
+                        isVip ? "text-yellow-400" : "text-foreground"
+                      )}>{pc.label}</h3>
                       <div className="flex items-center gap-2">
-                        <span className={cn("text-[10px] font-black uppercase tracking-[0.3em] opacity-80", tierCfg.color)}>{tierCfg.label} SERIES</span>
+                        <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-80", isVip ? "text-yellow-500" : tierCfg.color)}>{tierCfg.label}</span>
                       </div>
-                    </div>
-
-                    <div className="space-y-3 mb-8">
-                      {pc.specs?.gpu && (
-                        <div className="flex items-center gap-2.5 text-[9px] text-muted-foreground font-black uppercase tracking-widest bg-muted/50 px-3 py-2 rounded-xl border border-border/50">
-                          <Cpu className="w-4 h-4 text-primary/60" /> 
-                          <span className="truncate">{pc.specs.gpu}</span>
-                        </div>
-                      )}
-                      {pc.status === "inUse" && pc.remainingSeconds != null && (
-                        <div className="flex items-center gap-2.5 text-[9px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 px-3 py-2 rounded-xl border border-primary/20">
-                          <Clock className="w-4 h-4 animate-pulse" /> 
-                          {Math.floor(pc.remainingSeconds / 60)}M REMAINING
-                        </div>
-                      )}
                     </div>
 
                     {isAvailable && (
-                      <Button className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-black uppercase text-[10px] tracking-[0.3em] shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-                        DEPLOY
+                      <Button className={cn(
+                        "w-full h-10 rounded-xl font-black uppercase text-[9px] tracking-[0.2em] transition-transform",
+                        isVip ? "bg-yellow-500 text-black hover:bg-yellow-400" : "bg-primary text-primary-foreground"
+                      )}>
+                        USE PC
                       </Button>
                     )}
                   </div>

@@ -71,11 +71,11 @@ export function MembershipCard({ user, className }: MembershipCardProps) {
         </div>
 
         {/* Middle Area: Name & Username */}
-        <div className="space-y-1">
-          <h2 className="text-2xl font-black font-display tracking-tight text-white uppercase italic truncate">
-            {user?.fullName || user?.displayName || user?.username}
+        <div className="space-y-0.5">
+          <h2 className="text-xl font-black font-display tracking-tight text-white uppercase italic truncate">
+            @{user?.username}
           </h2>
-          <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">@{user?.username}</p>
+          <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">{user?.fullName || user?.displayName}</p>
         </div>
 
         {/* Bottom Area: Metadata & Balance */}

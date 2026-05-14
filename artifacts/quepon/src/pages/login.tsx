@@ -104,9 +104,9 @@ export default function Login() {
             <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
           </div>
           <h1 className="text-4xl font-black font-display text-foreground tracking-tighter mb-2">
-            WELCOME <span className="text-primary">BACK</span>
+            LOGIN
           </h1>
-          <p className="text-muted-foreground font-medium tracking-wide">Enter your credentials to enter the arena.</p>
+          <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Access your player account</p>
         </div>
 
         <div className="bg-card backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl relative overflow-hidden">
@@ -179,7 +179,7 @@ export default function Login() {
                   {loginMutation.isPending ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
-                    "Initialize Session"
+                    "Login"
                   )}
                 </span>
               </Button>

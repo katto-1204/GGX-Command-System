@@ -26,7 +26,7 @@ export default function AdminPromos() {
   const handleCreate = () => {
     createMutation.mutate({ data: { ...formData, isActive: true } }, {
       onSuccess: () => {
-        toast({ title: "CAMPAIGN DEPLOYED", description: "Promotional directive active." });
+        toast({ title: "Promo Created", description: "The promotion is now active." });
         setIsOpen(false);
         setFormData({ title: "", description: "", tag: "discount", displayPriority: 0 });
         queryClient.invalidateQueries({ queryKey: getListPromosQueryKey() });
@@ -37,7 +37,7 @@ export default function AdminPromos() {
   const handleDelete = (id: string) => {
     deleteMutation.mutate({ promoId: id }, {
       onSuccess: () => {
-        toast({ title: "CAMPAIGN PURGED", description: "Promotional directive removed." });
+        toast({ title: "Promo Deleted", description: "The promotion has been removed." });
         queryClient.invalidateQueries({ queryKey: getListPromosQueryKey() });
       }
     });
@@ -52,16 +52,16 @@ export default function AdminPromos() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary">
               <Megaphone className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Marketing Engine</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Promotions</span>
             </div>
             <h1 className="text-4xl font-black font-display tracking-tight text-foreground">PROMO <span className="text-primary">MANAGER</span></h1>
-            <p className="text-muted-foreground font-medium text-sm">Deploy targeted campaigns and player incentives.</p>
+            <p className="text-muted-foreground font-medium text-sm">Create and manage special offers for players.</p>
           </div>
           
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 transition-all active:scale-95">
-                <Plus className="w-4 h-4 mr-2" /> Launch Campaign
+                <Plus className="w-4 h-4 mr-2" /> New Promo
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-border sm:max-w-md rounded-[2.5rem] p-8 overflow-hidden shadow-2xl">
@@ -69,34 +69,34 @@ export default function AdminPromos() {
               <DialogHeader className="mb-6">
                 <DialogTitle className="text-2xl font-black font-display tracking-tight uppercase italic flex items-center gap-2">
                   <Sparkles className="w-6 h-6 text-primary" />
-                  New Directive
+                   New Promo
                 </DialogTitle>
                 <DialogDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                  Initialize promotional parameters
+                   Set promo details
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Designation</label>
+                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Title</label>
                   <Input 
                     value={formData.title} 
                     onChange={e => setFormData(p => ({...p, title: e.target.value}))} 
                     className="bg-muted/50 border-border h-12 rounded-xl focus:border-primary/50 text-sm font-bold" 
-                    placeholder="ENTER CAMPAIGN TITLE"
+                    placeholder="Enter promo title"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Parameters</label>
+                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description</label>
                   <Textarea 
                     value={formData.description} 
                     onChange={e => setFormData(p => ({...p, description: e.target.value}))} 
                     className="bg-muted/50 border-border rounded-xl focus:border-primary/50 resize-none h-24 text-sm" 
-                    placeholder="ENTER CAMPAIGN DETAILS"
+                    placeholder="Enter promo description"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Classification</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Tag</label>
                     <Input 
                       value={formData.tag} 
                       onChange={e => setFormData(p => ({...p, tag: e.target.value}))} 
@@ -104,7 +104,7 @@ export default function AdminPromos() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Priority (Level)</label>
+                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Priority</label>
                     <Input 
                       type="number" 
                       value={formData.displayPriority} 
@@ -119,7 +119,7 @@ export default function AdminPromos() {
                   disabled={createMutation.isPending}
                 >
                   {createMutation.isPending ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Target className="w-5 h-5 mr-2" />}
-                  Execute Launch
+                   Create Promo
                 </Button>
               </div>
             </DialogContent>
@@ -133,7 +133,7 @@ export default function AdminPromos() {
           ) : !promos || promos.length === 0 ? (
             <div className="col-span-full text-center py-24 bg-card rounded-[3rem] border-2 border-dashed border-border flex flex-col items-center">
               <Megaphone className="w-16 h-16 text-muted-foreground/20 mb-4" />
-              <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em]">Zero Active Campaigns</p>
+              <p className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em]">No active promotions</p>
             </div>
           ) : (
             <AnimatePresence>
@@ -158,7 +158,7 @@ export default function AdminPromos() {
                           size="icon" 
                           className="h-8 w-8 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors" 
                           onClick={() => handleDelete(promo.id)}
-                          title="Purge Campaign"
+                          title="Delete Promo"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

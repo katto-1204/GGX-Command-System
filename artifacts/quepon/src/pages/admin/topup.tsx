@@ -82,10 +82,10 @@ export default function AdminTopup() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary">
               <Wallet className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Credit Injection</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Credits</span>
             </div>
-            <h1 className="text-4xl font-black font-display tracking-tight text-foreground italic">TOP <span className="text-primary">UP</span></h1>
-            <p className="text-muted-foreground font-medium text-sm">Add credits to player wallets and verify history.</p>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground uppercase italic leading-none">TOP UP</h1>
+            <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Recharge player accounts</p>
           </div>
         </div>
 
@@ -102,7 +102,7 @@ export default function AdminTopup() {
                 </div>
                 <div>
                   Process Payment
-                  <p className="text-[10px] text-muted-foreground tracking-widest mt-1 normal-case">SECURE TRANSACTION GATEWAY</p>
+                  <p className="text-[10px] text-muted-foreground tracking-widest mt-1 normal-case">SECURE PAYMENT PROCESSING</p>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -126,7 +126,7 @@ export default function AdminTopup() {
                     name="userId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Account Target</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Select Account</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="bg-muted/50 border-border h-14 rounded-2xl px-5 text-base font-bold focus:border-primary/50 hover:bg-muted/80 transition-colors">
@@ -155,7 +155,7 @@ export default function AdminTopup() {
                       name="amount"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Credits (PHP)</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Amount (PHP)</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} className="bg-muted/50 border-border h-14 rounded-2xl px-5 font-mono text-xl font-black text-primary focus-visible:ring-primary/30 hover:bg-muted/80 transition-colors" />
                           </FormControl>
@@ -214,7 +214,7 @@ export default function AdminTopup() {
                     name="adminNote"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Transaction Identity (Optional)</FormLabel>
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Reference / Note (Optional)</FormLabel>
                         <FormControl>
                           <Input placeholder="e.g. Ref #12345" {...field} className="bg-muted/50 border-border h-14 rounded-2xl px-5 font-mono text-sm hover:bg-muted/80 transition-colors focus-visible:ring-primary/30" />
                         </FormControl>
@@ -233,7 +233,7 @@ export default function AdminTopup() {
                     ) : (
                       <Wallet className="w-5 h-5 mr-3 opacity-70 group-hover/btn:scale-110 transition-transform" />
                     )}
-                    Inject Funds
+                    Add Credits
                   </Button>
                 </form>
               </Form>
@@ -245,7 +245,7 @@ export default function AdminTopup() {
             <Card className="bg-card border-border shadow-xl rounded-[2.5rem] overflow-hidden">
               <CardHeader className="bg-muted/30 border-b border-border py-6 px-8">
                 <CardTitle className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-3">
-                  <User className="w-4 h-4 text-primary" /> User Profile
+                  <User className="w-4 h-4 text-primary" /> Player Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
@@ -261,7 +261,7 @@ export default function AdminTopup() {
                       <div className="bg-muted/50 p-4 rounded-2xl border border-border">
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Birth Date</span>
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Birthday</span>
                         </div>
                         <div className="font-mono text-sm font-black text-foreground">
                           {selectedPlayer.birthDate ? new Date(selectedPlayer.birthDate).toLocaleDateString() : "—"}
@@ -296,7 +296,7 @@ export default function AdminTopup() {
               <Card className="bg-card border-border shadow-xl rounded-[2.5rem] overflow-hidden">
                 <CardHeader className="bg-muted/30 border-b border-border py-6 px-8">
                   <CardTitle className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-3">
-                    <History className="w-4 h-4 text-primary" /> Audit Trail
+                    <History className="w-4 h-4 text-primary" /> Transaction History
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-8">

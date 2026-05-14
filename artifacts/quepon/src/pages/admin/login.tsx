@@ -85,8 +85,8 @@ export default function AdminLogin() {
             <Shield className="w-3 h-3" />
             Restricted Terminal
           </div>
-          <h1 className="text-5xl font-black font-display mb-4 text-foreground tracking-tighter italic">QUEPON<span className="text-primary">.OS</span></h1>
-          <p className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-[0.4em]">Administrative Uplink</p>
+          <h1 className="text-5xl font-black font-display mb-4 text-foreground tracking-tighter italic uppercase">HUB</h1>
+          <p className="text-[10px] font-black text-muted-foreground/30 uppercase tracking-[0.4em]">Administrative Access</p>
         </div>
 
         <div className="relative group">
@@ -99,7 +99,7 @@ export default function AdminLogin() {
                   name="username"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] ml-2">Operator ID</FormLabel>
+                      <FormLabel className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] ml-2">Username</FormLabel>
                       <FormControl>
                         <div className="relative">
                            <Input placeholder="ADMIN_REF_001" {...field} className="bg-muted/30 border-border h-14 rounded-2xl text-xs font-black tracking-widest uppercase focus:ring-primary/20 pl-12" />
@@ -115,7 +115,7 @@ export default function AdminLogin() {
                   name="password"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] ml-2">Secure Key</FormLabel>
+                      <FormLabel className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] ml-2">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input type="password" placeholder="••••••••" {...field} className="bg-muted/30 border-border h-14 rounded-2xl text-xs font-black tracking-widest uppercase focus:ring-primary/20 pl-12" />
@@ -132,7 +132,7 @@ export default function AdminLogin() {
                   disabled={loginMutation.isPending}
                 >
                   {loginMutation.isPending ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Zap className="w-5 h-5 mr-2" />}
-                  Establish Uplink
+                  Login
                 </Button>
               </form>
             </Form>

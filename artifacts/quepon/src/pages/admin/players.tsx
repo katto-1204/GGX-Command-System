@@ -54,8 +54,8 @@ export default function AdminPlayers() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold font-display">Player Accounts</h1>
-            <p className="text-muted-foreground">Manage users and balances</p>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground uppercase italic leading-none">PLAYERS</h1>
+            <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Manage player accounts</p>
           </div>
           <div className="flex gap-3">
             <div className="relative w-64">
@@ -159,7 +159,7 @@ export default function AdminPlayers() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Link href={`/admin/topup?userId=${player.id}`}>
-                            <Button size="sm" variant="outline" className="border-green-500/20 text-green-500 hover:bg-green-500/10 px-2" title="Top-up Wallet">
+                            <Button size="sm" variant="outline" className="border-green-500/20 text-green-500 hover:bg-green-500/10 px-2" title="Add Credits">
                               <Wallet className="w-4 h-4" />
                             </Button>
                           </Link>
@@ -169,7 +169,7 @@ export default function AdminPlayers() {
                               variant="outline"
                               className="border-red-500/20 text-red-500 hover:bg-red-500/10 px-2"
                               onClick={() => handleStatusChange(player.id, "banned")}
-                              title="Ban User"
+                              title="Suspend User"
                             >
                               <Ban className="w-4 h-4" />
                             </Button>
@@ -179,7 +179,7 @@ export default function AdminPlayers() {
                               variant="outline"
                               className="border-green-500/20 text-green-500 hover:bg-green-500/10 px-2"
                               onClick={() => handleStatusChange(player.id, "active")}
-                              title="Activate User"
+                              title="Restore User"
                             >
                               <CheckCircle className="w-4 h-4" />
                             </Button>

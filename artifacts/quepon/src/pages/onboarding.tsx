@@ -206,7 +206,7 @@ function SlideToStart({ onComplete }: { onComplete: () => void }) {
       ref={trackRef}
       className="relative h-16 w-full overflow-hidden rounded-full bg-gradient-to-r from-primary to-purple-600 p-1.5 shadow-[0_0_34px_rgba(124,58,237,0.5)]"
     >
-      <motion.div className="absolute inset-y-0 left-0 rounded-full bg-white/18" style={{ width: fillWidth }} />
+      <motion.div className="absolute inset-y-0 left-0 rounded-full bg-white/18" style={{ width: fillWidth as any }} />
       <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm font-black uppercase tracking-[0.28em] text-white">
         Start
         <ChevronsRight className="h-5 w-5 animate-pulse" />

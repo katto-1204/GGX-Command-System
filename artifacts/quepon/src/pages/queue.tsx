@@ -3,7 +3,7 @@ import { useGetMyQueueEntry, useJoinQueue, useListPcs, useRemoveQueueEntry, getG
 import { PlayerLayout } from "@/components/layout/player-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Monitor, X, Loader2, ChevronRight, AlertTriangle, Home, ChevronLeft, Zap, Shield, Trophy } from "lucide-react";
+import { Clock, Monitor, X, Loader2, ChevronRight, AlertTriangle, Home, ChevronLeft, Zap, Shield, Trophy, ListOrdered } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,11 +72,11 @@ export default function Queue() {
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[120px] -mr-40 -mt-40 pointer-events-none" />
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Sequence Management</span>
+              <ListOrdered className="w-5 h-5 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Position Status</span>
             </div>
             <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
-              STATION <span className="text-primary">QUEUE</span>
+              QUEUE
             </h1>
             <p className="text-xs font-black uppercase tracking-[0.1em]">
               {anyAvailable
@@ -212,9 +212,8 @@ export default function Queue() {
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border rounded-[1.5rem] p-2 shadow-3xl">
                     {[
-                      { value: "standard", label: "Standard station", price: "25" },
-                      { value: "premium", label: "Elite station", price: "35" },
-                      { value: "vip", label: "Legend station", price: "50" }
+                      { value: "standard", label: "Regular station", price: "25" },
+                      { value: "vip", label: "VVIP station", price: "50" }
                     ].map(t => (
                       <SelectItem key={t.value} value={t.value} className="text-[11px] font-black uppercase tracking-[0.2em] py-4 rounded-xl focus:bg-primary focus:text-primary-foreground">
                         {t.label} <span className="ml-2 opacity-50">₱{t.price}/H</span>

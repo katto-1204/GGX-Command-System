@@ -3,7 +3,7 @@ import { useGetMySession, useExtendSession, useEndSession, getGetMySessionQueryK
 import { PlayerLayout } from "@/components/layout/player-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Monitor, Clock, X, Plus } from "lucide-react";
+import { Monitor, Clock, X, Plus, Zap } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
@@ -90,11 +90,11 @@ export default function Session() {
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[120px] -mr-40 -mt-40 pointer-events-none" />
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-3">
-              <Monitor className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Terminal Uplink</span>
+              <Zap className="w-5 h-5 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Live Metrics</span>
             </div>
             <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
-              ACTIVE <span className="text-primary">SESSION</span>
+              SESSION
             </h1>
             <p className="text-xs font-black uppercase tracking-[0.1em]">
               {isActive 

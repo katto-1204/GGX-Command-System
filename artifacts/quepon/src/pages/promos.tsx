@@ -51,11 +51,9 @@ export default function Promos() {
   return (
     <PlayerLayout>
       <div className="space-y-6 pt-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold font-display">Info & Promos</h1>
-            <p className="text-muted-foreground text-sm">Deals, rates & available games</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold font-display uppercase tracking-tight">Offers</h1>
+          <p className="text-muted-foreground text-sm font-medium">Claim rewards and discounts</p>
         </div>
 
         {/* Tabs */}

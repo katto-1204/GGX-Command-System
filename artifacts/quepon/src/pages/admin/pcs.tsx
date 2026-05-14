@@ -54,10 +54,10 @@ export default function AdminPcs() {
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/60 italic">Hardware Grid</span>
             </div>
             <h1 className="text-5xl font-black font-display tracking-tight text-foreground italic uppercase leading-none">
-              FLEET <span className="text-primary">DEPLOYMENT</span>
+              STATIONS
             </h1>
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 italic">
-              Real-time monitoring and administrative oversight of local network nodes.
+              Manage shop terminals
             </p>
           </div>
           <div className="flex items-center gap-4">

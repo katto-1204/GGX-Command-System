@@ -90,7 +90,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     displayName: displayName ?? null,
     phone: phone ?? null,
     fullName: fullName ?? null,
-    birthDate: birthDate ?? null,
+    birthDate: birthDate ? new Date(birthDate) : null,
     sex: sex ?? null,
     role: "player",
     status: "active",

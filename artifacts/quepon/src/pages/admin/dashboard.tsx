@@ -11,10 +11,10 @@ export default function AdminDashboard() {
   const { data: activity } = useGetRecentActivity({ query: { refetchInterval: 15000 } as any });
 
   const kpis = [
-    { title: "Fleet Status", value: stats?.totalPcs || 0, subValue: `${stats?.availablePcs || 0} Ready`, icon: Monitor, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
-    { title: "Active Queue", value: stats?.queueCount || 0, subValue: "Pending Approval", icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
-    { title: "Total Users", value: stats?.activeSessions || 0, subValue: "In-Game Now", icon: Users, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-    { title: "Open Orders", value: stats?.pendingOrdersCount || 0, subValue: "Fulfillment Req.", icon: ShoppingBag, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" },
+    { title: "Stations", value: stats?.totalPcs || 0, subValue: `${stats?.availablePcs || 0} Available`, icon: Monitor, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" },
+    { title: "Queue", value: stats?.queueCount || 0, subValue: "Waiting", icon: Clock, color: "text-yellow-400", bg: "bg-yellow-400/10", border: "border-yellow-400/20" },
+    { title: "Active Sessions", value: stats?.activeSessions || 0, subValue: "Current Players", icon: Users, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+    { title: "Orders", value: stats?.pendingOrdersCount || 0, subValue: "Pending", icon: ShoppingBag, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" },
   ];
 
   const container = {
@@ -41,10 +41,10 @@ export default function AdminDashboard() {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
-                GGX <span className="text-primary">HUB</span>
+                HUB
               </h1>
               <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] max-w-md opacity-60 leading-relaxed">
-                Real-time operational oversight for GGX infrastructure.
+                Management Panel
               </p>
             </div>
             <div className="flex gap-5">
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-[11px] font-black uppercase tracking-[0.5em] text-foreground flex items-center gap-4 italic">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  Activity Feed
+                  Recent Activity
                 </CardTitle>
                 <div className="flex items-center gap-3">
                    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[9px] font-black text-muted-foreground uppercase tracking-widest">
@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                     <div className="w-20 h-20 rounded-[2rem] bg-muted/50 border border-border flex items-center justify-center mb-6 shadow-inner">
                       <Shield className="w-10 h-10 text-muted-foreground/10" />
                     </div>
-                    <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] italic">System Idle — Awaiting Telemetry</p>
+                    <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.4em] italic">No recent activity</p>
                   </div>
                 )}
               </div>
@@ -173,12 +173,12 @@ export default function AdminDashboard() {
                     <Trophy className="w-8 h-8 text-white" />
                   </div>
                   <div className="space-y-2">
-                    <h4 className="text-2xl font-black uppercase tracking-tighter italic leading-none">PEAK LOAD DETECTED</h4>
-                    <p className="text-[11px] text-white/70 font-black uppercase tracking-[0.1em] leading-relaxed">Deployment is currently 85% above the 7-day trailing average.</p>
+                    <h4 className="text-2xl font-black uppercase tracking-tighter italic leading-none">PEAK USAGE</h4>
+                    <p className="text-[11px] text-white/70 font-black uppercase tracking-[0.1em] leading-relaxed">Usage is currently 85% above the 7-day average.</p>
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
-                       <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic">Resource Consumption</span>
+                       <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 italic">Usage</span>
                        <span className="text-xl font-black font-mono italic">85%</span>
                     </div>
                     <div className="h-3 w-full bg-white/20 rounded-full overflow-hidden border border-white/10 p-0.5">
@@ -190,21 +190,21 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <Button className="w-full h-14 bg-white text-primary hover:bg-white/90 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] shadow-xl">
-                    Detailed Metrics
+                    View More
                   </Button>
                </div>
             </Card>
 
             <Card className="bg-card border-border p-10 rounded-[3rem] shadow-xl">
                <div className="flex items-center justify-between mb-10">
-                  <h4 className="text-[11px] font-black text-foreground uppercase tracking-[0.4em] italic">Deployment Health</h4>
+                  <h4 className="text-[11px] font-black text-foreground uppercase tracking-[0.4em] italic">Health</h4>
                   <Shield className="w-5 h-5 text-muted-foreground/30" />
                </div>
                <div className="space-y-6">
                   {[
-                    { label: "Network Node A", value: 92, status: "stable" },
-                    { label: "Hardware Matrix", value: 78, status: "active" },
-                    { label: "Storage Core", value: 45, status: "optimizing" }
+                    { label: "Network", value: 92, status: "stable" },
+                    { label: "Hardware", value: 78, status: "active" },
+                    { label: "Storage", value: 45, status: "optimizing" }
                   ].map((sys, i) => (
                     <div key={i} className="space-y-3">
                        <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/80 italic">

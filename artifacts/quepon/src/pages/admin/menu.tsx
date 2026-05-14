@@ -50,24 +50,24 @@ export default function AdminMenu() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Coffee className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Logistics & Provisioning</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Store Management</span>
             </div>
             <h1 className="text-4xl font-black font-display tracking-tight text-foreground uppercase">MENU <span className="text-primary">CATALOG</span></h1>
-            <p className="text-muted-foreground font-medium uppercase tracking-[0.1em] text-xs mt-1">Configure food and beverage inventory for active deployments.</p>
+            <p className="text-muted-foreground font-medium uppercase tracking-[0.1em] text-xs mt-1">Manage shop items.</p>
           </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary/90 h-12 px-8 rounded-xl font-black uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(124,58,237,0.3)]">
-                <Plus className="w-4 h-4 mr-2" /> Add Resource
+                <Plus className="w-4 h-4 mr-2" /> Add Item
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-border backdrop-blur-2xl max-w-md rounded-[2rem]">
               <DialogHeader>
-                <DialogTitle className="text-xl font-black uppercase tracking-tight">Register New Item</DialogTitle>
+                <DialogTitle className="text-xl font-black uppercase tracking-tight">New Menu Item</DialogTitle>
               </DialogHeader>
               <div className="space-y-6 pt-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Item Designation</label>
+                  <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Item Name</label>
                   <Input value={formData.name} onChange={e => setFormData(p => ({...p, name: e.target.value}))} className="bg-muted border-border h-12 rounded-xl px-4 font-medium" placeholder="e.g. Energy Shot X" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -84,12 +84,12 @@ export default function AdminMenu() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Cost Unit (₱)</label>
+                    <label className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">Price (₱)</label>
                     <Input type="number" value={formData.price} onChange={e => setFormData(p => ({...p, price: parseFloat(e.target.value)||0}))} className="bg-muted border-border h-12 rounded-xl font-mono font-bold" />
                   </div>
                 </div>
                 <Button className="w-full h-14 bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] text-xs rounded-xl mt-4" onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />} Initialize Resource
+                  {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />} Add to Menu
                 </Button>
               </div>
             </DialogContent>
@@ -103,12 +103,12 @@ export default function AdminMenu() {
                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
                  <Loader2 className="w-10 h-10 text-primary/40" />
                </motion.div>
-               <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">Synchronizing Manifest...</p>
+               <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">Loading Menu...</p>
             </div>
           ) : !menu || menu.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center py-24 text-center bg-card border border-dashed border-border rounded-[2.5rem]">
               <Coffee className="w-12 h-12 text-muted-foreground/20 mb-4" />
-              <p className="text-xs font-black text-muted-foreground/40 uppercase tracking-widest">Operational Manifest Empty</p>
+              <p className="text-xs font-black text-muted-foreground/40 uppercase tracking-widest">The menu is empty</p>
             </div>
           ) : (
             menu.map(item => (

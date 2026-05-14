@@ -72,8 +72,8 @@ export default function Feedback() {
     <PlayerLayout>
       <div className="space-y-6 pt-4">
         <div>
-          <h1 className="text-2xl font-bold font-display">Feedback</h1>
-          <p className="text-muted-foreground text-sm">Help us improve GGX. Your feedback goes directly to management.</p>
+          <h1 className="text-2xl font-bold font-display">Support</h1>
+          <p className="text-muted-foreground text-sm">Send us a message or report an issue.</p>
         </div>
 
         {/* Category */}

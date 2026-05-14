@@ -57,8 +57,8 @@ export default function AdminSessions() {
               <Activity className="w-4 h-4" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em]">Network Telemetry</span>
             </div>
-            <h1 className="text-4xl font-black font-display tracking-tight text-foreground">LIVE <span className="text-primary">SESSIONS</span></h1>
-            <p className="text-muted-foreground font-medium text-sm">Monitor and manage operational connections.</p>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground uppercase italic leading-none">SESSIONS</h1>
+            <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Manage active sessions</p>
           </div>
           
           <div className="flex items-center gap-4">

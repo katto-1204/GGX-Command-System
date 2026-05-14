@@ -59,7 +59,7 @@ export function AdminLayout({ children, breadcrumbs }: AdminLayoutProps) {
               <h1 className="text-2xl font-black text-foreground font-display tracking-tighter italic leading-none">
                 GGX<span className="text-primary italic">.HUB</span>
               </h1>
-              <p className="text-[9px] text-muted-foreground/60 uppercase tracking-[0.4em] mt-2 font-black">Admin Station</p>
+              <p className="text-[9px] text-muted-foreground/60 uppercase tracking-[0.4em] mt-2 font-black italic">Terminal</p>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export function AdminLayout({ children, breadcrumbs }: AdminLayoutProps) {
              <div className="hidden lg:flex flex-col items-end">
                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-1">
                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                 Link Secure
+                 Status: Online
                </div>
                <span className="text-xs font-black text-foreground">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
              </div>

@@ -79,8 +79,8 @@ export default function Menu() {
     <PlayerLayout>
       <div className="space-y-6 pt-4 pb-24">
         <div>
-          <h1 className="text-2xl font-bold font-display">Menu</h1>
-          <p className="text-muted-foreground text-sm">Order to your desk</p>
+          <h1 className="text-2xl font-bold font-display">Shop</h1>
+          <p className="text-muted-foreground text-sm">Select items and order</p>
         </div>
 
         <Tabs defaultValue="drinks" onValueChange={setCategory}>

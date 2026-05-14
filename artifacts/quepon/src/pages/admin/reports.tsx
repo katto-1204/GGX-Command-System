@@ -31,11 +31,13 @@ export default function AdminReports() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Analytical Telemetry</span>
+            <div className="flex items-center gap-3">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Performance Data</span>
             </div>
-            <h1 className="text-4xl font-black font-display tracking-tight text-foreground">OPERATIONAL <span className="text-primary">INSIGHTS</span></h1>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
+              REPORTS
+            </h1>
           </div>
           <div className="px-4 py-2 rounded-xl bg-muted border border-border">
             <p className="text-[8px] font-black text-muted-foreground/40 uppercase tracking-widest mb-0.5">Report Period</p>

@@ -39,7 +39,7 @@ export function WelcomeModal() {
               Welcome to <span className="text-primary">GGX</span>
             </DialogTitle>
             <DialogDescription className="text-white/40 font-medium">
-              You are now authorized to use the Hub. What would you like to do first?
+              Welcome! Explore the shop and start playing.
             </DialogDescription>
           </DialogHeader>
 
@@ -52,7 +52,7 @@ export function WelcomeModal() {
               >
                 <Monitor className="w-6 h-6 mr-4 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
-                  <div className="font-bold text-sm">Browse Available PCs</div>
+                  <div className="font-bold text-sm">Browse PCs</div>
                   <div className="text-[10px] text-white/40 uppercase tracking-widest font-black">Manual Selection</div>
                 </div>
               </Button>
@@ -66,7 +66,7 @@ export function WelcomeModal() {
               >
                 <ListOrdered className="w-6 h-6 mr-4 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
-                  <div className="font-bold text-sm">Join the Queue</div>
+                  <div className="font-bold text-sm">Join Queue</div>
                   <div className="text-[10px] text-white/40 uppercase tracking-widest font-black">Live Updates</div>
                 </div>
               </Button>
@@ -80,8 +80,8 @@ export function WelcomeModal() {
               >
                 <LayoutDashboard className="w-6 h-6 mr-4 text-primary group-hover:scale-110 transition-transform" />
                 <div className="text-left">
-                  <div className="font-bold text-sm">Go to Dashboard</div>
-                  <div className="text-[10px] text-white/40 uppercase tracking-widest font-black">Main Control</div>
+                  <div className="font-bold text-sm">Go to Home</div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-widest font-black">Player Menu</div>
                 </div>
               </Button>
             </Link>

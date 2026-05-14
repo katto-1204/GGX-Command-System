@@ -36,8 +36,8 @@ export default function AdminSettings() {
 
   const handleSave = () => {
     updateMutation.mutate({ data: form as any }, {
-      onSuccess: () => toast({ title: "SYSTEM PROTOCOLS SAVED", description: "Global settings updated successfully." }),
-      onError: () => toast({ title: "UPDATE OVERRIDE FAILED", variant: "destructive" }),
+      onSuccess: () => toast({ title: "Settings Saved", description: "Global settings updated successfully." }),
+      onError: () => toast({ title: "Update Failed", variant: "destructive" }),
     });
   };
 
@@ -48,7 +48,7 @@ export default function AdminSettings() {
           <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }}>
             <Settings className="w-10 h-10 text-primary opacity-20" />
           </motion.div>
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Accessing Core Directives...</span>
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Loading Settings...</span>
         </div>
       </AdminLayout>
     );
@@ -63,15 +63,15 @@ export default function AdminSettings() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-primary">
               <Settings className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Core Configuration</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">General Settings</span>
             </div>
             <h1 className="text-4xl font-black font-display tracking-tight text-foreground">SYSTEM <span className="text-primary">SETTINGS</span></h1>
-            <p className="text-muted-foreground font-medium text-sm">Configure global operational parameters and display modes.</p>
+            <p className="text-muted-foreground font-medium text-sm">Configure store settings and display modes.</p>
           </div>
           
           <Button onClick={handleSave} disabled={updateMutation.isPending} className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-[0_10px_20px_rgba(var(--primary),0.2)] transition-all active:scale-95 group">
             {updateMutation.isPending ? <Loader2 className="w-5 h-5 mr-3 animate-spin" /> : <Save className="w-5 h-5 mr-3 opacity-70 group-hover:scale-110 transition-transform" />}
-            Commit Changes
+            Save Settings
           </Button>
         </div>
 
@@ -83,21 +83,21 @@ export default function AdminSettings() {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
                   <MonitorPlay className="w-5 h-5 text-primary" />
                 </div>
-                Facility Identity
+                Store Info
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-8">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Shop Brand Identity</label>
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Shop Name</label>
                 <Input value={form.shopName} onChange={e => setForm({ ...form, shopName: e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold focus:border-primary/50 transition-colors" />
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Activation Time</label>
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Opening Time</label>
                   <Input type="time" value={form.openTime} onChange={e => setForm({ ...form, openTime: e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold font-mono focus:border-primary/50 transition-colors" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Deactivation Time</label>
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Closing Time</label>
                   <Input type="time" value={form.closeTime} onChange={e => setForm({ ...form, closeTime: e.target.value })} className="bg-muted/50 border-border h-12 rounded-xl px-4 font-bold font-mono focus:border-primary/50 transition-colors" />
                 </div>
               </div>
@@ -115,7 +115,7 @@ export default function AdminSettings() {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
                   <DollarSign className="w-5 h-5 text-primary" />
                 </div>
-                Pricing Matrix
+                Pricing
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 p-8">
@@ -149,13 +149,13 @@ export default function AdminSettings() {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
                   <Shield className="w-5 h-5 text-primary" />
                 </div>
-                Security Protocols
+                Permissions & Security
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-8">
               {[
-                { key: "allowAnonymousFeedback", label: "Anonymous Feedback", desc: "Permit subjects to submit data without identification" },
-                { key: "maintenanceMode", label: "Maintenance Lockdown", desc: "Restrict all player access to the grid (Offline Mode)" },
+                { key: "allowAnonymousFeedback", label: "Allow Anonymous Feedback", desc: "Allow players to submit feedback without signing in" },
+                { key: "maintenanceMode", label: "Maintenance Mode", desc: "Put the system in offline mode for maintenance" },
               ].map(({ key, label, desc }) => (
                 <div key={key} className="flex items-center justify-between gap-4 p-5 rounded-2xl bg-muted/20 border border-border/50 hover:border-primary/20 transition-colors">
                   <div>
@@ -179,7 +179,7 @@ export default function AdminSettings() {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-inner">
                   <Cpu className="w-5 h-5 text-primary" />
                 </div>
-                Display Engine
+                Visuals
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
@@ -188,12 +188,12 @@ export default function AdminSettings() {
                 <div className="relative z-10">
                   <div className="font-bold text-sm text-foreground uppercase tracking-tight">System Theme</div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-mono">
-                    STATE: {theme === 'dark' ? <span className="text-primary">DARK_MODE</span> : <span className="text-orange-500">LIGHT_MODE</span>}
+                    Mode: {theme === 'dark' ? <span className="text-primary">Dark</span> : <span className="text-orange-500">Light</span>}
                   </div>
                 </div>
                 <Button variant="outline" onClick={toggleTheme} className="h-12 border-border bg-card rounded-xl px-5 gap-3 font-black text-[10px] uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all relative z-10 shadow-sm">
                   {theme === "dark" ? <Sun className="w-4 h-4 text-orange-500" /> : <Moon className="w-4 h-4 text-primary" />}
-                  {theme === "dark" ? "IGNITE LIGHT" : "ENGAGE DARK"}
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </Button>
               </div>
             </CardContent>

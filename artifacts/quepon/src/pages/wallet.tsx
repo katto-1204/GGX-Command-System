@@ -16,16 +16,16 @@ export default function Wallet() {
   return (
     <PlayerLayout>
       <div className="space-y-6 pt-4">
-        <div>
-          <h1 className="text-2xl font-bold font-display">Wallet</h1>
-          <p className="text-muted-foreground text-sm">Manage your funds</p>
-        </div>
 
         <Card className="bg-gradient-to-br from-green-500/20 via-[rgba(255,255,255,0.04)] to-[rgba(255,255,255,0.04)] border-[rgba(34,197,94,0.3)] backdrop-blur-sm overflow-hidden">
           <CardContent className="p-8 relative">
-            <WalletIcon className="absolute right-6 top-1/2 -translate-y-1/2 w-32 h-32 text-green-500/10 pointer-events-none" />
-            
-            <div className="text-sm text-green-400 uppercase tracking-wider mb-2 font-medium">Available Balance</div>
+            <div className="flex items-center gap-3 mb-6">
+              <WalletIcon className="w-5 h-5 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Balance Details</span>
+            </div>
+            <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase mb-6">
+              WALLET
+            </h1>
             <div className="text-5xl font-bold font-mono text-white tracking-tighter mb-4 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]">
               ₱{balance.toFixed(2)}
             </div>
