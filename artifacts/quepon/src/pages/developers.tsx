@@ -4,29 +4,29 @@ import { useLocation } from "wouter";
 import { useState } from "react";
 
 const developersData = [
-  { 
-    name: "CATHERINE", 
-    role: "FULL STACK DEV", 
+  {
+    name: "CATHERINE",
+    role: "FULL STACK DEV",
     image: "/DEVELOPERS/catherine - full stack.png",
-    accent: "#a855f7" 
+    accent: "#a855f7"
   },
-  { 
-    name: "XANDER", 
-    role: "BACKEND DEV", 
+  {
+    name: "XANDER",
+    role: "BACKEND DEV",
     image: "/DEVELOPERS/xander - backend.png",
-    accent: "#3b82f6" 
+    accent: "#3b82f6"
   },
-  { 
-    name: "JOEY", 
-    role: "UI/UX", 
+  {
+    name: "JOEY",
+    role: "UI/UX",
     image: "/DEVELOPERS/joey - uiux.png",
-    accent: "#ec4899" 
+    accent: "#ec4899"
   },
-  { 
-    name: "NORMAN", 
-    role: "QA/TESTER", 
+  {
+    name: "NORMAN",
+    role: "QA/TESTER",
     image: "/DEVELOPERS/norman - qa.png",
-    accent: "#10b981" 
+    accent: "#10b981"
   }
 ];
 
@@ -38,11 +38,11 @@ export default function Developers() {
     <div className="min-h-[100dvh] w-full bg-[#0a0a0a] relative overflow-hidden text-white flex flex-col">
       {/* Background Radial Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(168,85,247,0.05),transparent_70%)]" />
-      
+
       {/* Header */}
       <header className="relative z-30 px-6 pt-[max(1.5rem,env(safe-area-inset-top))] flex items-center justify-between">
-        <button 
-          onClick={() => setLocation("/role-select")}
+        <button
+          onClick={() => setLocation("/role-selection")}
           className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm"
         >
           <ChevronLeft className="w-6 h-6 text-primary" />
@@ -54,7 +54,7 @@ export default function Developers() {
       </header>
 
       <div className="flex-1 flex flex-col md:flex-row items-center justify-center p-6 gap-8 relative z-10">
-        
+
         {/* Left Side: Static Team Image */}
         <div className="relative w-full md:w-1/2 aspect-square max-w-[500px] flex items-center justify-center">
           <motion.div
@@ -62,8 +62,8 @@ export default function Developers() {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full h-full"
           >
-            <img 
-              src="/DEVELOPERS/developers.png" 
+            <img
+              src="/DEVELOPERS/developers.png"
               alt="The Developers"
               className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(168,85,247,0.2)]"
             />
@@ -88,13 +88,13 @@ export default function Developers() {
                 className={`relative group h-20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${selectedDev === i ? 'z-50' : ''}`}
               >
                 {/* Background Shape */}
-                <div 
+                <div
                   className={`absolute inset-0 bg-[#151515] border-[2px] transition-colors ${selectedDev === i ? 'border-primary' : 'border-white/10 group-hover:border-primary'}`}
                   style={{
                     clipPath: "polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%)"
                   }}
                 />
-                
+
                 <div className="relative z-10 flex items-center justify-between px-12 h-full">
                   <div className="text-left">
                     <h3 className={`text-xl font-black italic tracking-tighter transition-colors ${selectedDev === i ? 'text-primary' : 'text-white group-hover:text-primary'}`}>
@@ -140,17 +140,17 @@ export default function Developers() {
               initial={{ y: 200, opacity: 0, scale: 0.5, rotate: -5 }}
               animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }}
               exit={{ y: 200, opacity: 0, scale: 0.5, rotate: 5 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
+              transition={{
+                type: "spring",
+                stiffness: 300,
                 damping: 15, // Lower damping = more bounce
                 mass: 1
               }}
               className="relative w-full max-w-4xl h-full flex items-center justify-center pointer-events-auto"
               onClick={() => setSelectedDev(null)}
             >
-              <img 
-                src={developersData[selectedDev].image} 
+              <img
+                src={developersData[selectedDev].image}
                 alt="Developer"
                 className="max-w-full max-h-full object-contain drop-shadow-[0_20px_80px_rgba(168,85,247,0.3)]"
               />

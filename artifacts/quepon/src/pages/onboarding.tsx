@@ -104,7 +104,7 @@ export default function Onboarding() {
           </div>
           <button
             type="button"
-            onClick={() => setLocation("/role-select")}
+            onClick={() => setLocation("/role-selection")}
             className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/55 backdrop-blur-md active:scale-95"
           >
             Skip
