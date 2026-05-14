@@ -60,7 +60,9 @@ function QRScanner({ onScan, enabled }: { onScan: (code: string) => void; enable
             hasScannedRef.current = true;
             onScan(decodedText);
             // Stop scanner after successful scan
-            qrScanner.stop().catch(() => {});
+            if (qrScanner.getState() === 2) { // 2 is SCANNING
+              qrScanner.stop().catch(() => {});
+            }
           }
         },
         () => {} // Ignore scan failures (continuous scanning)
@@ -68,7 +70,8 @@ function QRScanner({ onScan, enabled }: { onScan: (code: string) => void; enable
       setIsScanning(true);
       setCameraError(null);
     } catch (err: any) {
-      console.error("QR Scanner error:", err);
+      console.warn("QR Scanner failed to start:", err);
+      html5QrCodeRef.current = null;
       setCameraError(
         err?.message?.includes("NotAllowedError") || err?.message?.includes("Permission")
           ? "Camera permission denied. Please allow camera access."
@@ -83,20 +86,35 @@ function QRScanner({ onScan, enabled }: { onScan: (code: string) => void; enable
       const timer = setTimeout(startScanner, 300);
       return () => clearTimeout(timer);
     }
-    return () => {
-      if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().catch(() => {});
-        html5QrCodeRef.current = null;
+    
+    // If disabled, cleanup
+    if (html5QrCodeRef.current) {
+      const scanner = html5QrCodeRef.current;
+      html5QrCodeRef.current = null;
+      setIsScanning(false);
+      try {
+        if (scanner.getState() === 2) {
+          scanner.stop().catch(() => {});
+        }
+      } catch (e) {
+        // Ignore errors if getState or stop fails
       }
-    };
+    }
   }, [enabled, startScanner]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().catch(() => {});
+        const scanner = html5QrCodeRef.current;
         html5QrCodeRef.current = null;
+        try {
+          if (scanner.getState() === 2) {
+            scanner.stop().catch(() => {});
+          }
+        } catch (e) {
+          // Ignore
+        }
       }
     };
   }, []);

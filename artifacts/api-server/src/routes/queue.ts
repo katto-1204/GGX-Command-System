@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, queueEntriesTable, usersTable, pcsTable, sessionsTable } from "@workspace/db";
 import { eq, and, or, inArray } from "drizzle-orm";
 import { z } from "zod";
-import crypto from "crypto";
+import { randomUUID } from "crypto";
 import { getSessionUser } from "./auth.js";
 
 const router = Router();
@@ -162,91 +162,113 @@ const assignSchema = z.object({
   durationMinutes: z.number().int().min(15).optional(),
 });
 
+
 router.patch("/queue/:queueId/assign", async (req, res): Promise<void> => {
-  const userId = getSessionUser(req);
-  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  const adminId = getSessionUser(req);
+  if (!adminId) { res.status(401).json({ error: "Not authenticated" }); return; }
 
   const { queueId } = req.params;
   const parsed = assignSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
 
   try {
-    const [entry] = await db.select().from(queueEntriesTable).where(eq(queueEntriesTable.id, queueId)).limit(1);
-    if (!entry) { res.status(404).json({ error: "Queue entry not found" }); return; }
+    const result = await db.transaction(async (tx) => {
+      const [entry] = await tx.select().from(queueEntriesTable).where(eq(queueEntriesTable.id, queueId)).limit(1);
+      if (!entry) throw new Error("Queue entry not found");
 
-    const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, parsed.data.pcId)).limit(1);
-    if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
-    if (pc.status !== "available") { res.status(400).json({ error: "PC is not available" }); return; }
+      const [pc] = await tx.select().from(pcsTable).where(eq(pcsTable.id, parsed.data.pcId)).limit(1);
+      if (!pc) throw new Error("PC not found");
+      if (pc.status !== "available") throw new Error("PC is not available");
 
-    const now = new Date();
-    const sessionId = crypto.randomUUID();
-    const durationMinutes = parsed.data.durationMinutes ?? 60;
-    const endsAt = new Date(now.getTime() + durationMinutes * 60 * 1000);
+      const now = new Date();
+      const sessionId = randomUUID();
+      const durationMinutes = parsed.data.durationMinutes ?? 60;
+      const endsAt = new Date(now.getTime() + durationMinutes * 60 * 1000);
 
-    // Create session
-    const [session] = await db.insert(sessionsTable).values({
-      id: sessionId,
-      userId: entry.userId,
-      username: entry.username,
-      pcId: parsed.data.pcId,
-      sessionCode: `GGX-${pc.label}+${entry.username}`.toUpperCase().replace(/\s+/g, ''),
-      status: "active",
-      sessionType: "limited",
-      ratePerHour: 30, // Default rate
-      allocatedAmount: (durationMinutes / 60) * 30,
-      walletBalanceAtStart: 1000, // Placeholder balance for test
-      durationMinutes,
-      durationSeconds: durationMinutes * 60,
-      extendedMinutes: 0,
-      startedAt: now,
-      endsAt,
-      costSoFar: 0,
-      paymentSource: "prepaid",
-      startedBy: userId,
-      queueId: entry.id,
-      isLocked: false,
-    }).returning();
+      // 1. Create session
+      const [session] = await tx.insert(sessionsTable).values({
+        id: sessionId,
+        userId: entry.userId,
+        username: entry.username,
+        pcId: parsed.data.pcId,
+        sessionCode: `GGX-${pc.label}+${entry.username}`.toUpperCase().replace(/\s+/g, ''),
+        status: "active",
+        sessionType: "limited",
+        ratePerHour: 30,
+        allocatedAmount: (durationMinutes / 60) * 30,
+        walletBalanceAtStart: 1000,
+        durationMinutes,
+        durationSeconds: durationMinutes * 60,
+        extendedMinutes: 0,
+        startedAt: now,
+        endsAt,
+        costSoFar: 0,
+        paymentSource: "prepaid",
+        startedBy: adminId,
+        queueId: entry.id,
+        isLocked: false,
+      }).returning();
 
-    // Update queue entry
-    await db.update(queueEntriesTable).set({
-      status: "assigned",
-      assignedPcId: parsed.data.pcId,
-      sessionId,
-      assignedAt: now,
-      updatedAt: now,
-    }).where(eq(queueEntriesTable.id, queueId));
+      if (!session) throw new Error("Failed to create session record");
 
-    // Update PC
-    await db.update(pcsTable).set({
-      status: "inUse",
-      currentSessionId: sessionId,
-      currentUserId: entry.userId,
-      updatedAt: now,
-    }).where(eq(pcsTable.id, parsed.data.pcId));
-
-    // Update user session count
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, entry.userId)).limit(1);
-    if (user) {
-      await db.update(usersTable).set({
-        sessionCount: (user.sessionCount ?? 0) + 1,
+      // 2. Update queue entry
+      await tx.update(queueEntriesTable).set({
+        status: "assigned",
+        assignedPcId: parsed.data.pcId,
+        sessionId,
+        assignedAt: now,
         updatedAt: now,
-      }).where(eq(usersTable.id, entry.userId));
-    }
+      }).where(eq(queueEntriesTable.id, queueId));
+
+      // 3. Update PC
+      await tx.update(pcsTable).set({
+        status: "inUse",
+        currentSessionId: sessionId,
+        currentUserId: entry.userId,
+        updatedAt: now,
+      }).where(eq(pcsTable.id, parsed.data.pcId));
+
+      // 4. Update user session count
+      const [user] = await tx.select().from(usersTable).where(eq(usersTable.id, entry.userId)).limit(1);
+      if (user) {
+        await tx.update(usersTable).set({
+          sessionCount: (user.sessionCount ?? 0) + 1,
+          updatedAt: now,
+        }).where(eq(usersTable.id, entry.userId));
+      }
+
+      return { session, pc, durationMinutes };
+    });
+
+    // Safe date serialization
+    const startedAt = result.session.startedAt ? new Date(result.session.startedAt).toISOString() : new Date().toISOString();
+    const endsAt = result.session.endsAt ? new Date(result.session.endsAt).toISOString() : new Date().toISOString();
 
     res.json({
       success: true,
       session: {
-        id: session.id,
-        code: session.sessionCode,
-        pcLabel: pc.label,
-        remainingSeconds: durationMinutes * 60,
-        startedAt: session.startedAt.toISOString(),
-        endsAt: session.endsAt.toISOString(),
+        id: result.session.id,
+        code: result.session.sessionCode,
+        pcLabel: result.pc.label,
+        remainingSeconds: result.durationMinutes * 60,
+        startedAt,
+        endsAt,
       }
     });
   } catch (err: any) {
-    console.error("[api] Error during assignment:", err);
-    res.status(500).json({ error: "Internal Server Error", details: err.message });
+    console.error("[api] Error during assignment transaction:", err);
+    
+    // Check if it's one of our expected errors
+    const knownErrors = ["Queue entry not found", "PC not found", "PC is not available"];
+    if (knownErrors.includes(err.message)) {
+      res.status(400).json({ error: err.message });
+    } else {
+      res.status(500).json({ 
+        error: "Internal Server Error", 
+        message: err.message,
+        details: process.env.NODE_ENV === "development" ? err.stack : undefined 
+      });
+    }
   }
 });
 

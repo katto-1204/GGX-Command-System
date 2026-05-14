@@ -403,10 +403,12 @@ export default function Pcs() {
             <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-6 mx-auto">
               <Wallet className="w-8 h-8 text-primary" />
             </div>
-            <DialogTitle className="text-xl font-black uppercase italic tracking-tighter mb-2">CREDIT RELOAD</DialogTitle>
-            <p className="text-[10px] font-black text-muted-foreground uppercase leading-relaxed tracking-widest mb-8">
-              Please proceed to the <span className="text-primary">service counter</span> for manual top-up and verification.
-            </p>
+            <DialogHeader>
+              <DialogTitle className="text-xl font-black uppercase italic tracking-tighter mb-2">CREDIT RELOAD</DialogTitle>
+              <DialogDescription className="text-[10px] font-black text-muted-foreground uppercase leading-relaxed tracking-widest mb-8">
+                Please proceed to the <span className="text-primary">service counter</span> for manual top-up and verification.
+              </DialogDescription>
+            </DialogHeader>
             <Button onClick={() => setTopUpModalOpen(false)} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-[0.2em] text-[10px]">
               Acknowledged
             </Button>
