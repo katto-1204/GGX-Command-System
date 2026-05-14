@@ -1,53 +1,25 @@
-// Vercel serverless proxy — forwards /api/* requests to the Render backend.
-// Uses plain types to avoid needing @vercel/node as a dependency.
+// @ts-ignore - bypassing missing types for Vercel functions
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import type { IncomingMessage, ServerResponse } from "node:http";
-
-const BACKEND_URL = process.env.VITE_API_URL || "https://ggx-quepon.onrender.com";
-
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
+export default async function handler(req: any, res: any) {
   try {
-    // Extract the path from the URL
-    const url = new URL(req.url || "/", `http://${req.headers.host}`);
-    const targetUrl = `${BACKEND_URL}${url.pathname}${url.search}`;
+    // Import the backend app from the built server output
+    // @ts-ignore - bypassing missing declaration file for .mjs
+    const mod = await import("../../api-server/dist/app.mjs");
+    const app = mod.default || mod.app;
 
-    const headers: Record<string, string> = {
-      "content-type": req.headers["content-type"] || "application/json",
-    };
-
-    if (req.headers["x-session-token"]) {
-      headers["x-session-token"] = req.headers["x-session-token"] as string;
-    }
-    if (req.headers["authorization"]) {
-      headers["authorization"] = req.headers["authorization"] as string;
+    if (!app) {
+      return res.status(500).json({ error: "Backend app export not found" });
     }
 
-    const fetchOptions: RequestInit = {
-      method: req.method || "GET",
-      headers,
-    };
-
-    // Read body for non-GET requests
-    if (req.method !== "GET" && req.method !== "HEAD") {
-      const body = await new Promise<string>((resolve) => {
-        let data = "";
-        req.on("data", (chunk: Buffer) => { data += chunk.toString(); });
-        req.on("end", () => resolve(data));
-      });
-      if (body) fetchOptions.body = body;
-    }
-
-    const upstream = await fetch(targetUrl, fetchOptions);
-    const data = await upstream.text();
-
-    const contentType = upstream.headers.get("content-type");
-    res.writeHead(upstream.status, {
-      "content-type": contentType || "application/json",
-      "access-control-allow-origin": "*",
+    // Pass the request and response to the express app
+    return app(req, res);
+  } catch (error: any) {
+    console.error("API handler failed:", error);
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: error?.message || "Unknown error",
+      stack: error?.stack
     });
-    res.end(data);
-  } catch (err: any) {
-    res.writeHead(502, { "content-type": "application/json" });
-    res.end(JSON.stringify({ error: "Backend proxy error", details: err.message }));
   }
 }
