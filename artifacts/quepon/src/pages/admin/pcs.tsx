@@ -99,7 +99,8 @@ export default function AdminPcs() {
                 transition={{ duration: 0.4 }}
               >
                 <Card className={cn(
-                  "bg-card border-2 transition-all duration-500 group relative overflow-hidden rounded-[2.5rem] shadow-xl",
+                  "bg-card border-2 transition-all duration-500 group relative overflow-hidden shadow-xl",
+                  "rounded-[3rem_1rem_3rem_1.5rem]", // Abstract Shape
                   pc.status === "available" ? "border-green-500/10 hover:border-green-500/40 hover:shadow-green-500/10" :
                   pc.status === "inUse" ? "border-red-500/10 hover:border-red-500/40 hover:shadow-red-500/10" :
                   "border-border hover:border-primary/40 hover:shadow-primary/10"
@@ -113,32 +114,41 @@ export default function AdminPcs() {
                   )} />
 
                   <CardContent className="p-8">
-                    <div className="flex justify-between items-start mb-8">
-                      <div className="flex items-center gap-4">
-                        <div className={cn(
-                          "w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all duration-500 shadow-inner border border-white/5",
-                          pc.status === "available" ? "bg-green-500/10 text-green-500" :
-                          pc.status === "inUse" ? "bg-red-500/10 text-red-500" :
-                          "bg-muted text-muted-foreground"
-                        )}>
-                          <Monitor className={cn("w-8 h-8", pc.status === "inUse" && "animate-pulse")} />
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-2xl font-black font-display tracking-tighter text-foreground italic uppercase block leading-none">{pc.label}</span>
-                          <span className={cn(
-                            "text-[10px] uppercase tracking-[0.3em] font-black italic opacity-60",
-                            pc.tier === "premium" ? "text-primary" : "text-muted-foreground"
-                          )}>
-                            {pc.tier} Tier Node
-                          </span>
-                        </div>
-                      </div>
+                    <div className="flex justify-between items-start mb-6">
                       <Badge className={cn(
-                        "font-black uppercase tracking-widest text-[9px] py-1.5 px-4 rounded-full border-2 italic", 
+                        "font-black uppercase tracking-widest text-[9px] py-1.5 px-4 rounded-full border-2 italic bg-background/50 backdrop-blur-sm", 
                         getStatusColor(pc.status)
                       )} variant="outline">
                         {pc.status}
                       </Badge>
+                      <div className={cn(
+                        "text-4xl font-black font-display tracking-tighter italic leading-none opacity-20",
+                        pc.tier === "premium" ? "text-primary" : "text-muted-foreground"
+                      )}>
+                        {pc.label.replace(/[^0-9]/g, '')}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center py-4 mb-6">
+                      <div 
+                        style={{ clipPath: "polygon(0% 12%, 12% 0%, 100% 0%, 100% 88%, 88% 100%, 0% 100%)" }}
+                        className={cn(
+                          "w-28 h-28 flex items-center justify-center transition-all duration-500 shadow-inner border border-white/5",
+                          pc.status === "available" ? "bg-green-500/10" :
+                          pc.status === "inUse" ? "bg-red-500/10" :
+                          "bg-muted/50"
+                        )}
+                      >
+                        <img src="/pc svg (2).png" alt="PC" className={cn("w-20 h-20 object-contain filter brightness-110", pc.status === "inUse" && "animate-pulse")} />
+                      </div>
+                      <div className="mt-4 text-center">
+                        <span className={cn(
+                          "text-[10px] uppercase tracking-[0.4em] font-black italic opacity-60",
+                          pc.tier === "premium" ? "text-primary" : "text-muted-foreground"
+                        )}>
+                          {pc.tier} Tier
+                        </span>
+                      </div>
                     </div>
 
                     {/* Operational Telemetry Card */}

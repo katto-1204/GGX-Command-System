@@ -21,6 +21,7 @@ import Menu from "@/pages/menu";
 import Wallet from "@/pages/wallet";
 import Feedback from "@/pages/feedback";
 import Profile from "@/pages/profile";
+import Developers from "@/pages/developers";
 
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/" component={Splash} />
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/role-select" component={RoleSelection} />
+      <Route path="/developers" component={Developers} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
 

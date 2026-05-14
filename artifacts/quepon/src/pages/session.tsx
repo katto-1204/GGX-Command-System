@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
 import { QRCodeSVG } from "qrcode.react";
+
 export default function Session() {
   const [, setLocation] = useLocation();
   const { data: session, isLoading } = useGetMySession({ query: { refetchInterval: 5000 } as any });
@@ -74,7 +75,7 @@ export default function Session() {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   const isLowTime = localRemaining != null && localRemaining < 300; // < 5 mins
@@ -84,125 +85,125 @@ export default function Session() {
 
   return (
     <PlayerLayout backHref="/home">
-      <div className="space-y-8 pt-6 pb-20">
+      <div className="space-y-5 pt-4 pb-20">
         {/* Session Header */}
-        <div className="relative overflow-hidden rounded-[3rem] bg-card border border-border p-10 shadow-2xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[120px] -mr-40 -mt-40 pointer-events-none" />
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-3">
-              <Zap className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Live Metrics</span>
+        <div className="relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-xl">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] -mr-24 -mt-24 pointer-events-none" />
+          <div className="relative z-10 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-primary" />
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Live Metrics</span>
             </div>
-            <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
+            <h1 className="text-2xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
               SESSION
             </h1>
-            <p className="text-xs font-black uppercase tracking-[0.1em]">
+            <p className="text-[9px] font-black uppercase tracking-[0.1em] truncate">
               {isActive 
-                ? <span className="text-green-500">SYSTEM ENGAGED — STATION {session?.pcLabel}</span>
-                : <span className="text-muted-foreground">NO ACTIVE HARDWARE CONNECTION</span>}
+                ? <span className="text-green-500">ENGAGED — STATION {session?.pcLabel}</span>
+                : <span className="text-muted-foreground">NO ACTIVE CONNECTION</span>}
             </p>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-24 space-y-6">
+          <div className="flex flex-col items-center justify-center p-16 space-y-4">
             <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse" />
-              <Loader2 className="w-16 h-16 animate-spin text-primary relative z-10" />
+              <div className="absolute inset-0 bg-primary/20 blur-2xl animate-pulse" />
+              <Loader2 className="w-12 h-12 animate-spin text-primary relative z-10" />
             </div>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.5em] animate-pulse">Syncing Session Data...</p>
+            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.4em] animate-pulse">Syncing...</p>
           </div>
         ) : isActive && session ? (
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
             <Card className={cn(
-              "bg-card border-2 rounded-[3.5rem] overflow-hidden transition-all shadow-3xl relative",
+              "bg-card border-2 rounded-2xl overflow-hidden transition-all shadow-xl relative",
               isLowTime 
-                ? "border-red-500/50 shadow-red-500/20" 
+                ? "border-red-500/50 shadow-red-500/10" 
                 : isMediumTime 
-                  ? "border-yellow-500/50 shadow-yellow-500/20" 
-                  : "border-border shadow-primary/10"
+                  ? "border-yellow-500/50 shadow-yellow-500/10" 
+                  : "border-border shadow-primary/5"
             )}>
               {isLowTime && (
                 <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none" />
               )}
-              <CardContent className="p-12 text-center flex flex-col items-center">
-                <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-2xl bg-muted/50 border border-border backdrop-blur-sm mb-10 shadow-inner group">
-                  <Monitor className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                  <span className="font-black font-mono text-lg uppercase italic tracking-tighter text-foreground">{session.pcLabel}</span>
+              <CardContent className="p-6 text-center flex flex-col items-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/50 border border-border backdrop-blur-sm mb-6 shadow-inner">
+                  <Monitor className="w-4 h-4 text-primary" />
+                  <span className="font-black font-mono text-base uppercase italic tracking-tighter text-foreground">{session.pcLabel}</span>
                 </div>
                 
-                <div className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-[0.5em] mb-4 italic">Time Remaining</div>
+                <div className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-[0.4em] mb-2 italic">Time Remaining</div>
                 <div className={cn(
-                  "text-[8rem] font-black font-mono mb-10 tracking-tighter leading-none italic",
+                  "text-[3.5rem] sm:text-[4.5rem] font-black font-mono mb-6 tracking-tighter leading-none italic w-full overflow-hidden",
                   isLowTime 
-                    ? "text-red-500 drop-shadow-[0_0_40px_rgba(239,68,68,0.6)]" 
+                    ? "text-red-500 drop-shadow-[0_0_30px_rgba(239,68,68,0.5)]" 
                     : isMediumTime 
-                      ? "text-yellow-500 drop-shadow-[0_0_40px_rgba(234,179,8,0.4)]" 
-                      : "text-foreground drop-shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                      ? "text-yellow-500 drop-shadow-[0_0_30px_rgba(234,179,8,0.3)]" 
+                      : "text-foreground drop-shadow-[0_0_20px_rgba(255,255,255,0.08)]"
                 )}>
                   {formatTime(localRemaining || 0)}
                 </div>
 
-                <div className="grid grid-cols-2 gap-5 w-full mb-12">
-                  <div className="bg-background/40 rounded-[2rem] p-6 border border-border/50 shadow-inner text-left group hover:bg-muted/50 transition-colors">
-                    <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-2">Billing Rate</div>
-                    <div className="font-mono text-2xl font-black italic text-foreground leading-none">₱{session.ratePerHour}<span className="text-[10px] opacity-40 ml-1">/HR</span></div>
+                <div className="grid grid-cols-2 gap-3 w-full mb-6">
+                  <div className="bg-background/40 rounded-xl p-4 border border-border/50 shadow-inner text-left">
+                    <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Billing Rate</div>
+                    <div className="font-mono text-lg font-black italic text-foreground leading-none">₱{session.ratePerHour}<span className="text-[8px] opacity-40 ml-0.5">/HR</span></div>
                   </div>
-                  <div className="bg-background/40 rounded-[2rem] p-6 border border-border/50 shadow-inner text-left group hover:bg-muted/50 transition-colors">
-                    <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-2">Accumulated</div>
-                    <div className="font-mono text-2xl font-black italic text-green-500 leading-none">₱{session.costSoFar?.toFixed(2) || "0.00"}</div>
+                  <div className="bg-background/40 rounded-xl p-4 border border-border/50 shadow-inner text-left">
+                    <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Accumulated</div>
+                    <div className="font-mono text-lg font-black italic text-green-500 leading-none">₱{session.costSoFar?.toFixed(2) || "0.00"}</div>
                   </div>
                 </div>
 
-                {/* Session QR Code */}
+                {/* Session QR Code — compact */}
                 {session.sessionCode && (
-                  <div className="w-full bg-background/40 rounded-[2rem] p-6 border border-primary/20 shadow-inner mb-12">
-                    <div className="flex items-center gap-6">
-                      <div className="bg-white p-3 rounded-2xl shadow-lg">
-                        <QRCodeSVG value={session.sessionCode} size={96} level="H" />
+                  <div className="w-full bg-background/40 rounded-xl p-4 border border-primary/20 shadow-inner mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white p-2 rounded-lg shadow flex-shrink-0">
+                        <QRCodeSVG value={session.sessionCode} size={72} level="H" />
                       </div>
-                      <div className="flex-1 text-left space-y-2">
-                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Your Session Code</p>
-                        <p className="text-lg font-black font-mono text-primary tracking-wider">{session.sessionCode}</p>
-                        <p className="text-[9px] text-muted-foreground/40 italic uppercase tracking-widest leading-relaxed">Show this QR at the front desk to verify your check-in</p>
+                      <div className="flex-1 text-left space-y-1 min-w-0">
+                        <p className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 italic">Session Code</p>
+                        <p className="text-sm font-black font-mono text-primary tracking-wider break-all leading-tight">{session.sessionCode}</p>
+                        <p className="text-[7px] text-muted-foreground/40 italic uppercase tracking-widest leading-relaxed">Show QR at desk to verify</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="flex gap-4 w-full">
+                <div className="flex gap-3 w-full">
                   <Button 
                     variant="ghost" 
-                    className="flex-1 h-16 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.3em] text-destructive/60 hover:text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
+                    className="flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-destructive/60 hover:text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20"
                     onClick={handleEnd}
                     disabled={endSessionMutation.isPending}
                   >
-                    <X className="w-5 h-5 mr-3" /> Terminate
+                    <X className="w-4 h-4 mr-2" /> End
                   </Button>
                   <Button 
-                    className="flex-[1.5] h-16 rounded-[1.5rem] bg-primary text-primary-foreground font-black uppercase text-[11px] tracking-[0.4em] shadow-2xl shadow-primary/30 relative overflow-hidden group border-2 border-white/10"
+                    className="flex-[1.5] h-12 rounded-xl bg-primary text-primary-foreground font-black uppercase text-[10px] tracking-[0.3em] shadow-xl shadow-primary/20 relative overflow-hidden group border border-white/10"
                     onClick={handleExtend}
                     disabled={extendSessionMutation.isPending}
                   >
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12" />
-                    <Plus className="w-5 h-5 mr-3" /> Extend +1H
+                    <Plus className="w-4 h-4 mr-2" /> Extend +
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         ) : (
-          <div className="bg-card border-2 border-dashed border-border rounded-[3.5rem] p-16 text-center shadow-inner mx-2">
-            <div className="w-24 h-24 rounded-[2rem] bg-muted/50 border border-border flex items-center justify-center mx-auto mb-8 shadow-inner">
-              <Monitor className="w-12 h-12 text-muted-foreground/20" />
+          <div className="bg-card border-2 border-dashed border-border rounded-2xl p-10 text-center shadow-inner">
+            <div className="w-16 h-16 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Monitor className="w-8 h-8 text-muted-foreground/20" />
             </div>
-            <h3 className="text-2xl font-black text-foreground uppercase tracking-[0.2em] italic mb-4">No Active Link</h3>
-            <p className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.3em] max-w-[280px] mx-auto leading-relaxed opacity-60">
-              You don't have an active hardware uplink right now. Secure a station from the fleet.
+            <h3 className="text-xl font-black text-foreground uppercase tracking-[0.15em] italic mb-3">No Active Link</h3>
+            <p className="text-muted-foreground text-[9px] font-black uppercase tracking-[0.2em] max-w-[240px] mx-auto leading-relaxed opacity-60 mb-6">
+              No active hardware uplink. Secure a station from the fleet.
             </p>
             <Button 
               onClick={() => setLocation("/pcs")}
-              className="mt-10 h-14 rounded-2xl bg-primary text-primary-foreground font-black uppercase text-[10px] tracking-[0.4em] px-10 shadow-xl shadow-primary/20"
+              className="h-11 rounded-xl bg-primary text-primary-foreground font-black uppercase text-[9px] tracking-[0.3em] px-8 shadow-lg shadow-primary/20"
             >
               View Fleet
             </Button>
@@ -210,6 +211,5 @@ export default function Session() {
         )}
       </div>
     </PlayerLayout>
-
   );
 }

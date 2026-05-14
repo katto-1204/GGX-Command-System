@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Shield, UserRound } from "lucide-react";
+import { Shield, UserRound, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { useLocation } from "wouter";
 import { PCModel } from "@/components/pc-model";
@@ -64,6 +64,18 @@ export default function RoleSelection() {
           >
             <Shield className="h-5 w-5 text-primary" />
             Admin
+          </motion.button>
+          
+          <motion.button
+            type="button"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            onClick={() => setLocation("/developers")}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white/5 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-primary transition-colors italic"
+          >
+            <Users className="h-4 w-4" />
+            Developers
           </motion.button>
         </footer>
       </div>

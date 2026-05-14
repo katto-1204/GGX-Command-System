@@ -26,7 +26,7 @@ const slides = [
   {
     title: "Order, Report, and Stay Updated",
     subtitle: "Order snacks, report issues, view promos, and get shop updates without asking the counter.",
-    image: "/gaming_home_hero_1778711412356.png",
+    image: "/lastpage.png",
     accent: "from-primary to-purple-600",
   },
 ];

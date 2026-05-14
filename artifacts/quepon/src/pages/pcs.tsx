@@ -6,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Search, ChevronRight, Clock, Cpu, Zap, Star, Shield, LayoutGrid } from "lucide-react";
+import { Monitor, Search, ChevronRight, Clock, Cpu, Zap, Star, Shield, LayoutGrid, Wallet, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
 
 const STATUS_CONFIG = {
   available: { label: "ONLINE", color: "text-green-400", dot: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]", bar: "bg-green-500", glow: "border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.05)]" },
@@ -26,17 +27,23 @@ const TIER_CONFIG = {
   vip: { label: "VVIP", color: "text-yellow-400", bg: "bg-yellow-400/10", icon: Star, rate: 50 },
 };
 
+type SessionMode = "open" | "limited";
+
 export default function Pcs() {
   const { data: pcs, isLoading } = useListPcs({ query: { refetchInterval: 5000 } as any });
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
-  
+
   const [selectedPc, setSelectedPc] = useState<any>(null);
+  const [sessionMode, setSessionMode] = useState<SessionMode>("limited");
   const [bookingMinutes, setBookingMinutes] = useState(60);
   const [isBooking, setIsBooking] = useState(false);
+
+  const walletBalance = (user as any)?.walletBalance ?? 0;
 
   const availablePcs = pcs?.filter(p => p.status === "available") ?? [];
   const hasAvailable = availablePcs.length > 0;
@@ -49,17 +56,32 @@ export default function Pcs() {
     return matchesSearch && matchesFilter;
   });
 
+  // Calculate max minutes affordable with current balance for "open" mode
+  const getOpenModeMinutes = () => {
+    const rate = (TIER_CONFIG as any)[selectedPc?.tier]?.rate || 25;
+    const maxMinutes = Math.floor((walletBalance / rate) * 60);
+    return Math.max(15, Math.min(maxMinutes, 1440)); // Clamp between 15m and 24h
+  };
+
+  const getEffectiveDuration = () => {
+    return sessionMode === "open" ? getOpenModeMinutes() : bookingMinutes;
+  };
+
   const handleDirectBook = async () => {
     if (!selectedPc) return;
     setIsBooking(true);
     try {
+      const token = localStorage.getItem("quepon_token");
       const response = await fetch("/api/sessions", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           pcId: selectedPc.id,
-          durationMinutes: bookingMinutes
+          durationMinutes: getEffectiveDuration(),
         })
       });
 
@@ -73,7 +95,7 @@ export default function Pcs() {
         description: `Deployment on ${selectedPc.label} authorized. GLHF!`,
         variant: "default",
       });
-      
+
       setSelectedPc(null);
       queryClient.invalidateQueries();
       setLocation("/session");
@@ -91,22 +113,33 @@ export default function Pcs() {
   return (
     <PlayerLayout backHref="/home">
       <div className="space-y-8 pt-6 pb-20">
-        {/* Immersive Header */}
-        <div className="relative overflow-hidden rounded-[3rem] bg-card border border-border p-10 shadow-2xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 blur-[120px] -mr-40 -mt-40 pointer-events-none" />
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Hardware Status</span>
+        {/* Immersive Header - Reduced Size */}
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-card border border-border p-6 shadow-xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Shield className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-muted-foreground/60">Fleet</span>
+              </div>
+              <h1 className="text-xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
+                STATIONS
+              </h1>
+              <p className="text-[9px] font-black uppercase tracking-[0.1em]">
+                {hasAvailable
+                  ? <span className="text-green-500">{availablePcs.length} READY</span>
+                  : <span className="text-primary">FULL</span>}
+              </p>
             </div>
-            <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
-              STATIONS
-            </h1>
-            <p className="text-xs font-black uppercase tracking-[0.1em]">
-              {hasAvailable
-                ? <span className="text-green-500">{availablePcs.length} AVAILABLE</span>
-                : <span className="text-primary">FULL CAPACITY</span>}
-            </p>
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-10 h-10 rounded-xl bg-card border-border hover:bg-muted"
+              onClick={() => setSearch(search ? "" : " ")} // Simple toggle for now, or I can add a state for showing search
+            >
+              <Search className="w-4 h-4 text-muted-foreground" />
+            </Button>
           </div>
         </div>
 
@@ -133,32 +166,43 @@ export default function Pcs() {
           </motion.div>
         )}
 
-        {/* Search & Filters */}
-        <div className="space-y-5">
-          <div className="relative group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="SEARCH..."
-              className="h-16 pl-14 bg-card border-border rounded-[1.5rem] focus:border-primary/50 focus:ring-primary/10 transition-all uppercase text-[11px] tracking-[0.2em] font-black shadow-inner"
-            />
-          </div>
+        {/* Compact Filters - Chip Style */}
+        <div className="flex flex-col gap-4">
+          {/* @ts-ignore - framer-motion React 19 type compat */}
+        <AnimatePresence>
+            {search && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="relative"
+              >
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+                <Input
+                  autoFocus
+                  value={search === " " ? "" : search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="SEARCH STATIONS..."
+                  className="h-12 pl-11 bg-card/50 border-border rounded-xl text-[10px] font-black uppercase tracking-widest shadow-inner"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar px-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar px-1">
             {["all", "available", "inUse", "maintenance"].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border whitespace-nowrap active:scale-95",
+                  "px-5 py-2.5 rounded-full text-[9px] font-black uppercase tracking-[0.1em] transition-all border whitespace-nowrap active:scale-95 flex items-center gap-2",
                   filter === f
-                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                    : "bg-card text-muted-foreground border-border hover:bg-muted hover:text-foreground"
+                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
+                    : "bg-card text-muted-foreground border-border hover:bg-muted"
                 )}
               >
                 {f === "all" ? "TOTAL" : f === "inUse" ? "BUSY" : f}
-                <span className={cn("ml-3 px-2 py-0.5 rounded-lg text-[9px]", filter === f ? "bg-white/20 text-white" : "bg-muted text-muted-foreground")}>
+                <span className={cn("px-1.5 py-0.5 rounded-md text-[8px] min-w-[1.5rem]", filter === f ? "bg-white/20 text-white" : "bg-muted text-muted-foreground")}>
                   {pcs ? pcs.filter(p => f === "all" ? true : p.status === f).length : 0}
                 </span>
               </button>
@@ -166,69 +210,86 @@ export default function Pcs() {
           </div>
         </div>
 
-        {/* PC Grid */}
-        <div className="grid grid-cols-2 gap-5">
+        {/* PC Grid - 3 Columns */}
+        <div className="grid grid-cols-3 gap-2 px-1">
           {/* @ts-ignore */}
           <AnimatePresence mode="popLayout">
             {filtered.map((pc, i) => {
               const cfg = STATUS_CONFIG[pc.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.offline;
               const tierCfg = (TIER_CONFIG as any)[pc.tier] ?? { label: pc.tier, color: "text-muted-foreground", bg: "bg-muted", icon: Monitor, rate: 0 };
               const isAvailable = pc.status === "available";
-              const TierIcon = tierCfg.icon;
-
               const isVip = pc.tier === "vip";
 
               return (
-                <motion.div 
-                  key={pc.id} 
+                <motion.div
+                  key={pc.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.9 }} 
-                  animate={{ opacity: 1, scale: 1 }} 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                 >
-                  <div 
+                  <div
                     onClick={() => isAvailable && setSelectedPc(pc)}
+                    style={{
+                      clipPath: "polygon(0% 12%, 12% 0%, 100% 0%, 100% 88%, 88% 100%, 0% 100%)"
+                    }}
                     className={cn(
-                      "relative p-5 rounded-[2rem] border-2 transition-all active:scale-95 group overflow-hidden shadow-sm h-full flex flex-col",
-                      isAvailable 
-                        ? (isVip 
-                            ? "cursor-pointer bg-gradient-to-br from-yellow-500/20 via-yellow-500/5 to-transparent border-yellow-500/50 hover:border-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.15)] bg-[#1a1608]" 
-                            : "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/30") 
-                        : "bg-muted/40 opacity-70 border-border grayscale-[0.5]"
+                      "relative p-3 transition-all active:scale-95 group overflow-hidden shadow-lg aspect-square flex flex-col border-2",
+                      isAvailable
+                        ? (isVip
+                          ? "cursor-pointer bg-gradient-to-br from-[#1a1608] via-[#2a220a] to-[#1a1608] border-yellow-500/60 hover:border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.15)]"
+                          : "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/40")
+                        : "bg-muted/40 opacity-60 border-border grayscale-[0.8]"
                     )}
                   >
-                    {/* Status Indicator */}
-                    <div className="flex justify-between items-start mb-4">
+                    {/* Corner Accent for "Staplered" look */}
+                    <div className="absolute top-0 left-0 w-4 h-4 bg-primary/20 -rotate-45 -translate-x-2 -translate-y-2" />
+
+                    {/* Header: Status (L) and Number (R) */}
+                    <div className="flex justify-between items-start mb-0.5 relative z-10">
                       <div className={cn(
-                        "flex items-center gap-1.5 px-2 py-1 rounded-lg bg-background/50 border border-border backdrop-blur-sm",
+                        "flex items-center gap-0.5 px-1 py-0.5 rounded-sm bg-black/40 backdrop-blur-sm border border-white/5",
                         cfg.color
                       )}>
-                        <div className={cn("w-1.5 h-1.5 rounded-full", cfg.dot, isAvailable && "animate-pulse")} />
-                        <span className="text-[8px] font-black tracking-[0.1em]">{cfg.label}</span>
+                        <div className={cn("w-0.5 h-0.5 rounded-full", cfg.dot, isAvailable && "animate-pulse")} />
+                        <span className="text-[5px] font-black tracking-widest uppercase">{cfg.label}</span>
                       </div>
-                      <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center shadow-inner", isVip ? "bg-yellow-500/20 text-yellow-400" : tierCfg.bg, tierCfg.color)}>
-                        <TierIcon className="w-4 h-4" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 mb-4 flex-1">
-                      <h3 className={cn(
-                        "text-xl font-black font-mono tracking-tighter uppercase italic",
-                        isVip ? "text-yellow-400" : "text-foreground"
-                      )}>{pc.label}</h3>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-80", isVip ? "text-yellow-500" : tierCfg.color)}>{tierCfg.label}</span>
-                      </div>
-                    </div>
-
-                    {isAvailable && (
-                      <Button className={cn(
-                        "w-full h-10 rounded-xl font-black uppercase text-[9px] tracking-[0.2em] transition-transform",
-                        isVip ? "bg-yellow-500 text-black hover:bg-yellow-400" : "bg-primary text-primary-foreground"
+                      <div className={cn(
+                        "text-lg font-black font-display tracking-tighter italic leading-none opacity-50",
+                        isVip ? "text-yellow-500" : "text-foreground"
                       )}>
-                        USE PC
-                      </Button>
+                        {pc.label.replace(/[^0-9]/g, '')}
+                      </div>
+                    </div>
+
+                    {/* Centered PC Icon - Maximized for visibility */}
+                    <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+                      <div className="w-full h-full max-w-[4.5rem] max-h-[4.5rem] flex items-center justify-center group-hover:scale-110 transition-all duration-700 ease-out">
+                        <img
+                          src="/pc svg (2).png"
+                          alt="PC"
+                          className="w-full h-full object-contain filter brightness-125 drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]"
+                        />
+                      </div>
+
+                      <div className="mt-0.5 text-center">
+                        <span className={cn(
+                          "text-[7px] font-black uppercase tracking-[0.2em] opacity-80 italic",
+                          isVip ? "text-yellow-500" : tierCfg.color
+                        )}>
+                          {tierCfg.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Footer: USE PC Badge Overlay */}
+                    {isAvailable && (
+                      <div className="absolute inset-0 bg-primary/30 opacity-0 group-hover:opacity-100 backdrop-blur-[1px] transition-all duration-300 flex items-center justify-center z-20">
+                        <div className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] shadow-2xl border border-white/20 scale-90 group-hover:scale-100 transition-transform">
+                          USE
+                        </div>
+                      </div>
                     )}
                   </div>
                 </motion.div>
@@ -245,76 +306,168 @@ export default function Pcs() {
         )}
 
         {/* Immersive Booking Dialog */}
-        <Dialog open={!!selectedPc} onOpenChange={() => !isBooking && setSelectedPc(null)}>
+        <Dialog open={!!selectedPc} onOpenChange={() => { if (!isBooking) { setSelectedPc(null); setSessionMode("limited"); } }}>
           <DialogContent className="sm:max-w-md bg-zinc-950 border-border rounded-[2rem] p-6 shadow-2xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-primary" />
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] -mr-24 -mt-24 pointer-events-none" />
-            
-            <DialogHeader className="mb-6 text-center">
-              <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center mb-4 mx-auto border border-primary/20 shadow-inner">
-                <Monitor className="w-8 h-8 text-primary" />
+
+            <DialogHeader className="mb-4 text-center">
+              <div className="w-14 h-14 rounded-[1.25rem] bg-primary/10 flex items-center justify-center mb-3 mx-auto border border-primary/20 shadow-inner">
+                <Monitor className="w-7 h-7 text-primary" />
               </div>
-              <DialogTitle className="text-3xl font-black font-display tracking-tight text-foreground italic uppercase">
+              <DialogTitle className="text-2xl font-black font-display tracking-tight text-foreground italic uppercase">
                 STATION <span className="text-primary">{selectedPc?.label}</span>
               </DialogTitle>
               <DialogDescription className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[9px] mt-1">
-                Configure session parameters
+                Choose your session type
               </DialogDescription>
             </DialogHeader>
-            
-            <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-3">
-                {[60, 120, 180, 240, 300, 480].map(mins => (
-                  <button
-                    key={mins}
-                    className={cn(
-                      "h-20 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border-2 active:scale-95 group relative overflow-hidden shadow-sm",
-                      bookingMinutes === mins 
-                        ? "bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20" 
-                        : "bg-muted border-border hover:bg-muted/80 text-muted-foreground"
-                    )}
-                    onClick={() => setBookingMinutes(mins)}
-                  >
-                    <span className={cn("text-xl font-black font-mono leading-none", bookingMinutes === mins ? "text-primary-foreground" : "text-foreground")}>{mins / 60}H</span>
-                    <span className={cn("text-[9px] font-black uppercase tracking-[0.1em] opacity-70", bookingMinutes === mins ? "text-primary-foreground" : "text-primary")}>₱{((mins / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(0)}</span>
-                  </button>
-                ))}
+
+            <div className="space-y-5">
+              {/* Session Mode Toggle */}
+              <div className="bg-muted/60 border border-border rounded-2xl p-1.5 flex gap-1.5">
+                <button
+                  onClick={() => setSessionMode("open")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all active:scale-[0.97]",
+                    sessionMode === "open"
+                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-400/30"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Wallet className="w-3.5 h-3.5" />
+                  Open Time
+                </button>
+                <button
+                  onClick={() => setSessionMode("limited")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all active:scale-[0.97]",
+                    sessionMode === "limited"
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 border border-primary/30"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Timer className="w-3.5 h-3.5" />
+                  Limit Amount
+                </button>
               </div>
 
-              <div className="bg-muted/50 border border-border rounded-2xl p-5 space-y-4 shadow-inner">
+              {/* Open Time Mode */}
+              {sessionMode === "open" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <div className="bg-gradient-to-br from-emerald-950/80 to-emerald-900/40 border border-emerald-500/20 rounded-2xl p-5 text-center space-y-3 shadow-inner">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <Wallet className="w-4 h-4 text-emerald-400" />
+                      <span className="text-[9px] font-black text-emerald-400/80 uppercase tracking-[0.3em]">Wallet Balance</span>
+                    </div>
+                    <div className="text-3xl font-black text-emerald-400 font-mono tracking-tighter italic">
+                      ₱{walletBalance.toFixed(2)}
+                    </div>
+                    <div className="h-px bg-emerald-500/20" />
+                    <p className="text-[9px] text-emerald-300/60 font-bold uppercase tracking-wider leading-relaxed">
+                      Use your entire balance until it runs out.
+                      <br />
+                      Session auto-ends when balance hits ₱0.
+                    </p>
+                    <div className="flex items-center justify-center gap-3 pt-1">
+                      <div className="text-center">
+                        <div className="text-lg font-black font-mono text-foreground italic">{Math.floor(getOpenModeMinutes() / 60)}h {getOpenModeMinutes() % 60}m</div>
+                        <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Est. Playtime</div>
+                      </div>
+                      <div className="w-px h-8 bg-emerald-500/20" />
+                      <div className="text-center">
+                        <div className="text-lg font-black font-mono text-foreground italic">₱{((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 25)}/hr</div>
+                        <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Rate</div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Limited Time Mode */}
+              {sessionMode === "limited" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-4"
+                >
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {[60, 120, 180, 240, 300, 480].map(mins => (
+                      <button
+                        key={mins}
+                        className={cn(
+                          "h-[4.5rem] rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-2 active:scale-95 group relative overflow-hidden shadow-sm",
+                          bookingMinutes === mins
+                            ? "bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20"
+                            : "bg-muted border-border hover:bg-muted/80 text-muted-foreground"
+                        )}
+                        onClick={() => setBookingMinutes(mins)}
+                      >
+                        <span className={cn("text-lg font-black font-mono leading-none", bookingMinutes === mins ? "text-primary-foreground" : "text-foreground")}>{mins / 60}H</span>
+                        <span className={cn("text-[8px] font-black uppercase tracking-[0.1em] opacity-70", bookingMinutes === mins ? "text-primary-foreground" : "text-primary")}>₱{((mins / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(0)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Cost Summary */}
+              <div className="bg-muted/50 border border-border rounded-2xl p-4 space-y-3 shadow-inner">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Session Cost</span>
-                  <span className="text-2xl font-black text-foreground font-mono tracking-tighter italic">₱{((bookingMinutes / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(2)}</span>
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">
+                    {sessionMode === "open" ? "Max Cost" : "Session Cost"}
+                  </span>
+                  <span className="text-xl font-black text-foreground font-mono tracking-tighter italic">
+                    ₱{((getEffectiveDuration() / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(2)}
+                  </span>
                 </div>
                 <div className="h-px bg-border" />
-                <div className="flex justify-between items-center bg-card/50 p-3 rounded-xl border border-border/50">
+                <div className="flex justify-between items-center bg-card/50 p-2.5 rounded-xl border border-border/50">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Termination</span>
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+                      {sessionMode === "open" ? "Est. End" : "Termination"}
+                    </span>
                   </div>
-                  <span className="text-sm font-black text-primary font-mono italic">
-                    {new Date(Date.now() + bookingMinutes * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                  <span className="text-xs font-black text-primary font-mono italic">
+                    {new Date(Date.now() + getEffectiveDuration() * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="mt-8 sm:flex-col gap-3">
-              <Button 
-                onClick={handleDirectBook} 
-                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-black text-xs tracking-[0.3em] uppercase shadow-xl shadow-primary/30 relative overflow-hidden group border-2 border-white/10"
-                disabled={isBooking}
+            <DialogFooter className="mt-6 sm:flex-col gap-2.5">
+              <Button
+                onClick={handleDirectBook}
+                className={cn(
+                  "w-full h-14 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-xl relative overflow-hidden group border-2 border-white/10 transition-colors",
+                  sessionMode === "open"
+                    ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/30"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/30"
+                )}
+                disabled={isBooking || (sessionMode === "open" && walletBalance <= 0)}
               >
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12" />
-                {isBooking ? <Clock className="w-5 h-5 animate-spin mr-3" /> : "ENGAGE STATION"}
+                {isBooking ? (
+                  <Clock className="w-5 h-5 animate-spin" />
+                ) : (
+                  <span className="flex items-center gap-2">
+                    {sessionMode === "open" ? <Wallet className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+                    {sessionMode === "open" ? "START OPEN SESSION" : "LOCK IN & PLAY"}
+                  </span>
+                )}
               </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => setSelectedPc(null)} 
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedPc(null)}
                 disabled={isBooking}
-                className="w-full h-10 text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-foreground active:scale-95"
+                className="w-full h-9 text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-foreground active:scale-95"
               >
-                Cancel Authorization
+                Cancel
               </Button>
             </DialogFooter>
           </DialogContent>

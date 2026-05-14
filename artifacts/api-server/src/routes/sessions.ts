@@ -64,7 +64,7 @@ router.get("/sessions/my", async (req, res): Promise<void> => {
       inArray(sessionsTable.status, ["active", "extended", "locked"])
     )).limit(1);
 
-  if (!session) { res.status(404).json({ error: "No active session" }); return; }
+  if (!session) { res.json(null); return; }
 
   const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, session.pcId)).limit(1);
   res.json(serializeSession(session, pc?.label));

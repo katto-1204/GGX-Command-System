@@ -127,6 +127,23 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Pc"
+    post:
+      operationId: createPc
+      tags: [pcs]
+      summary: Create a new PC (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PcInput"
+      responses:
+        "201":
+          description: Created PC
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pc"
 
   /pcs/{pcId}:
     get:
@@ -173,6 +190,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pc"
+
+  /pcs/{pcId}/details:
+    patch:
+      operationId: updatePc
+      tags: [pcs]
+      summary: Update PC details (admin)
+      parameters:
+        - name: pcId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PcUpdateInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pc"
+
+  /pcs/{pcId}/delete:
+    delete:
+      operationId: deletePc
+      tags: [pcs]
+      summary: Delete a PC (admin)
+      parameters:
+        - name: pcId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted PC
 
   # --- QUEUE ---
   /queue:
@@ -1104,6 +1161,43 @@ components:
           enum: [available, inUse, maintenance, reserved, cleaning, offline]
         maintenanceNote:
           type: ["string", "null"]
+
+    PcInput:
+      type: object
+      required: [number, label, tier]
+      properties:
+        number:
+          type: integer
+        label:
+          type: string
+        tier:
+          type: string
+          enum: [standard, premium, vip]
+        status:
+          type: string
+          enum: [available, inUse, maintenance, reserved, cleaning, offline]
+        location:
+          type: string
+        specs:
+          $ref: "#/components/schemas/PcSpecs"
+
+    PcUpdateInput:
+      type: object
+      properties:
+        number:
+          type: integer
+        label:
+          type: string
+        tier:
+          type: string
+          enum: [standard, premium, vip]
+        status:
+          type: string
+          enum: [available, inUse, maintenance, reserved, cleaning, offline]
+        location:
+          type: string
+        specs:
+          $ref: "#/components/schemas/PcSpecs"
 
     # --- QUEUE ---
     QueueEntry:
