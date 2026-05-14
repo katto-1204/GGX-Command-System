@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Monitor, Search, ChevronRight, Clock, Cpu, Zap, Star, Shield, LayoutGrid, Wallet, Timer } from "lucide-react";
+import { Monitor, Search, ChevronRight, Clock, Cpu, Zap, Star, Shield, LayoutGrid, Wallet, Timer, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -42,6 +42,8 @@ export default function Pcs() {
   const [sessionMode, setSessionMode] = useState<SessionMode>("limited");
   const [bookingMinutes, setBookingMinutes] = useState(60);
   const [isBooking, setIsBooking] = useState(false);
+  const [ownedPcToManage, setOwnedPcToManage] = useState<any>(null);
+  const [topUpModalOpen, setTopUpModalOpen] = useState(false);
 
   const walletBalance = (user as any)?.walletBalance ?? 0;
 
@@ -107,6 +109,28 @@ export default function Pcs() {
       });
     } finally {
       setIsBooking(false);
+    }
+  };
+
+  const handleEndOwnedSession = async () => {
+    if (!ownedPcToManage) return;
+    try {
+      const token = localStorage.getItem("quepon_token");
+      const response = await fetch(`/api/sessions/end-active`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        }
+      });
+
+      if (!response.ok) throw new Error("Failed to end session");
+
+      toast({ title: "SESSION TERMINATED", description: `${ownedPcToManage.label} is now available.` });
+      setOwnedPcToManage(null);
+      queryClient.invalidateQueries();
+    } catch (err: any) {
+      toast({ title: "ERROR", description: err.message, variant: "destructive" });
     }
   };
 
@@ -219,6 +243,7 @@ export default function Pcs() {
               const tierCfg = (TIER_CONFIG as any)[pc.tier] ?? { label: pc.tier, color: "text-muted-foreground", bg: "bg-muted", icon: Monitor, rate: 0 };
               const isAvailable = pc.status === "available";
               const isVip = pc.tier === "vip";
+              const isMyPc = pc.status === "inUse" && pc.currentUserId === user?.id;
 
               return (
                 <motion.div
@@ -230,17 +255,22 @@ export default function Pcs() {
                   transition={{ duration: 0.3, delay: i * 0.05 }}
                 >
                   <div
-                    onClick={() => isAvailable && setSelectedPc(pc)}
+                    onClick={() => {
+                      if (isMyPc) setOwnedPcToManage(pc);
+                      else if (isAvailable) setSelectedPc(pc);
+                    }}
                     style={{
                       clipPath: "polygon(0% 12%, 12% 0%, 100% 0%, 100% 88%, 88% 100%, 0% 100%)"
                     }}
                     className={cn(
                       "relative p-3 transition-all active:scale-95 group overflow-hidden shadow-lg aspect-square flex flex-col border-2",
-                      isAvailable
-                        ? (isVip
-                          ? "cursor-pointer bg-gradient-to-br from-[#1a1608] via-[#2a220a] to-[#1a1608] border-yellow-500/60 hover:border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.15)]"
-                          : "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/40")
-                        : "bg-muted/40 opacity-60 border-border grayscale-[0.8]"
+                      isMyPc
+                        ? "cursor-pointer bg-[#1a0b2e] border-primary shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                        : isAvailable
+                          ? (isVip
+                            ? "cursor-pointer bg-gradient-to-br from-[#1a1608] via-[#2a220a] to-[#1a1608] border-yellow-500/60 hover:border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.15)]"
+                            : "cursor-pointer bg-card hover:bg-muted border-border hover:border-primary/40")
+                          : "bg-muted/40 opacity-60 border-border grayscale-[0.8]"
                     )}
                   >
                     {/* Corner Accent for "Staplered" look */}
@@ -276,9 +306,9 @@ export default function Pcs() {
                       <div className="mt-0.5 text-center w-full px-1">
                         <span className={cn(
                           "text-[7px] font-black uppercase tracking-[0.2em] opacity-80 italic block truncate w-full",
-                          isVip ? "text-yellow-500" : tierCfg.color
+                          isMyPc ? "text-primary" : isVip ? "text-yellow-500" : tierCfg.color
                         )}>
-                          {tierCfg.label}
+                          {isMyPc ? `@${user?.username}` : tierCfg.label}
                         </span>
                       </div>
                     </div>
@@ -304,6 +334,62 @@ export default function Pcs() {
             <p className="text-muted-foreground font-black uppercase tracking-[0.4em] text-xs">Scan returns zero units</p>
           </div>
         )}
+
+        {/* Manage Owned PC Dialog */}
+        <Dialog open={!!ownedPcToManage} onOpenChange={() => setOwnedPcToManage(null)}>
+          <DialogContent className="sm:max-w-md bg-zinc-950 border-border rounded-[2rem] p-6 shadow-2xl overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
+            <DialogHeader className="mb-6 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 mx-auto border border-primary/20">
+                <Monitor className="w-7 h-7 text-primary" />
+              </div>
+              <DialogTitle className="text-2xl font-black italic uppercase italic tracking-tighter">
+                MANAGE {ownedPcToManage?.label}
+              </DialogTitle>
+              <DialogDescription className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                Active Session Control
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-3">
+              <Button 
+                onClick={() => setTopUpModalOpen(true)}
+                className="h-14 rounded-2xl bg-card border border-primary/20 hover:border-primary/40 text-primary font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3"
+              >
+                <Wallet className="w-4 h-4" />
+                TOP UP SESSION
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={handleEndOwnedSession}
+                className="h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3"
+              >
+                <X className="w-4 h-4" />
+                TERMINATE SESSION
+              </Button>
+            </div>
+
+            <Button variant="ghost" onClick={() => setOwnedPcToManage(null)} className="w-full mt-4 text-[8px] font-black uppercase tracking-widest text-muted-foreground">
+              Close
+            </Button>
+          </DialogContent>
+        </Dialog>
+
+        {/* Top Up Instructions Dialog */}
+        <Dialog open={topUpModalOpen} onOpenChange={setTopUpModalOpen}>
+          <DialogContent className="sm:max-w-xs bg-zinc-950 border-border rounded-[2rem] p-8 text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-6 mx-auto">
+              <Wallet className="w-8 h-8 text-primary" />
+            </div>
+            <DialogTitle className="text-xl font-black uppercase italic tracking-tighter mb-2">CREDIT RELOAD</DialogTitle>
+            <p className="text-[10px] font-black text-muted-foreground uppercase leading-relaxed tracking-widest mb-8">
+              Please proceed to the <span className="text-primary">service counter</span> for manual top-up and verification.
+            </p>
+            <Button onClick={() => setTopUpModalOpen(false)} className="w-full h-12 rounded-xl bg-primary font-black uppercase tracking-[0.2em] text-[10px]">
+              Acknowledged
+            </Button>
+          </DialogContent>
+        </Dialog>
 
         {/* Immersive Booking Dialog */}
         <Dialog open={!!selectedPc} onOpenChange={() => { if (!isBooking) { setSelectedPc(null); setSessionMode("limited"); } }}>

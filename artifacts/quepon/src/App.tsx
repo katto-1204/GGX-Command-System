@@ -71,7 +71,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Splash} />
       <Route path="/onboarding" component={Onboarding} />
-      <Route path="/role-select" component={RoleSelection} />
+      <Route path="/role-selection" component={RoleSelection} />
       <Route path="/developers" component={Developers} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />

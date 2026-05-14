@@ -55,7 +55,7 @@ export default function Onboarding() {
     } catch {
       // Storage can be unavailable in private or embedded browser contexts.
     }
-    setLocation("/role-select");
+    setLocation("/role-selection");
   };
 
   return (

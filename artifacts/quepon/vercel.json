@@ -1,10 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "corepack pnpm -w run build:vercel",
-  "outputDirectory": "public",
+  "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!api(?:/|$)).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

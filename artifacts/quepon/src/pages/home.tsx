@@ -113,18 +113,18 @@ export default function Home() {
               <h2 className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em]">Popular Games</h2>
             </div>
           </div>
-          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar -mx-4 px-4 pb-4">
+          <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar -mx-4 px-4 pb-4 gap-4">
             {RECENT_GAMES.map((game) => (
-              <div key={game.id} className="min-w-full snap-center flex-shrink-0 group cursor-pointer pr-4 last:pr-0">
+              <div key={game.id} className="min-w-[80%] snap-center flex-shrink-0 group cursor-pointer">
                 <div className="relative aspect-[16/9] rounded-[2rem] overflow-hidden border border-border/50 shadow-2xl">
                   <img src={game.image} alt={game.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-black text-white truncate uppercase italic leading-none">{game.name}</div>
-                      <div className="text-[7px] text-primary uppercase tracking-widest font-black mt-0.5">{game.category}</div>
+                    <div className="min-w-0 flex-1 mr-2">
+                      <div className="text-[10px] font-black text-white truncate uppercase italic leading-none">{game.name}</div>
+                      <div className="text-[6px] text-primary uppercase tracking-widest font-black mt-0.5">{game.category}</div>
                     </div>
-                    <Button size="icon" className="w-8 h-8 rounded-full bg-primary shadow-lg shadow-primary/30"><Play className="w-3 h-3 fill-white" /></Button>
+                    <Button size="icon" className="w-7 h-7 rounded-full bg-primary shadow-lg shadow-primary/30 shrink-0"><Play className="w-2.5 h-2.5 fill-white" /></Button>
                   </div>
                 </div>
               </div>
@@ -170,19 +170,23 @@ export default function Home() {
                 VIEW ALL <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-0 -mx-1 px-1">
+            <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 -mx-4 px-4">
               {activePromos.slice(0, 3).map(promo => (
-                <div key={promo.id} className="min-w-full snap-center flex-shrink-0 px-1">
-                  <div className="bg-card border-2 border-border/60 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-2xl h-full">
+                <div key={promo.id} className="min-w-[85%] snap-center flex-shrink-0">
+                  <div className="bg-card border-2 border-border/60 rounded-[2.5rem] p-6 relative overflow-hidden group shadow-2xl h-full flex flex-col justify-between">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="relative z-10">
-                      <div className="inline-flex items-center px-2 py-1 rounded-lg bg-primary/20 text-primary text-[8px] font-black uppercase tracking-[0.2em] mb-4 border border-primary/20">{promo.tag || "MISSION"}</div>
-                      <h3 className="font-black text-2xl mb-2 leading-none text-foreground italic tracking-tighter uppercase line-clamp-1">{promo.title}</h3>
-                      <p className="text-[10px] text-muted-foreground line-clamp-2 font-bold leading-relaxed mb-6 uppercase tracking-wide">{promo.description}</p>
-                      <Button variant="default" size="sm" className="rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest px-6 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all text-[9px] h-10">Execute Now</Button>
+                    <div className="relative z-10 space-y-4">
+                      <div className="inline-flex items-center px-2 py-0.5 rounded-lg bg-primary/20 text-primary text-[7px] font-black uppercase tracking-[0.2em] border border-primary/20">{promo.tag || "MISSION"}</div>
+                      <div>
+                        <h3 className="font-black text-lg mb-1 leading-tight text-white italic tracking-tighter uppercase line-clamp-2">{promo.title}</h3>
+                        <p className="text-[9px] text-muted-foreground line-clamp-2 font-bold leading-relaxed uppercase tracking-wide">{promo.description}</p>
+                      </div>
                     </div>
-                    <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition-all group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
-                      <Ticket className="w-24 h-24" />
+                    <div className="relative z-10 pt-4">
+                      <Button variant="default" size="sm" className="rounded-xl bg-primary text-primary-foreground font-black uppercase tracking-widest px-5 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all text-[8px] h-9">Execute Now</Button>
+                    </div>
+                    <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
+                      <Ticket className="w-20 h-20" />
                     </div>
                   </div>
                 </div>

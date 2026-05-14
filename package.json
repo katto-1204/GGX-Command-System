@@ -5,7 +5,6 @@
   "scripts": {
     "preinstall": "node -e \"['package-lock.json', 'yarn.lock'].forEach(f => require('fs').existsSync(f) && require('fs').unlinkSync(f)); if (!/pnpm/.test(process.env.npm_config_user_agent || '')) { console.error('Use pnpm instead'); process.exit(1); }\"",
     "dev": "node ./scripts/dev.mjs",
-    "build:vercel": "node ./scripts/build-vercel.mjs",
     "build": "corepack pnpm run typecheck && corepack pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "corepack pnpm run typecheck:libs && corepack pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

@@ -29,10 +29,22 @@ export default function Session() {
   }, [session?.remainingSeconds]);
 
   useEffect(() => {
-    if (localRemaining === null || localRemaining <= 0 || session?.status !== "active") return;
+    if (localRemaining === null || localRemaining <= 0 || session?.status !== "active") {
+      if (localRemaining === 0 && session?.status === "active") {
+        handleEnd();
+      }
+      return;
+    }
     
     const interval = setInterval(() => {
-      setLocalRemaining(prev => prev ? prev - 1 : 0);
+      setLocalRemaining(prev => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     
     return () => clearInterval(interval);
