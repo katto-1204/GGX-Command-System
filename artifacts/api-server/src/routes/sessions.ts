@@ -76,45 +76,55 @@ function serializeSession(s: typeof sessionsTable.$inferSelect, pcLabel?: string
 }
 
 router.get("/sessions", async (req, res): Promise<void> => {
-  const { status } = req.query;
-  let sessions;
-  if (status && typeof status === "string") {
-    sessions = await db.select().from(sessionsTable)
-      .where(eq(sessionsTable.status, status as any))
-      .orderBy(sessionsTable.startedAt);
-  } else {
-    sessions = await db.select().from(sessionsTable).orderBy(sessionsTable.startedAt);
+  try {
+    const { status } = req.query;
+    let sessions;
+    if (status && typeof status === "string") {
+      sessions = await db.select().from(sessionsTable)
+        .where(eq(sessionsTable.status, status as any))
+        .orderBy(sessionsTable.startedAt);
+    } else {
+      sessions = await db.select().from(sessionsTable).orderBy(sessionsTable.startedAt);
+    }
+
+    const withLabels = await Promise.all(sessions.slice(-100).reverse().map(async (s) => {
+      const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, s.pcId)).limit(1);
+      return serializeSession(s, pc?.label);
+    }));
+
+    res.json(withLabels);
+  } catch (err: any) {
+    console.error("[api] Error fetching sessions:", err);
+    res.status(500).json({ error: "Failed to fetch sessions", details: err.message });
   }
-
-  const withLabels = await Promise.all(sessions.slice(-100).reverse().map(async (s) => {
-    const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, s.pcId)).limit(1);
-    return serializeSession(s, pc?.label);
-  }));
-
-  res.json(withLabels);
 });
 
 router.get("/sessions/my", async (req, res): Promise<void> => {
-  const userId = getSessionUser(req);
-  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  try {
+    const userId = getSessionUser(req);
+    if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
 
-  const [session] = await db.select().from(sessionsTable)
-    .where(and(
-      eq(sessionsTable.userId, userId),
-      inArray(sessionsTable.status, ["active", "extended", "locked"])
-    )).limit(1);
+    const [session] = await db.select().from(sessionsTable)
+      .where(and(
+        eq(sessionsTable.userId, userId),
+        inArray(sessionsTable.status, ["active", "extended", "locked"])
+      )).limit(1);
 
-  if (!session) { res.json(null); return; }
+    if (!session) { res.json(null); return; }
 
-  if (["active", "extended", "locked"].includes(session.status) && getDurationSeconds(session) - getElapsedSeconds(session) <= 0) {
-    const completed = await completeSessionRecord(session, "system");
-    const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, completed.pcId)).limit(1);
-    res.json(serializeSession(completed, pc?.label));
-    return;
+    if (["active", "extended", "locked"].includes(session.status) && getDurationSeconds(session) - getElapsedSeconds(session) <= 0) {
+      const completed = await completeSessionRecord(session, "system");
+      const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, completed.pcId)).limit(1);
+      res.json(serializeSession(completed, pc?.label));
+      return;
+    }
+
+    const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, session.pcId)).limit(1);
+    res.json(serializeSession(session, pc?.label));
+  } catch (err: any) {
+    console.error("[api] Error fetching my session:", err);
+    res.status(500).json({ error: "Failed to fetch session", details: err.message });
   }
-
-  const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, session.pcId)).limit(1);
-  res.json(serializeSession(session, pc?.label));
 });
 
 router.get("/sessions/:sessionId", async (req, res): Promise<void> => {
@@ -267,102 +277,107 @@ router.post("/sessions/end-active", async (req, res): Promise<void> => {
 });
 
 router.post("/sessions", async (req, res): Promise<void> => {
-  const userId = getSessionUser(req);
-  if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
+  try {
+    const userId = getSessionUser(req);
+    if (!userId) { res.status(401).json({ error: "Not authenticated" }); return; }
 
-  const schema = z.object({
-    pcId: z.string(),
-    sessionType: z.enum(["open_time", "limit_amount", "limited"]).optional(),
-    durationMinutes: z.number().min(1).max(1440).optional(),
-    durationSeconds: z.number().int().min(1).max(86400).optional(),
-    allocatedAmount: z.number().min(0.01).optional(),
-    maxCost: z.number().min(0.01).optional(),
-  });
-
-  const parsed = schema.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
-
-  const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, parsed.data.pcId)).limit(1);
-  if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
-  if (pc.status !== "available") { res.status(400).json({ error: "PC is not available" }); return; }
-
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-  if (!user) { res.status(404).json({ error: "User not found" }); return; }
-
-  // Check already active session
-  const [existing] = await db.select().from(sessionsTable)
-    .where(and(eq(sessionsTable.userId, userId), inArray(sessionsTable.status, ["active", "extended", "locked"])))
-    .limit(1);
-  if (existing) { res.status(400).json({ error: "You already have an active session" }); return; }
-
-  const sessionType = parsed.data.sessionType ?? "limited";
-  const ratePerHour = getPcRatePerHour(pc.tier);
-  const availableBalance = user.walletBalance ?? 0;
-  const requestedAmount = sessionType === "open_time"
-    ? availableBalance
-    : parsed.data.allocatedAmount ?? parsed.data.maxCost ?? (
-      parsed.data.durationSeconds != null
-        ? getSessionCostForSeconds(parsed.data.durationSeconds, ratePerHour)
-        : getSessionCost(parsed.data.durationMinutes ?? 60, ratePerHour)
-    );
-  const durationSeconds = parsed.data.durationSeconds
-    ?? Math.floor((requestedAmount / ratePerHour) * 3600);
-  const durationMinutes = Math.ceil(durationSeconds / 60);
-  const cappedRequestedAmount = Math.min(requestedAmount, availableBalance);
-
-  if (availableBalance <= 0 || requestedAmount > availableBalance) {
-    res.status(400).json({
-      message: `Insufficient wallet balance. You can only use up to ${availableBalance.toFixed(2)}.`,
-      error: `Insufficient wallet balance. You can only use up to ${availableBalance.toFixed(2)}.`,
-      availableBalance,
-      requestedAmount,
+    const schema = z.object({
+      pcId: z.string(),
+      sessionType: z.enum(["open_time", "limit_amount", "limited"]).optional(),
+      durationMinutes: z.number().min(1).max(1440).optional(),
+      durationSeconds: z.number().int().min(1).max(86400).optional(),
+      allocatedAmount: z.number().min(0.01).optional(),
+      maxCost: z.number().min(0.01).optional(),
     });
-    return;
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+
+    const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, parsed.data.pcId)).limit(1);
+    if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
+    if (pc.status !== "available") { res.status(400).json({ error: "PC is not available" }); return; }
+
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+    // Check already active session
+    const [existing] = await db.select().from(sessionsTable)
+      .where(and(eq(sessionsTable.userId, userId), inArray(sessionsTable.status, ["active", "extended", "locked"])))
+      .limit(1);
+    if (existing) { res.status(400).json({ error: "You already have an active session" }); return; }
+
+    const sessionType = parsed.data.sessionType ?? "limited";
+    const ratePerHour = getPcRatePerHour(pc.tier);
+    const availableBalance = user.walletBalance ?? 0;
+    const requestedAmount = sessionType === "open_time"
+      ? availableBalance
+      : parsed.data.allocatedAmount ?? parsed.data.maxCost ?? (
+        parsed.data.durationSeconds != null
+          ? getSessionCostForSeconds(parsed.data.durationSeconds, ratePerHour)
+          : getSessionCost(parsed.data.durationMinutes ?? 60, ratePerHour)
+      );
+    const durationSeconds = parsed.data.durationSeconds
+      ?? Math.floor((requestedAmount / ratePerHour) * 3600);
+    const durationMinutes = Math.ceil(durationSeconds / 60);
+    const cappedRequestedAmount = Math.min(requestedAmount, availableBalance);
+
+    if (availableBalance <= 0 || requestedAmount > availableBalance) {
+      res.status(400).json({
+        message: `Insufficient wallet balance. You can only use up to ${availableBalance.toFixed(2)}.`,
+        error: `Insufficient wallet balance. You can only use up to ${availableBalance.toFixed(2)}.`,
+        availableBalance,
+        requestedAmount,
+      });
+      return;
+    }
+
+    const now = new Date();
+    const endsAt = new Date(now.getTime() + durationSeconds * 1000);
+    const sessionId = crypto.randomUUID();
+    const sessionCode = `GGX-${pc.label}+${user.username}`.toUpperCase().replace(/\s+/g, '');
+
+    // Create session
+    const [session] = await db.insert(sessionsTable).values({
+      id: sessionId,
+      userId: userId,
+      username: user.username,
+      pcId: parsed.data.pcId,
+      sessionCode,
+      status: "active",
+      sessionType,
+      ratePerHour,
+      allocatedAmount: cappedRequestedAmount,
+      maxCost: cappedRequestedAmount,
+      walletBalanceAtStart: availableBalance,
+      durationMinutes,
+      durationSeconds,
+      extendedMinutes: 0,
+      startedAt: now,
+      endsAt,
+      costSoFar: 0,
+      paymentSource: "wallet",
+      startedBy: userId,
+      isLocked: false,
+    }).returning();
+
+    // Update PC
+    await db.update(pcsTable).set({
+      status: "inUse",
+      currentSessionId: sessionId,
+      currentUserId: userId,
+      updatedAt: now,
+    }).where(eq(pcsTable.id, parsed.data.pcId));
+
+    // Update user session count
+    await db.update(usersTable).set({
+      sessionCount: (user.sessionCount ?? 0) + 1,
+    }).where(eq(usersTable.id, userId));
+
+    res.status(201).json(serializeSession(session, pc.label));
+  } catch (err: any) {
+    console.error("[api] Error creating session:", err);
+    res.status(500).json({ error: "Failed to create session", details: err.message });
   }
-
-  const now = new Date();
-  const endsAt = new Date(now.getTime() + durationSeconds * 1000);
-  const sessionId = crypto.randomUUID();
-  const sessionCode = `GGX-${pc.label}+${user.username}`.toUpperCase().replace(/\s+/g, '');
-
-  // Create session
-  const [session] = await db.insert(sessionsTable).values({
-    id: sessionId,
-    userId: userId,
-    username: user.username,
-    pcId: parsed.data.pcId,
-    sessionCode,
-    status: "active",
-    sessionType,
-    ratePerHour,
-    allocatedAmount: cappedRequestedAmount,
-    maxCost: cappedRequestedAmount,
-    walletBalanceAtStart: availableBalance,
-    durationMinutes,
-    durationSeconds,
-    extendedMinutes: 0,
-    startedAt: now,
-    endsAt,
-    costSoFar: 0,
-    paymentSource: "wallet",
-    startedBy: userId,
-    isLocked: false,
-  }).returning();
-
-  // Update PC
-  await db.update(pcsTable).set({
-    status: "inUse",
-    currentSessionId: sessionId,
-    currentUserId: userId,
-    updatedAt: now,
-  }).where(eq(pcsTable.id, parsed.data.pcId));
-
-  // Update user session count
-  await db.update(usersTable).set({
-    sessionCount: (user.sessionCount ?? 0) + 1,
-  }).where(eq(usersTable.id, userId));
-
-  res.status(201).json(serializeSession(session, pc.label));
 });
 
 router.post("/sessions/checkin", async (req, res): Promise<void> => {

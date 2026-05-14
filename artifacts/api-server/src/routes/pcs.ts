@@ -47,29 +47,39 @@ async function getPcsWithRemainingTime() {
 }
 
 router.get("/pcs", async (req, res): Promise<void> => {
-  const pcs = await getPcsWithRemainingTime();
-  res.json(pcs);
+  try {
+    const pcs = await getPcsWithRemainingTime();
+    res.json(pcs);
+  } catch (err: any) {
+    console.error("[api] Error fetching PCs:", err);
+    res.status(500).json({ error: "Failed to fetch PCs", details: err.message });
+  }
 });
 
 router.get("/pcs/:pcId", async (req, res): Promise<void> => {
-  const { pcId } = req.params;
-  const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, pcId)).limit(1);
-  if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
+  try {
+    const { pcId } = req.params;
+    const [pc] = await db.select().from(pcsTable).where(eq(pcsTable.id, pcId)).limit(1);
+    if (!pc) { res.status(404).json({ error: "PC not found" }); return; }
 
-  let remaining: number | null = null;
-  let currentUsername: string | null = null;
-  let currentSessionCode: string | null = null;
-  if (pc.currentSessionId) {
-    const [session] = await db.select().from(sessionsTable)
-      .where(eq(sessionsTable.id, pc.currentSessionId)).limit(1);
-    if (session && session.status === "active") {
-      remaining = Math.max(0, Math.floor((session.endsAt.getTime() - Date.now()) / 1000));
-      currentUsername = session.username;
-      currentSessionCode = session.sessionCode ?? null;
+    let remaining: number | null = null;
+    let currentUsername: string | null = null;
+    let currentSessionCode: string | null = null;
+    if (pc.currentSessionId) {
+      const [session] = await db.select().from(sessionsTable)
+        .where(eq(sessionsTable.id, pc.currentSessionId)).limit(1);
+      if (session && session.status === "active") {
+        remaining = Math.max(0, Math.floor((session.endsAt.getTime() - Date.now()) / 1000));
+        currentUsername = session.username;
+        currentSessionCode = session.sessionCode ?? null;
+      }
     }
-  }
 
-  res.json(serializePc(pc, remaining, currentUsername, currentSessionCode));
+    res.json(serializePc(pc, remaining, currentUsername, currentSessionCode));
+  } catch (err: any) {
+    console.error("[api] Error fetching PC:", err);
+    res.status(500).json({ error: "Failed to fetch PC", details: err.message });
+  }
 });
 
 const statusUpdateSchema = z.object({

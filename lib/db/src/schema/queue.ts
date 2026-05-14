@@ -25,6 +25,7 @@ export const queueEntriesTable = pgTable("queue_entries", {
   completedAt: timestamp("completed_at", { withTimezone: true }),
   noShowAt: timestamp("no_show_at", { withTimezone: true }),
   notes: text("notes"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
 export const insertQueueEntrySchema = createInsertSchema(queueEntriesTable).omit({ joinedAt: true });
