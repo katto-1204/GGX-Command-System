@@ -2,8 +2,9 @@ import { useGetReports } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { BarChart3, Monitor, Clock, TrendingUp, Loader2 } from "lucide-react";
-
+import { BarChart3, Monitor, Clock, TrendingUp, Loader2, Shield, Activity } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 const TIER_COLORS: Record<string, string> = { standard: "#60a5fa", premium: "#c084fc", vip: "#fbbf24" };
 
 export default function AdminReports() {

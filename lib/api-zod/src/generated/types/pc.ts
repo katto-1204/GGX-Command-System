@@ -23,6 +23,8 @@ export interface Pc {
   /** @nullable */
   currentUsername?: string | null;
   /** @nullable */
+  currentSessionCode?: string | null;
+  /** @nullable */
   remainingSeconds?: number | null;
   location?: string;
   /** @nullable */

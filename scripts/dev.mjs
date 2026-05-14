@@ -28,7 +28,7 @@ if (!sharedEnv.DATABASE_URL) {
       "[dev] DATABASE_URL is not set.",
       "      Add your Supabase Postgres connection string to .env before running npm run dev.",
       "      Example:",
-      "      DATABASE_URL=postgresql://postgres:ggxquepon123@db.dbghdhebpsgwuntrfcnc.supabase.co:5432/postgres?sslmode=require",
+      "      DATABASE_URL=postgresql://postgres:YOUR_DB_PASSWORD@db.dbghdhebpsgwuntrfcnc.supabase.co:5432/postgres?sslmode=require",
     ].join("\n"),
   );
   process.exit(1);
@@ -130,14 +130,15 @@ function loadDotEnv(filePath) {
 
   const text = readFileSync(filePath, "utf8");
   for (const rawLine of text.split(/\r?\n/)) {
-    const line = rawLine.trim();
+    const line = rawLine.trim().replace(/^\uFEFF/, "");
     if (!line || line.startsWith("#")) continue;
 
-    const equalsIndex = line.indexOf("=");
+    const normalized = line.startsWith("export ") ? line.slice(7).trim() : line;
+    const equalsIndex = normalized.indexOf("=");
     if (equalsIndex === -1) continue;
 
-    const key = line.slice(0, equalsIndex).trim();
-    let value = line.slice(equalsIndex + 1).trim();
+    const key = normalized.slice(0, equalsIndex).trim();
+    let value = normalized.slice(equalsIndex + 1).trim();
 
     if (
       (value.startsWith('"') && value.endsWith('"')) ||

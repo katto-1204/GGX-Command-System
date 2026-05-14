@@ -5,18 +5,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Clock, Wallet, ShieldCheck } from "lucide-react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
+import { clearAuthenticatedUser } from "@/lib/auth-token";
 
 export default function Profile() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const logoutMutation = useLogoutUser();
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
-        localStorage.removeItem("quepon_token");
+        clearAuthenticatedUser(queryClient);
         setLocation("/login");
-        window.location.reload();
       }
     });
   };

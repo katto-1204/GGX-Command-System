@@ -9,6 +9,7 @@ export const sessionsTable = pgTable("sessions", {
   userId: text("user_id").notNull(),
   username: text("username").notNull(),
   pcId: text("pc_id").notNull(),
+  sessionCode: text("session_code"),
   status: sessionStatusEnum("status").notNull().default("active"),
   ratePerHour: real("rate_per_hour").notNull().default(30),
   durationMinutes: integer("duration_minutes").notNull().default(60),

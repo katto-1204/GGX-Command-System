@@ -31,4 +31,14 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
+app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  req.log.error({ err }, "Unhandled API error");
+
+  const message = err instanceof Error ? err.message : "Internal Server Error";
+  res.status(500).json({
+    error: "Internal Server Error",
+    message: process.env.NODE_ENV === "production" ? "Unexpected server error" : message,
+  });
+});
+
 export default app;

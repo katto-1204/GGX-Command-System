@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation } from "wouter";
-import { useRegisterPlayer, setAuthTokenGetter } from "@workspace/api-client-react";
+import { useRegisterPlayer } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowLeft, User, Lock, Smartphone, UserCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { persistAuthenticatedUser } from "@/lib/auth-token";
+
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertTriangle, Calendar, UserCheck } from "lucide-react";
 
 const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
   displayName: z.string().min(1, "Display name is required"),
+  fullName: z.string().min(1, "Full name is required"),
+  birthDate: z.string().min(1, "Birth date is required"),
+  sex: z.string().min(1, "Sex is required"),
   phone: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -27,10 +35,12 @@ export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { username: "", password: "", confirmPassword: "", displayName: "", phone: "" },
+    defaultValues: { username: "", password: "", confirmPassword: "", displayName: "", phone: "", fullName: "", birthDate: "", sex: "" },
   });
 
   const registerMutation = useRegisterPlayer();
@@ -39,19 +49,14 @@ export default function Register() {
     const { confirmPassword, ...submitData } = values;
     registerMutation.mutate({ data: submitData }, {
       onSuccess: (res) => {
-        localStorage.setItem("quepon_token", res.token);
-        setAuthTokenGetter(() => localStorage.getItem("quepon_token"));
-        queryClient.invalidateQueries();
+        persistAuthenticatedUser(queryClient, res.token, res.user);
         localStorage.setItem("quepon_show_welcome", "true");
         toast({ title: "Welcome to the Hub!" });
         setLocation("/home");
       },
       onError: (err: any) => {
-        toast({ 
-          title: "Registration Failed", 
-          description: err.message || "Could not create account. Please check your info.",
-          variant: "destructive" 
-        });
+        setErrorMessage(err.message || "Could not create account. Please check your info.");
+        setShowErrorModal(true);
       }
     });
   };
@@ -83,9 +88,9 @@ export default function Register() {
             <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
           </div>
           <h1 className="text-4xl font-black font-display text-foreground tracking-tighter mb-2 uppercase">
-            Create <span className="text-primary">Profile</span>
+            Join <span className="text-primary">GGX</span>
           </h1>
-          <p className="text-muted-foreground font-medium tracking-wide">Join the most advanced gaming community.</p>
+          <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] opacity-60">Initialize your player identity</p>
         </div>
 
         <div className="bg-card backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl relative overflow-hidden">
@@ -95,20 +100,67 @@ export default function Register() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
-                name="username"
+                name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Username *</FormLabel>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Full Name *</FormLabel>
+                    <FormControl>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
+                          <UserCheck className="w-5 h-5" />
+                        </div>
+                        <Input 
+                          placeholder="Your complete name" 
+                          {...field} 
+                          className="h-12 pl-12 bg-muted/30 border-border text-foreground rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="birthDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Birth Date *</FormLabel>
+                    <FormControl>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
+                          <Calendar className="w-5 h-5" />
+                        </div>
+                        <Input 
+                          type="date"
+                          {...field} 
+                          className="h-12 pl-12 bg-muted/30 border-border text-foreground rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sex"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Sex *</FormLabel>
                     <FormControl>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
                           <User className="w-5 h-5" />
                         </div>
-                        <Input 
-                          placeholder="Unique gamer handle" 
+                        <select 
                           {...field} 
-                          className="h-12 pl-12 bg-muted/30 border-border text-foreground rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
-                        />
+                          className="h-12 pl-12 w-full bg-muted/30 border border-border text-foreground rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all appearance-none"
+                        >
+                          <option value="" disabled className="text-muted-foreground">Select sex</option>
+                          <option value="Male" className="bg-background text-foreground">Male</option>
+                          <option value="Female" className="bg-background text-foreground">Female</option>
+                        </select>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -128,6 +180,28 @@ export default function Register() {
                         </div>
                         <Input 
                           placeholder="Your public name" 
+                          {...field} 
+                          className="h-12 pl-12 bg-muted/30 border-border text-foreground rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">Username *</FormLabel>
+                    <FormControl>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted-foreground/20 group-focus-within:text-primary transition-colors">
+                          <User className="w-5 h-5" />
+                        </div>
+                        <Input 
+                          placeholder="Unique gamer handle" 
                           {...field} 
                           className="h-12 pl-12 bg-muted/30 border-border text-foreground rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all"
                         />
@@ -208,7 +282,38 @@ export default function Register() {
           </Link>
         </div>
       </div>
-    </div>
 
+      <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+        <DialogContent className="max-w-[90vw] w-[400px] bg-zinc-950 border-white/10 rounded-[2rem] p-0 overflow-hidden shadow-[0_0_50px_rgba(255,0,0,0.15)]">
+          <div className="absolute top-0 left-0 w-full h-[120px] bg-gradient-to-b from-red-500/20 to-transparent pointer-events-none" />
+          
+          <div className="relative p-8 flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-6 relative group">
+              <div className="absolute inset-0 bg-red-500/20 blur-xl group-hover:blur-2xl transition-all" />
+              <AlertTriangle className="w-10 h-10 relative" />
+            </div>
+
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-2xl font-black font-display text-white tracking-tight uppercase leading-none mb-2">
+                Registration <span className="text-red-500">Failed</span>
+              </DialogTitle>
+              <DialogDescription className="text-white/60 font-medium text-sm">
+                {errorMessage}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="w-full space-y-3">
+              <Button 
+                variant="default" 
+                className="w-full h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold tracking-wider uppercase transition-all"
+                onClick={() => setShowErrorModal(false)}
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

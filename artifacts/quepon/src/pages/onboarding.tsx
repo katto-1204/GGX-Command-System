@@ -1,149 +1,227 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, animate as motionAnimate, motion, useMotionValue, useTransform } from "framer-motion";
+import { ChevronRight, ChevronsRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { ChevronRight, Gamepad2, Monitor, Zap, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const slides = [
   {
-    title: "PLAY THE BEST GAMES",
-    subtitle: "Check available PCs, join the queue, and start your session faster than ever.",
-    icon: Gamepad2,
+    title: "Play the Best Games",
+    subtitle: "Check available PCs, join the queue, and start your session faster.",
+    image: "/gaming_onboarding_1_1778711195013.png",
+    accent: "from-primary to-purple-400",
+  },
+  {
+    title: "Skip the Waiting Confusion",
+    subtitle: "See your queue position in real time and know when its your turn.",
+    image: "/gaming_home_hero_1778711412356.png",
+    accent: "from-purple-500 to-fuchsia-500",
+  },
+  {
+    title: "Control Your Session",
+    subtitle: "View your assigned PC, remaining time, wallet balance, and session status in one place.",
+    image: "/media__1778711031664.png",
+    accent: "from-fuchsia-500 to-primary",
+  },
+  {
+    title: "Order, Report, and Stay Updated",
+    subtitle: "Order snacks, report issues, view promos, and get shop updates without asking the counter.",
+    image: "/gaming_home_hero_1778711412356.png",
     accent: "from-primary to-purple-600",
-    glow: "bg-primary/20",
-    visual: "gaming character, PC setup, neon game elements"
   },
-  {
-    title: "REAL-TIME STATUS",
-    subtitle: "Monitor your session time, remaining credits, and rank in the queue live.",
-    icon: Zap,
-    accent: "from-red-500 to-orange-500",
-    glow: "bg-red-500/20",
-    visual: "tactical HUD, session timer, glowing status"
-  },
-  {
-    title: "ELITE EXPERIENCE",
-    subtitle: "Unlock premium rigs, manage orders, and dominate the arena at GGX Hub.",
-    icon: Monitor,
-    accent: "from-blue-500 to-cyan-500",
-    glow: "bg-blue-500/20",
-    visual: "premium PC rig, futuristic control panel"
-  }
 ];
 
+const swipeConfidenceThreshold = 8000;
+
+function swipePower(offset: number, velocity: number) {
+  return Math.abs(offset) * velocity;
+}
+
 export default function Onboarding() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [[page, direction], setPage] = useState([0, 0]);
   const [, setLocation] = useLocation();
+  const slideIndex = Math.max(0, Math.min(page, slides.length - 1));
+  const slide = slides[slideIndex];
 
-  const handleNext = () => {
-    if (currentSlide < slides.length - 1) {
-      setCurrentSlide(prev => prev + 1);
-    } else {
-      handleComplete();
+  const paginate = (newDirection: number) => {
+    const next = page + newDirection;
+    if (next < 0 || next > slides.length - 1) return;
+    setPage([next, newDirection]);
+  };
+
+  const complete = () => {
+    try {
+      localStorage.setItem("quepon_onboarding_seen", "true");
+    } catch {
+      // Storage can be unavailable in private or embedded browser contexts.
     }
+    setLocation("/role-select");
   };
-
-  const handleComplete = () => {
-    localStorage.setItem("quepon_onboarding_seen", "true");
-    setLocation("/login");
-  };
-
-  const slide = slides[currentSlide];
-  const Icon = slide.icon;
 
   return (
-    <div className="min-h-screen w-full bg-background flex flex-col relative overflow-hidden transition-colors duration-500">
-      {/* Background Ambience */}
-      <AnimatePresence mode="wait">
+    <div className="min-h-[100dvh] w-full bg-background relative overflow-hidden text-white">
+      <AnimatePresence initial={false} custom={direction}>
         <motion.div
-          key={currentSlide}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className={cn("absolute inset-0 pointer-events-none transition-all duration-1000", slide.glow)}
-          style={{ filter: "blur(140px)" }}
-        />
+          key={slideIndex}
+          custom={direction}
+          initial={{ x: direction >= 0 ? "18%" : "-18%", opacity: 0, scale: 1.08 }}
+          animate={{ x: "0%", opacity: 1, scale: 1 }}
+          exit={{ x: direction >= 0 ? "-14%" : "14%", opacity: 0, scale: 1.04 }}
+          transition={{ duration: 0.55, ease: [0.22, 0.9, 0.28, 1] }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.7}
+          onDragEnd={(_, { offset, velocity }) => {
+            const swipe = swipePower(offset.x, velocity.x);
+            if (swipe < -swipeConfidenceThreshold) paginate(1);
+            if (swipe > swipeConfidenceThreshold) paginate(-1);
+          }}
+          className="absolute inset-0 cursor-grab active:cursor-grabbing"
+        >
+          <motion.img
+            src={slide.image}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            animate={{ scale: [1.05, 1.1, 1.05], x: slideIndex % 2 === 0 ? [0, -10, 0] : [0, 10, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-black/92" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(124,58,237,0.24),transparent_34%),radial-gradient(circle_at_80%_82%,rgba(168,85,247,0.24),transparent_28%)]" />
+        </motion.div>
       </AnimatePresence>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8 relative z-10">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -50, opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="w-full max-w-sm flex flex-col items-center text-center"
+      <div className="relative z-10 min-h-[100dvh] flex flex-col px-6 pb-8 pt-[max(2rem,env(safe-area-inset-top))]">
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md p-2">
+              <img src="/ggx logo.png" alt="GGX" className="h-full w-full object-contain" />
+            </div>
+            <div>
+              <div className="text-[9px] uppercase tracking-[0.34em] text-white/45 font-black">GGX Hub</div>
+              <div className="font-display text-lg font-black italic tracking-tight">QUEPON</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLocation("/role-select")}
+            className="rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/55 backdrop-blur-md active:scale-95"
           >
-            {/* Immersive Visual Placeholder/Icon Card */}
-            <div className="relative mb-16 group">
-              <div className={cn("absolute inset-0 blur-3xl opacity-50 group-hover:opacity-80 transition-opacity rounded-full", slide.glow)} />
-              <div className={cn("w-48 h-48 md:w-56 md:h-56 rounded-[3rem] bg-card border border-white/10 flex items-center justify-center relative z-10 shadow-3xl overflow-hidden")}>
-                <div className={cn("absolute inset-0 bg-gradient-to-br opacity-10", slide.accent)} />
-                <Icon className={cn("w-20 h-20 md:w-24 md:h-24 transition-transform group-hover:scale-110 duration-500", currentSlide === 0 ? "text-primary" : currentSlide === 1 ? "text-red-500" : "text-blue-500")} />
-                
-                {/* Tactical HUD Overlays */}
-                <div className="absolute top-4 left-4 text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Module: 0{currentSlide + 1}</div>
-                <div className="absolute bottom-4 right-4 text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">SECURE_LINK</div>
-              </div>
+            Skip
+          </button>
+        </header>
+
+        <main className="flex flex-1 items-end pb-36">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={slideIndex}
+              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(6px)" }}
+              transition={{ duration: 0.42, ease: "easeOut" }}
+              className="max-w-sm"
+            >
+              <div className={cn("mb-5 h-1.5 w-24 rounded-full bg-gradient-to-r shadow-[0_0_22px_rgba(124,58,237,0.6)]", slide.accent)} />
+              <h1 className="text-4xl font-black font-display tracking-tight leading-[0.95] drop-shadow-[0_3px_18px_rgba(0,0,0,0.75)]">
+                {slide.title}
+              </h1>
+              <p className="mt-5 text-base leading-7 text-white/78 font-semibold drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
+                {slide.subtitle}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </main>
+
+        <footer className="absolute inset-x-0 bottom-0 z-20 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-16 bg-gradient-to-t from-black via-black/80 to-transparent">
+          <div className="mx-auto max-w-sm space-y-6">
+            <div className="flex items-center justify-center gap-2">
+              {slides.map((_, index) => (
+                <button
+                  type="button"
+                  key={index}
+                  onClick={() => setPage([index, index > slideIndex ? 1 : -1])}
+                  className="h-4 px-1"
+                  aria-label={`Go to onboarding slide ${index + 1}`}
+                >
+                  <motion.span
+                    className="block h-2 rounded-full bg-white/25"
+                    animate={{
+                      width: index === slideIndex ? 34 : 8,
+                      backgroundColor: index === slideIndex ? "rgb(168 85 247)" : "rgba(255,255,255,0.24)",
+                    }}
+                  />
+                </button>
+              ))}
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-black font-display tracking-tighter text-foreground italic uppercase mb-6 leading-none">
-              {slide.title.split(' ').map((word, i) => (
-                <span key={i} className={i === 1 ? "text-primary" : ""}>
-                  {word}{' '}
-                </span>
-              ))}
-            </h2>
-            <p className="text-sm md:text-base text-muted-foreground font-black uppercase tracking-wide leading-relaxed opacity-80 max-w-xs mx-auto italic">
-              {slide.subtitle}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Navigation Footer */}
-      <div className="p-8 md:p-12 space-y-10 relative z-10">
-        {/* Step Indicators */}
-        <div className="flex justify-center gap-3">
-          {slides.map((_, i) => (
-            <motion.div
-              key={i}
-              initial={false}
-              animate={{ 
-                width: i === currentSlide ? 32 : 8,
-                backgroundColor: i === currentSlide ? "var(--primary)" : "rgba(255,255,255,0.1)"
-              }}
-              className="h-2 rounded-full transition-all duration-500"
-            />
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
-          <Button 
-            onClick={handleNext}
-            className="h-16 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] shadow-2xl hover:shadow-primary/30 transition-all active:scale-95 italic group"
-          >
-            {currentSlide === slides.length - 1 ? (
-              <>INITIALIZE PORTAL <Play className="w-4 h-4 ml-3 fill-current" /></>
+            {slideIndex === slides.length - 1 ? (
+              <SlideToStart onComplete={complete} />
             ) : (
-              <>NEXT MODULE <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" /></>
+              <button
+                type="button"
+                onClick={() => paginate(1)}
+                className="h-14 w-full rounded-full bg-white/10 border border-white/15 backdrop-blur-xl text-[11px] font-black uppercase tracking-[0.24em] text-white shadow-[0_0_28px_rgba(124,58,237,0.18)] active:scale-[0.98]"
+              >
+                Next
+                <ChevronRight className="ml-2 inline h-4 w-4" />
+              </button>
             )}
-          </Button>
-          
-          {currentSlide < slides.length - 1 && (
-            <Button 
-              variant="ghost" 
-              onClick={handleComplete}
-              className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-foreground transition-colors italic"
-            >
-              Skip Intelligence Brief
-            </Button>
-          )}
-        </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
 }
 
-import { cn } from "@/lib/utils";
+function SlideToStart({ onComplete }: { onComplete: () => void }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const [maxDrag, setMaxDrag] = useState(220);
+  const [complete, setComplete] = useState(false);
+  const fillWidth = useTransform(x, [0, maxDrag], ["18%", "100%"]);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (!trackRef.current) return;
+      setMaxDrag(Math.max(120, trackRef.current.offsetWidth - 64));
+    };
+
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  const handleEnd = () => {
+    if (x.get() >= maxDrag * 0.75) {
+      setComplete(true);
+      void motionAnimate(x, maxDrag, { duration: 0.2, ease: "easeOut" });
+      window.setTimeout(onComplete, 320);
+      return;
+    }
+
+    void motionAnimate(x, 0, { type: "spring", stiffness: 460, damping: 34 });
+  };
+
+  return (
+    <div
+      ref={trackRef}
+      className="relative h-16 w-full overflow-hidden rounded-full bg-gradient-to-r from-primary to-purple-600 p-1.5 shadow-[0_0_34px_rgba(124,58,237,0.5)]"
+    >
+      <motion.div className="absolute inset-y-0 left-0 rounded-full bg-white/18" style={{ width: fillWidth }} />
+      <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm font-black uppercase tracking-[0.28em] text-white">
+        Start
+        <ChevronsRight className="h-5 w-5 animate-pulse" />
+      </div>
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: maxDrag }}
+        dragElastic={0.04}
+        style={{ x }}
+        onDragEnd={handleEnd}
+        animate={complete ? { scale: [1, 1.08, 1], boxShadow: "0 0 30px rgba(255,255,255,0.9)" } : undefined}
+        className="relative z-10 flex h-[52px] w-[52px] cursor-grab items-center justify-center rounded-full bg-white text-primary shadow-xl active:cursor-grabbing"
+      >
+        <ChevronsRight className="h-6 w-6" />
+      </motion.div>
+    </div>
+  );
+}

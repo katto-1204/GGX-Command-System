@@ -8,7 +8,9 @@ import { Monitor, Wrench, RefreshCw, Loader2, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { QRCodeSVG } from "qrcode.react";
 export default function AdminPcs() {
   const { data: pcs, isLoading } = useListPcs({ query: { refetchInterval: 10000 } as any });
   const updatePcMutation = useUpdatePcStatus();
@@ -153,6 +155,21 @@ export default function AdminPcs() {
                                <p className="text-xs font-black font-mono text-primary italic">SESSION_LIVE</p>
                             </div>
                           </div>
+
+                          {/* Session QR Code */}
+                          {pc.currentSessionCode && (
+                            <div className="flex items-center gap-4 p-4 bg-black/30 rounded-2xl border border-primary/20">
+                              <div className="bg-white p-2 rounded-xl">
+                                <QRCodeSVG value={pc.currentSessionCode} size={64} level="H" />
+                              </div>
+                              <div className="flex-1 space-y-1">
+                                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Session Code</p>
+                                <p className="text-sm font-black font-mono text-primary tracking-wider">{pc.currentSessionCode}</p>
+                                <p className="text-[8px] text-muted-foreground/40 italic uppercase tracking-widest">Scan to verify check-in</p>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="space-y-2">
                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-red-500 italic">
                                <span>TIME DEPLETION</span>
@@ -162,7 +179,7 @@ export default function AdminPcs() {
                               <motion.div 
                                 className="h-full bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.4)]" 
                                 initial={{ width: "100%" }}
-                                animate={{ width: "65%" }} // Simulation
+                                animate={{ width: "65%" }}
                                 transition={{ duration: 1 }}
                               />
                             </div>

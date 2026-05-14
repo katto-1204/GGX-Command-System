@@ -6,7 +6,7 @@ import { getSessionUser } from "./auth";
 
 const router = Router();
 
-function serializePc(pc: typeof pcsTable.$inferSelect, remainingSeconds?: number | null, currentUsername?: string | null) {
+function serializePc(pc: typeof pcsTable.$inferSelect, remainingSeconds?: number | null, currentUsername?: string | null, currentSessionCode?: string | null) {
   return {
     id: pc.id,
     number: pc.number,
@@ -17,6 +17,7 @@ function serializePc(pc: typeof pcsTable.$inferSelect, remainingSeconds?: number
     currentSessionId: pc.currentSessionId ?? null,
     currentUserId: pc.currentUserId ?? null,
     currentUsername: currentUsername ?? null,
+    currentSessionCode: currentSessionCode ?? null,
     remainingSeconds: remainingSeconds ?? null,
     location: pc.location,
     maintenanceNote: pc.maintenanceNote ?? null,
@@ -35,10 +36,10 @@ async function getPcsWithRemainingTime() {
         .where(eq(sessionsTable.id, pc.currentSessionId)).limit(1);
       if (session && session.status === "active") {
         const remaining = Math.max(0, Math.floor((session.endsAt.getTime() - now) / 1000));
-        return serializePc(pc, remaining, session.username);
+        return serializePc(pc, remaining, session.username, session.sessionCode ?? null);
       }
     }
-    return serializePc(pc, null, null);
+    return serializePc(pc, null, null, null);
   }));
 
   return enriched;
@@ -56,16 +57,18 @@ router.get("/pcs/:pcId", async (req, res): Promise<void> => {
 
   let remaining: number | null = null;
   let currentUsername: string | null = null;
+  let currentSessionCode: string | null = null;
   if (pc.currentSessionId) {
     const [session] = await db.select().from(sessionsTable)
       .where(eq(sessionsTable.id, pc.currentSessionId)).limit(1);
     if (session && session.status === "active") {
       remaining = Math.max(0, Math.floor((session.endsAt.getTime() - Date.now()) / 1000));
       currentUsername = session.username;
+      currentSessionCode = session.sessionCode ?? null;
     }
   }
 
-  res.json(serializePc(pc, remaining, currentUsername));
+  res.json(serializePc(pc, remaining, currentUsername, currentSessionCode));
 });
 
 const statusUpdateSchema = z.object({

@@ -14,6 +14,8 @@ export interface Session {
   pcId: string;
   /** @nullable */
   pcLabel?: string | null;
+  /** @nullable */
+  sessionCode?: string | null;
   status: SessionStatus;
   ratePerHour: number;
   durationMinutes: number;

@@ -16,6 +16,9 @@ export interface RegisterInput {
   password: string;
   displayName?: string;
   phone?: string;
+  fullName?: string;
+  birthDate?: string;
+  sex?: string;
 }
 
 export interface LoginInput {
@@ -44,6 +47,12 @@ export interface User {
   username: string;
   /** @nullable */
   displayName?: string | null;
+  /** @nullable */
+  fullName?: string | null;
+  /** @nullable */
+  birthDate?: string | null;
+  /** @nullable */
+  sex?: string | null;
   /** @nullable */
   phone?: string | null;
   /** @nullable */
@@ -101,6 +110,8 @@ export interface Pc {
   currentUserId?: string | null;
   /** @nullable */
   currentUsername?: string | null;
+  /** @nullable */
+  currentSessionCode?: string | null;
   /** @nullable */
   remainingSeconds?: number | null;
   location?: string;
@@ -203,6 +214,8 @@ export interface Session {
   pcId: string;
   /** @nullable */
   pcLabel?: string | null;
+  /** @nullable */
+  sessionCode?: string | null;
   status: SessionStatus;
   ratePerHour: number;
   durationMinutes: number;

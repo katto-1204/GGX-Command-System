@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLocation } from "wouter";
-import { useLoginUser, setAuthTokenGetter } from "@workspace/api-client-react";
+import { useLoginUser } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield, Lock, Zap, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { persistAuthenticatedUser } from "@/lib/auth-token";
 
 const adminLoginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -32,9 +33,7 @@ export default function AdminLogin() {
   const onSubmit = (values: z.infer<typeof adminLoginSchema>) => {
     loginMutation.mutate({ data: values }, {
       onSuccess: (res) => {
-        localStorage.setItem("quepon_token", res.token);
-        setAuthTokenGetter(() => localStorage.getItem("quepon_token"));
-        queryClient.invalidateQueries();
+        persistAuthenticatedUser(queryClient, res.token, res.user);
         if (res.user.role === "admin" || res.user.role === "superAdmin") {
           toast({ title: "ACCESS GRANTED", description: "Command Center connection established." });
           setLocation("/admin/dashboard");

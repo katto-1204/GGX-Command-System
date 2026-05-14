@@ -32,22 +32,20 @@ app.listen(port, (err) => {
 
 function loadDotEnv() {
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    path.resolve(process.cwd(), ".env"),
-    path.resolve(currentDir, "..", "..", "..", ".env"),
-  ];
+  const candidates = getEnvCandidates(currentDir);
 
   for (const filePath of candidates) {
     if (!existsSync(filePath)) continue;
 
     const text = readFileSync(filePath, "utf8");
     for (const rawLine of text.split(/\r?\n/)) {
-      const line = rawLine.trim();
+      const line = rawLine.trim().replace(/^\uFEFF/, "");
       if (!line || line.startsWith("#") || !line.includes("=")) continue;
 
-      const equalsIndex = line.indexOf("=");
-      const key = line.slice(0, equalsIndex).trim();
-      let value = line.slice(equalsIndex + 1).trim();
+      const normalized = line.startsWith("export ") ? line.slice(7).trim() : line;
+      const equalsIndex = normalized.indexOf("=");
+      const key = normalized.slice(0, equalsIndex).trim();
+      let value = normalized.slice(equalsIndex + 1).trim();
 
       if (
         (value.startsWith('"') && value.endsWith('"')) ||
@@ -61,5 +59,37 @@ function loadDotEnv() {
       }
     }
     return;
+  }
+}
+
+function getEnvCandidates(currentDir: string) {
+  const candidates = new Set<string>();
+
+  if (process.env.DOTENV_CONFIG_PATH) {
+    candidates.add(path.resolve(process.env.DOTENV_CONFIG_PATH));
+  }
+
+  for (const root of [process.cwd(), currentDir]) {
+    for (const dir of walkUp(root)) {
+      candidates.add(path.join(dir, ".env"));
+
+      if (existsSync(path.join(dir, "pnpm-workspace.yaml"))) {
+        break;
+      }
+    }
+  }
+
+  return [...candidates];
+}
+
+function* walkUp(start: string) {
+  let current = path.resolve(start);
+
+  while (true) {
+    yield current;
+
+    const parent = path.dirname(current);
+    if (parent === current) break;
+    current = parent;
   }
 }

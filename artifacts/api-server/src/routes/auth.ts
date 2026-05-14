@@ -20,6 +20,9 @@ const registerSchema = z.object({
   password: z.string().min(6),
   displayName: z.string().optional(),
   phone: z.string().optional(),
+  fullName: z.string().optional(),
+  birthDate: z.string().optional(),
+  sex: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -71,7 +74,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { username, password, displayName, phone } = parsed.data;
+  const { username, password, displayName, phone, fullName, birthDate, sex } = parsed.data;
 
   const existing = await db.select().from(usersTable).where(eq(usersTable.username, username)).limit(1);
   if (existing.length > 0) {
@@ -86,6 +89,9 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     passwordHash: hashPassword(password),
     displayName: displayName ?? null,
     phone: phone ?? null,
+    fullName: fullName ?? null,
+    birthDate: birthDate ?? null,
+    sex: sex ?? null,
     role: "player",
     status: "active",
     walletBalance: 0,

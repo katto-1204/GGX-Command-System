@@ -7,8 +7,12 @@ import { Monitor, Clock, X, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
+import { QRCodeSVG } from "qrcode.react";
 export default function Session() {
+  const [, setLocation] = useLocation();
   const { data: session, isLoading } = useGetMySession({ query: { refetchInterval: 5000 } as any });
   const extendSessionMutation = useExtendSession();
   const endSessionMutation = useEndSession();
@@ -149,6 +153,22 @@ export default function Session() {
                     <div className="font-mono text-2xl font-black italic text-green-500 leading-none">₱{session.costSoFar?.toFixed(2) || "0.00"}</div>
                   </div>
                 </div>
+
+                {/* Session QR Code */}
+                {session.sessionCode && (
+                  <div className="w-full bg-background/40 rounded-[2rem] p-6 border border-primary/20 shadow-inner mb-12">
+                    <div className="flex items-center gap-6">
+                      <div className="bg-white p-3 rounded-2xl shadow-lg">
+                        <QRCodeSVG value={session.sessionCode} size={96} level="H" />
+                      </div>
+                      <div className="flex-1 text-left space-y-2">
+                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/50 italic">Your Session Code</p>
+                        <p className="text-lg font-black font-mono text-primary tracking-wider">{session.sessionCode}</p>
+                        <p className="text-[9px] text-muted-foreground/40 italic uppercase tracking-widest leading-relaxed">Show this QR at the front desk to verify your check-in</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-4 w-full">
                   <Button 

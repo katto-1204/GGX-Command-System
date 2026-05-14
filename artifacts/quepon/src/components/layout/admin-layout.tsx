@@ -57,9 +57,9 @@ export function AdminLayout({ children, breadcrumbs }: AdminLayoutProps) {
           <div className="flex items-center justify-between w-full">
             <div className="text-center w-full">
               <h1 className="text-2xl font-black text-foreground font-display tracking-tighter italic leading-none">
-                QUEPON<span className="text-primary italic">.OS</span>
+                GGX<span className="text-primary italic">.HUB</span>
               </h1>
-              <p className="text-[9px] text-muted-foreground/60 uppercase tracking-[0.4em] mt-2 font-black">Command Terminal</p>
+              <p className="text-[9px] text-muted-foreground/60 uppercase tracking-[0.4em] mt-2 font-black">Admin Station</p>
             </div>
           </div>
         </div>
@@ -112,7 +112,7 @@ export function AdminLayout({ children, breadcrumbs }: AdminLayoutProps) {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Shutdown</span>
+              <span>Logout</span>
             </button>
           </div>
         </div>

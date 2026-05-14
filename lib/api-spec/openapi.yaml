@@ -662,6 +662,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
+  /players/{userId}/transactions:
+    get:
+      operationId: getPlayerTransactions
+      tags: [players]
+      summary: Get player's wallet transactions (admin)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WalletTransaction"
+
   # --- WALLET ---
   /wallet/topup:
     post:
@@ -962,6 +983,12 @@ components:
           type: string
         phone:
           type: string
+        fullName:
+          type: string
+        birthDate:
+          type: string
+        sex:
+          type: string
 
     LoginInput:
       type: object
@@ -990,6 +1017,12 @@ components:
         username:
           type: string
         displayName:
+          type: ["string", "null"]
+        fullName:
+          type: ["string", "null"]
+        birthDate:
+          type: ["string", "null"]
+        sex:
           type: ["string", "null"]
         phone:
           type: ["string", "null"]
@@ -1048,6 +1081,8 @@ components:
         currentUserId:
           type: ["string", "null"]
         currentUsername:
+          type: ["string", "null"]
+        currentSessionCode:
           type: ["string", "null"]
         remainingSeconds:
           type: ["integer", "null"]
@@ -1142,6 +1177,8 @@ components:
         pcId:
           type: string
         pcLabel:
+          type: ["string", "null"]
+        sessionCode:
           type: ["string", "null"]
         status:
           type: string

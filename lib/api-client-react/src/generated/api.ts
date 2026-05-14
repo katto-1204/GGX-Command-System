@@ -2806,6 +2806,95 @@ export const useUpdatePlayerStatus = <
 };
 
 /**
+ * @summary Get player's wallet transactions (admin)
+ */
+export const getGetPlayerTransactionsUrl = (userId: string) => {
+  return `/api/players/${userId}/transactions`;
+};
+
+export const getPlayerTransactions = async (
+  userId: string,
+  options?: RequestInit,
+): Promise<WalletTransaction[]> => {
+  return customFetch<WalletTransaction[]>(getGetPlayerTransactionsUrl(userId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetPlayerTransactionsQueryKey = (userId: string) => {
+  return [`/api/players/${userId}/transactions`] as const;
+};
+
+export const getGetPlayerTransactionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPlayerTransactions>>,
+  TError = ErrorType<unknown>,
+>(
+  userId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getPlayerTransactions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetPlayerTransactionsQueryKey(userId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getPlayerTransactions>>
+  > = ({ signal }) =>
+    getPlayerTransactions(userId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!userId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPlayerTransactions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetPlayerTransactionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPlayerTransactions>>
+>;
+export type GetPlayerTransactionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get player's wallet transactions (admin)
+ */
+
+export function useGetPlayerTransactions<
+  TData = Awaited<ReturnType<typeof getPlayerTransactions>>,
+  TError = ErrorType<unknown>,
+>(
+  userId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getPlayerTransactions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetPlayerTransactionsQueryOptions(userId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Top up a player's wallet (admin)
  */
 export const getTopUpWalletUrl = () => {

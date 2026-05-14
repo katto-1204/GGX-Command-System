@@ -56,6 +56,7 @@ export default function Pcs() {
     try {
       const response = await fetch("/api/sessions", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pcId: selectedPc.id,
@@ -250,73 +251,73 @@ export default function Pcs() {
 
         {/* Immersive Booking Dialog */}
         <Dialog open={!!selectedPc} onOpenChange={() => !isBooking && setSelectedPc(null)}>
-          <DialogContent className="sm:max-w-md bg-card border-border rounded-[3rem] p-10 shadow-3xl overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
+          <DialogContent className="sm:max-w-md bg-zinc-950 border-border rounded-[2rem] p-6 shadow-2xl overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] -mr-24 -mt-24 pointer-events-none" />
             
-            <DialogHeader className="mb-10 text-center">
-              <div className="w-20 h-20 rounded-[2rem] bg-primary/10 flex items-center justify-center mb-8 mx-auto border border-primary/20 shadow-inner">
-                <Monitor className="w-10 h-10 text-primary" />
+            <DialogHeader className="mb-6 text-center">
+              <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center mb-4 mx-auto border border-primary/20 shadow-inner">
+                <Monitor className="w-8 h-8 text-primary" />
               </div>
-              <DialogTitle className="text-4xl font-black font-display tracking-tight text-foreground italic uppercase">
+              <DialogTitle className="text-3xl font-black font-display tracking-tight text-foreground italic uppercase">
                 STATION <span className="text-primary">{selectedPc?.label}</span>
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] mt-2">
-                Configure session parameters for deployment
+              <DialogDescription className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[9px] mt-1">
+                Configure session parameters
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-10">
-              <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-3">
                 {[60, 120, 180, 240, 300, 480].map(mins => (
                   <button
                     key={mins}
                     className={cn(
-                      "h-24 rounded-[1.5rem] flex flex-col items-center justify-center gap-1.5 transition-all border-2 active:scale-95 group relative overflow-hidden shadow-sm",
+                      "h-20 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border-2 active:scale-95 group relative overflow-hidden shadow-sm",
                       bookingMinutes === mins 
                         ? "bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20" 
                         : "bg-muted border-border hover:bg-muted/80 text-muted-foreground"
                     )}
                     onClick={() => setBookingMinutes(mins)}
                   >
-                    <span className={cn("text-2xl font-black font-mono leading-none", bookingMinutes === mins ? "text-primary-foreground" : "text-foreground")}>{mins / 60}H</span>
+                    <span className={cn("text-xl font-black font-mono leading-none", bookingMinutes === mins ? "text-primary-foreground" : "text-foreground")}>{mins / 60}H</span>
                     <span className={cn("text-[9px] font-black uppercase tracking-[0.1em] opacity-70", bookingMinutes === mins ? "text-primary-foreground" : "text-primary")}>₱{((mins / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(0)}</span>
                   </button>
                 ))}
               </div>
 
-              <div className="bg-muted/50 border border-border rounded-[2rem] p-8 space-y-6 shadow-inner">
+              <div className="bg-muted/50 border border-border rounded-2xl p-5 space-y-4 shadow-inner">
                 <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em]">Session Cost</span>
-                  <span className="text-3xl font-black text-foreground font-mono tracking-tighter italic">₱{((bookingMinutes / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(2)}</span>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Session Cost</span>
+                  <span className="text-2xl font-black text-foreground font-mono tracking-tighter italic">₱{((bookingMinutes / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(2)}</span>
                 </div>
                 <div className="h-px bg-border" />
-                <div className="flex justify-between items-center bg-card/50 p-4 rounded-xl border border-border/50">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-primary" />
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Termination</span>
+                <div className="flex justify-between items-center bg-card/50 p-3 rounded-xl border border-border/50">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Termination</span>
                   </div>
-                  <span className="text-base font-black text-primary font-mono italic">
+                  <span className="text-sm font-black text-primary font-mono italic">
                     {new Date(Date.now() + bookingMinutes * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="mt-12 sm:flex-col gap-4">
+            <DialogFooter className="mt-8 sm:flex-col gap-3">
               <Button 
                 onClick={handleDirectBook} 
-                className="w-full h-16 rounded-[1.5rem] bg-primary text-primary-foreground hover:bg-primary/90 font-black text-sm tracking-[0.3em] uppercase shadow-2xl shadow-primary/30 relative overflow-hidden group border-2 border-white/10"
+                className="w-full h-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-black text-xs tracking-[0.3em] uppercase shadow-xl shadow-primary/30 relative overflow-hidden group border-2 border-white/10"
                 disabled={isBooking}
               >
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12" />
-                {isBooking ? <Clock className="w-6 h-6 animate-spin mr-3" /> : "ENGAGE STATION"}
+                {isBooking ? <Clock className="w-5 h-5 animate-spin mr-3" /> : "ENGAGE STATION"}
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => setSelectedPc(null)} 
                 disabled={isBooking}
-                className="w-full h-12 text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] hover:text-foreground active:scale-95"
+                className="w-full h-10 text-[9px] font-black text-muted-foreground uppercase tracking-[0.3em] hover:text-foreground active:scale-95"
               >
                 Cancel Authorization
               </Button>

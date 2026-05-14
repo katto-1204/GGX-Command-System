@@ -1,6 +1,7 @@
 import { useGetDashboardStats, useGetPcSummary, useGetRecentActivity } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Monitor, Clock, Users, AlertCircle, ShoppingBag, Zap, Activity, Shield, Trophy, TrendingUp, History } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -39,15 +40,11 @@ export default function AdminDashboard() {
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 blur-[140px] -mr-80 -mt-80 animate-pulse pointer-events-none" />
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/60">SYSTEM STATUS: OPERATIONAL</span>
-              </div>
               <h1 className="text-5xl md:text-6xl font-black font-display tracking-tight text-foreground leading-none italic uppercase">
-                COMMAND <span className="text-primary">CENTER</span>
+                GGX <span className="text-primary">HUB</span>
               </h1>
               <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-[10px] max-w-md opacity-60 leading-relaxed">
-                Aggregated tactical telemetry and real-time operational oversight for GGX infrastructure.
+                Real-time operational oversight for GGX infrastructure.
               </p>
             </div>
             <div className="flex gap-5">
@@ -55,12 +52,12 @@ export default function AdminDashboard() {
                   <div className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] mb-2 italic">Uptime</div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-lg font-black text-foreground font-mono tracking-tighter italic">99.98%</span>
+                    <span className="text-lg font-black text-foreground font-mono tracking-tighter italic">99.9%</span>
                   </div>
                </div>
                <div className="px-8 py-5 rounded-[1.5rem] bg-muted/50 border border-border/50 backdrop-blur-xl shadow-inner group hover:bg-muted transition-colors">
-                  <div className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] mb-2 italic">Response</div>
-                  <div className="text-lg font-black text-foreground font-mono tracking-tighter italic text-primary">08MS</div>
+                  <div className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] mb-2 italic">Latency</div>
+                  <div className="text-lg font-black text-foreground font-mono tracking-tighter italic text-primary">05MS</div>
                </div>
             </div>
           </div>
@@ -119,8 +116,8 @@ export default function AdminDashboard() {
             <CardHeader className="border-b border-border bg-muted/30 px-10 py-8">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-[11px] font-black uppercase tracking-[0.5em] text-foreground flex items-center gap-4 italic">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  Live Operational Feed
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  Activity Feed
                 </CardTitle>
                 <div className="flex items-center gap-3">
                    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[9px] font-black text-muted-foreground uppercase tracking-widest">

@@ -14,6 +14,12 @@ export interface User {
   /** @nullable */
   displayName?: string | null;
   /** @nullable */
+  fullName?: string | null;
+  /** @nullable */
+  birthDate?: string | null;
+  /** @nullable */
+  sex?: string | null;
+  /** @nullable */
   phone?: string | null;
   /** @nullable */
   avatarUrl?: string | null;

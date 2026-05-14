@@ -1,17 +1,17 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
-import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { initializeAuthToken } from "@/lib/auth-token";
 
 import NotFound from "@/pages/not-found";
 import Splash from "@/pages/splash";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Onboarding from "@/pages/onboarding";
+import RoleSelection from "@/pages/role-selection";
 import Home from "@/pages/home";
 import Pcs from "@/pages/pcs";
 import Queue from "@/pages/queue";
@@ -47,6 +47,8 @@ const queryClient = new QueryClient({
   },
 });
 
+initializeAuthToken();
+
 function PlayerRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
   if (isLoading) return null;
@@ -68,6 +70,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Splash} />
       <Route path="/onboarding" component={Onboarding} />
+      <Route path="/role-select" component={RoleSelection} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
 
@@ -105,21 +108,6 @@ function Router() {
 }
 
 function App() {
-  useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return;
-    const client = supabase;
-
-    async function getTodos() {
-      const { error } = await client.from("todos").select();
-
-      if (error) {
-        console.error("Failed to fetch Supabase todos:", error.message);
-      }
-    }
-
-    void getTodos();
-  }, []);
-
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>

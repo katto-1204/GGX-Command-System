@@ -26,6 +26,9 @@ export const RegisterPlayerBody = zod.object({
   password: zod.string().min(registerPlayerBodyPasswordMin),
   displayName: zod.string().optional(),
   phone: zod.string().optional(),
+  fullName: zod.string().optional(),
+  birthDate: zod.string().optional(),
+  sex: zod.string().optional(),
 });
 
 /**
@@ -41,6 +44,9 @@ export const LoginUserResponse = zod.object({
     id: zod.string(),
     username: zod.string(),
     displayName: zod.string().nullish(),
+    fullName: zod.string().nullish(),
+    birthDate: zod.string().nullish(),
+    sex: zod.string().nullish(),
     phone: zod.string().nullish(),
     avatarUrl: zod.string().nullish(),
     role: zod.enum(["player", "admin", "superAdmin"]),
@@ -61,6 +67,9 @@ export const GetCurrentUserResponse = zod.object({
   id: zod.string(),
   username: zod.string(),
   displayName: zod.string().nullish(),
+  fullName: zod.string().nullish(),
+  birthDate: zod.string().nullish(),
+  sex: zod.string().nullish(),
   phone: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
   role: zod.enum(["player", "admin", "superAdmin"]),
@@ -99,6 +108,7 @@ export const ListPcsResponseItem = zod.object({
   currentSessionId: zod.string().nullish(),
   currentUserId: zod.string().nullish(),
   currentUsername: zod.string().nullish(),
+  currentSessionCode: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
   location: zod.string().optional(),
   maintenanceNote: zod.string().nullish(),
@@ -138,6 +148,7 @@ export const GetPcResponse = zod.object({
   currentSessionId: zod.string().nullish(),
   currentUserId: zod.string().nullish(),
   currentUsername: zod.string().nullish(),
+  currentSessionCode: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
   location: zod.string().optional(),
   maintenanceNote: zod.string().nullish(),
@@ -188,6 +199,7 @@ export const UpdatePcStatusResponse = zod.object({
   currentSessionId: zod.string().nullish(),
   currentUserId: zod.string().nullish(),
   currentUsername: zod.string().nullish(),
+  currentSessionCode: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
   location: zod.string().optional(),
   maintenanceNote: zod.string().nullish(),
@@ -355,6 +367,7 @@ export const AssignQueueEntryToPcResponse = zod.object({
   username: zod.string(),
   pcId: zod.string(),
   pcLabel: zod.string().nullish(),
+  sessionCode: zod.string().nullish(),
   status: zod.enum([
     "pending",
     "active",
@@ -392,6 +405,7 @@ export const ListSessionsResponseItem = zod.object({
   username: zod.string(),
   pcId: zod.string(),
   pcLabel: zod.string().nullish(),
+  sessionCode: zod.string().nullish(),
   status: zod.enum([
     "pending",
     "active",
@@ -426,6 +440,7 @@ export const GetMySessionResponse = zod.object({
   username: zod.string(),
   pcId: zod.string(),
   pcLabel: zod.string().nullish(),
+  sessionCode: zod.string().nullish(),
   status: zod.enum([
     "pending",
     "active",
@@ -463,6 +478,7 @@ export const GetSessionResponse = zod.object({
   username: zod.string(),
   pcId: zod.string(),
   pcLabel: zod.string().nullish(),
+  sessionCode: zod.string().nullish(),
   status: zod.enum([
     "pending",
     "active",
@@ -506,6 +522,7 @@ export const ExtendSessionResponse = zod.object({
   username: zod.string(),
   pcId: zod.string(),
   pcLabel: zod.string().nullish(),
+  sessionCode: zod.string().nullish(),
   status: zod.enum([
     "pending",
     "active",
@@ -543,6 +560,7 @@ export const EndSessionResponse = zod.object({
   username: zod.string(),
   pcId: zod.string(),
   pcLabel: zod.string().nullish(),
+  sessionCode: zod.string().nullish(),
   status: zod.enum([
     "pending",
     "active",
@@ -801,6 +819,9 @@ export const ListPlayersResponseItem = zod.object({
   id: zod.string(),
   username: zod.string(),
   displayName: zod.string().nullish(),
+  fullName: zod.string().nullish(),
+  birthDate: zod.string().nullish(),
+  sex: zod.string().nullish(),
   phone: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
   role: zod.enum(["player", "admin", "superAdmin"]),
@@ -824,6 +845,9 @@ export const GetPlayerResponse = zod.object({
   id: zod.string(),
   username: zod.string(),
   displayName: zod.string().nullish(),
+  fullName: zod.string().nullish(),
+  birthDate: zod.string().nullish(),
+  sex: zod.string().nullish(),
   phone: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
   role: zod.enum(["player", "admin", "superAdmin"]),
@@ -850,6 +874,9 @@ export const UpdatePlayerStatusResponse = zod.object({
   id: zod.string(),
   username: zod.string(),
   displayName: zod.string().nullish(),
+  fullName: zod.string().nullish(),
+  birthDate: zod.string().nullish(),
+  sex: zod.string().nullish(),
   phone: zod.string().nullish(),
   avatarUrl: zod.string().nullish(),
   role: zod.enum(["player", "admin", "superAdmin"]),
@@ -860,6 +887,38 @@ export const UpdatePlayerStatusResponse = zod.object({
   sessionCount: zod.number().optional(),
   createdAt: zod.string(),
 });
+
+/**
+ * @summary Get player's wallet transactions (admin)
+ */
+export const GetPlayerTransactionsParams = zod.object({
+  userId: zod.coerce.string(),
+});
+
+export const GetPlayerTransactionsResponseItem = zod.object({
+  id: zod.string(),
+  userId: zod.string(),
+  username: zod.string().nullish(),
+  type: zod.enum([
+    "topUp",
+    "sessionCharge",
+    "orderCharge",
+    "refund",
+    "adjustment",
+  ]),
+  amount: zod.number(),
+  previousBalance: zod.number(),
+  newBalance: zod.number(),
+  paymentMethod: zod.string().nullish(),
+  sessionId: zod.string().nullish(),
+  orderId: zod.string().nullish(),
+  processedBy: zod.string().nullish(),
+  adminNote: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const GetPlayerTransactionsResponse = zod.array(
+  GetPlayerTransactionsResponseItem,
+);
 
 /**
  * @summary Top up a player's wallet (admin)

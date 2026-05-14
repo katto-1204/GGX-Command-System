@@ -16,6 +16,7 @@ function serializeSession(s: typeof sessionsTable.$inferSelect, pcLabel?: string
     userId: s.userId,
     username: s.username,
     pcId: s.pcId,
+    sessionCode: s.sessionCode,
     pcLabel: pcLabel ?? null,
     status: s.status,
     ratePerHour: s.ratePerHour,
@@ -174,6 +175,7 @@ router.post("/sessions", async (req, res): Promise<void> => {
   const now = new Date();
   const endsAt = new Date(now.getTime() + durationMinutes * 60 * 1000);
   const sessionId = crypto.randomUUID();
+  const sessionCode = `GGX-${pc.label}+${user.username}`.toUpperCase().replace(/\s+/g, '');
 
   // Create session
   const [session] = await db.insert(sessionsTable).values({
@@ -181,6 +183,7 @@ router.post("/sessions", async (req, res): Promise<void> => {
     userId: userId,
     username: user.username,
     pcId: parsed.data.pcId,
+    sessionCode,
     status: "active",
     ratePerHour: 30, // Default rate
     durationMinutes,
@@ -220,6 +223,7 @@ router.post("/sessions/checkin", async (req, res): Promise<void> => {
     .where(inArray(sessionsTable.status, ["active", "extended"]));
 
   const session = sessions.find(s =>
+    (s.sessionCode && s.sessionCode.toUpperCase() === code) ||
     s.id.toUpperCase().startsWith(code) ||
     s.id.toUpperCase().replace(/-/g, "").startsWith(code.replace(/-/g, ""))
   );

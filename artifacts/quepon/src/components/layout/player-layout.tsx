@@ -35,7 +35,12 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
   }));
 
   return (
-    <div className="min-h-[100dvh] w-full flex flex-col bg-background text-foreground pb-24 transition-colors duration-300">
+    <div className="min-h-[100dvh] w-full flex flex-col bg-background text-foreground transition-colors duration-300 relative overflow-hidden" 
+      style={{ 
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)"
+      }}
+    >
       {/* Top Header */}
       <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md border-b border-border px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -87,7 +92,7 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
         </div>
       )}
 
-      <main className="flex-1 w-full max-w-md mx-auto p-4 overflow-x-hidden">
+      <main className="flex-1 w-full max-w-md mx-auto p-4 overflow-x-hidden pb-24">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -98,7 +103,9 @@ export function PlayerLayout({ children, backHref, pageTitle, showBreadcrumbs = 
       </main>
 
       {/* Bottom Pill Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-md z-50">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2.5rem)] max-w-md z-50"
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+      >
         <nav className="flex items-center justify-around bg-card/80 backdrop-blur-2xl border border-border rounded-[2rem] p-2.5 shadow-2xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           {navItems.map((item) => {

@@ -13,4 +13,7 @@ export interface RegisterInput {
   password: string;
   displayName?: string;
   phone?: string;
+  fullName?: string;
+  birthDate?: string;
+  sex?: string;
 }

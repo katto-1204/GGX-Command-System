@@ -2,16 +2,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation } from "wouter";
-import { useLoginUser, setAuthTokenGetter } from "@workspace/api-client-react";
+import { useLoginUser } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Loader2, ArrowLeft, Lock, User, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { persistAuthenticatedUser } from "@/lib/auth-token";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -23,6 +25,8 @@ export default function Login() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -34,11 +38,8 @@ export default function Login() {
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     loginMutation.mutate({ data: values }, {
       onSuccess: (res) => {
-        localStorage.setItem("quepon_token", res.token);
-        setAuthTokenGetter(() => localStorage.getItem("quepon_token"));
-        queryClient.invalidateQueries();
+        persistAuthenticatedUser(queryClient, res.token, res.user);
         localStorage.setItem("quepon_show_welcome", "true");
-        toast({ title: "Welcome back, player!" });
         if (res.user.role === "admin" || res.user.role === "superAdmin") {
           setLocation("/admin/dashboard");
         } else {
@@ -46,11 +47,9 @@ export default function Login() {
         }
       },
       onError: (err: any) => {
-        toast({ 
-          title: "Access Denied", 
-          description: err.message || "Invalid credentials. Please try again.",
-          variant: "destructive" 
-        });
+        const message = err.response?.data?.error || err.error || err.message || "Invalid credentials or account not found.";
+        setErrorMessage(message);
+        setShowErrorModal(true);
       }
     });
   };
@@ -73,7 +72,7 @@ export default function Login() {
             key={i}
             className="absolute w-1 h-1 bg-foreground rounded-full"
             initial={{ 
-              x: Math.random() * 1000, // Fallback for window.innerWidth
+              x: Math.random() * 1000,
               y: Math.random() * 800,
             }}
             animate={{ 
@@ -205,7 +204,47 @@ export default function Login() {
           <div className="h-[1px] w-8 bg-border" />
         </div>
       </div>
-    </div>
 
+      <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+        <DialogContent className="max-w-[90vw] w-[400px] bg-zinc-950 border-white/10 rounded-[2rem] p-0 overflow-hidden shadow-[0_0_50px_rgba(255,0,0,0.15)]">
+          <div className="absolute top-0 left-0 w-full h-[120px] bg-gradient-to-b from-red-500/20 to-transparent pointer-events-none" />
+          
+          <div className="relative p-8 flex flex-col items-center text-center">
+            <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-6 relative group">
+              <div className="absolute inset-0 bg-red-500/20 blur-xl group-hover:blur-2xl transition-all" />
+              <AlertTriangle className="w-10 h-10 relative" />
+            </div>
+
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-2xl font-black font-display text-white tracking-tight uppercase leading-none mb-2">
+                Access <span className="text-red-500">Denied</span>
+              </DialogTitle>
+              <DialogDescription className="text-white/60 font-medium text-sm">
+                {errorMessage}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="w-full space-y-3">
+              <Button 
+                variant="default" 
+                className="w-full h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold tracking-wider uppercase transition-all"
+                onClick={() => setShowErrorModal(false)}
+              >
+                Try Again
+              </Button>
+              <Link href="/register">
+                <Button 
+                  variant="outline" 
+                  className="w-full h-14 rounded-2xl bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-bold tracking-wider uppercase transition-all"
+                  onClick={() => setShowErrorModal(false)}
+                >
+                  Create Account
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

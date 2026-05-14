@@ -5,21 +5,21 @@ import { PlayerLayout } from "@/components/layout/player-layout";
 import { 
   useGetPcSummary, 
   useListPromos, 
-  useGetDashboardStats,
   useGetMySession
 } from "@workspace/api-client-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Monitor, Clock, Wallet, Coffee, MessageSquare, Ticket, ChevronRight, Play, Star, TrendingUp, Zap } from "lucide-react";
+import { Monitor, Clock, Wallet, Coffee, MessageSquare, Ticket, ChevronRight, Play, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WelcomeModal } from "@/components/welcome-modal";
 import { motion } from "framer-motion";
+import { MembershipCard } from "@/components/membership-card";
+import { RulesSection } from "@/components/rules-section";
+import { PcSpecsSection } from "@/components/pc-specs-section";
 
 const RECENT_GAMES = [
-  { id: 1, name: "Valorant", image: "https://images.unsplash.com/photo-1624138784614-87fd1b6528f2?q=80&w=200&h=280&auto=format&fit=crop", category: "FPS" },
-  { id: 2, name: "Dota 2", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=200&h=280&auto=format&fit=crop", category: "MOBA" },
-  { id: 3, name: "LoL", image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=200&h=280&auto=format&fit=crop", category: "MOBA" },
-  { id: 4, name: "CS2", image: "https://images.unsplash.com/photo-1542751110-97427bbecf20?q=80&w=200&h=280&auto=format&fit=crop", category: "FPS" },
+  { id: 1, name: "Valorant", image: "/POPULAR%20GAME%20CARD/valorant%20card.png", category: "FPS" },
+  { id: 2, name: "Genshin Impact", image: "/POPULAR%20GAME%20CARD/genshincard.png", category: "RPG" },
+  { id: 3, name: "Roblox", image: "/POPULAR%20GAME%20CARD/robloxcardred.png", category: "Sandbox" },
 ];
 
 export default function Home() {
@@ -47,47 +47,22 @@ export default function Home() {
     <PlayerLayout showBreadcrumbs={false}>
       <WelcomeModal />
       
-      <div className="space-y-10 pt-6 pb-12">
-        {/* Hero Banner Section */}
-        <div className="relative h-[240px] rounded-[3rem] overflow-hidden border border-border group shadow-2xl">
-          {/* Background Image */}
-          <div className="absolute inset-0">
-            <img 
-              src="/gaming_home_hero_1778711412356.png" 
-              alt="Gaming Hero" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-transparent to-transparent" />
-          </div>
-
-          <div className="relative z-10 p-8 h-full flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-foreground/60">System Online</span>
-              </div>
-              <h1 className="text-4xl font-black font-display tracking-tighter text-foreground leading-none italic">
-                WELCOME <span className="text-primary">COMMANDER</span>
-              </h1>
-              <p className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">{user?.displayName || user?.username}</p>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="bg-card/40 backdrop-blur-xl border border-border rounded-2xl px-5 py-3 shadow-sm">
-                <div className="text-[8px] uppercase tracking-[0.3em] text-muted-foreground font-black mb-1">Wallet Balance</div>
-                <div className="text-2xl font-black text-foreground font-mono tracking-tighter leading-none">₱{(user?.walletBalance || 0).toFixed(2)}</div>
-              </div>
-              <Link href="/wallet">
-                <Button size="icon" className="w-14 h-14 rounded-2xl bg-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all active:scale-90 border-2 border-white/10">
-                  <Wallet className="w-7 h-7" />
-                </Button>
-              </Link>
-            </div>
-          </div>
+      <div className="space-y-12 pt-6 pb-24 px-1" style={{ 
+        paddingTop: "calc(1.5rem + env(safe-area-inset-top))",
+        paddingBottom: "calc(6rem + env(safe-area-inset-bottom))"
+      }}>
+        {/* Header Greeting */}
+        <div className="space-y-1 mb-2 px-1">
+          <h1 className="text-4xl font-black font-display tracking-tighter text-foreground leading-none italic uppercase">
+            {user?.displayName || user?.username}
+          </h1>
+          <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em]">Player Hub Access</p>
         </div>
 
-        {/* Real-time Status Grid */}
+        {/* 1. WALLET BALANCE (INSIDE MEMBERSHIP CARD) */}
+        <MembershipCard user={user} className="mb-4" />
+
+        {/* 2. sTATIONS FREE */}
         <div className="grid grid-cols-2 gap-5">
           <Link href="/pcs" className="block h-full group">
             <div className={cn(
@@ -143,11 +118,11 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Command Grid */}
+        {/* Command Hub */}
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-8 h-1 bg-primary rounded-full" />
-            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Operations Hub</h2>
+            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Hub</h2>
           </div>
           <div className="grid grid-cols-3 gap-4">
             {quickActions.map((action) => {
@@ -169,12 +144,12 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Recent Games - Swipable Section */}
+        {/* 3. POPULAR GAMES */}
         <div className="space-y-6">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-3">
               <div className="w-8 h-1 bg-primary rounded-full" />
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Battle Zone</h2>
+              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Popular Games</h2>
             </div>
           </div>
           <div className="flex overflow-x-auto space-x-5 snap-x hide-scrollbar px-1 pb-4">
@@ -196,13 +171,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Promo Banner */}
+        {/* 4. OFFERS */}
         {activePromos.length > 0 && (
           <div className="space-y-6">
             <div className="flex justify-between items-center px-1">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-1 bg-primary rounded-full" />
-                <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Tactical Offers</h2>
+                <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">Offers</h2>
               </div>
               <Link href="/promos" className="text-[9px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-1.5 hover:translate-x-1 transition-transform">
                 VIEW ALL <ChevronRight className="w-3 h-3" />
@@ -226,8 +201,13 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* PC SPECS SECTION */}
+        <PcSpecsSection />
+
+        {/* GENERAL RULES SECTION */}
+        <RulesSection />
       </div>
     </PlayerLayout>
-
   );
 }

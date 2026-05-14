@@ -139,4 +139,29 @@ router.get("/wallet/transactions", async (req, res): Promise<void> => {
   })));
 });
 
+router.get("/players/:userId/transactions", async (req, res): Promise<void> => {
+  const currentUserId = getSessionUser(req);
+  if (!currentUserId) { res.status(401).json({ error: "Not authenticated" }); return; }
+
+  const txns = await db.select().from(walletTransactionsTable)
+    .where(eq(walletTransactionsTable.userId, req.params.userId))
+    .orderBy(walletTransactionsTable.createdAt);
+
+  res.json(txns.reverse().map(t => ({
+    id: t.id,
+    userId: t.userId,
+    username: t.username ?? null,
+    type: t.type,
+    amount: t.amount,
+    previousBalance: t.previousBalance,
+    newBalance: t.newBalance,
+    paymentMethod: t.paymentMethod ?? null,
+    sessionId: t.sessionId ?? null,
+    orderId: t.orderId ?? null,
+    processedBy: t.processedBy ?? null,
+    adminNote: t.adminNote ?? null,
+    createdAt: t.createdAt.toISOString(),
+  })));
+});
+
 export default router;
