@@ -1,21 +1,20 @@
-// Vercel serverless function that proxies API requests to the Render backend.
-// Since the frontend uses VITE_API_URL to call Render directly, this handler
-// only exists as a fallback for any /api/* requests that hit Vercel.
+// Vercel serverless proxy — forwards /api/* requests to the Render backend.
+// Uses plain types to avoid needing @vercel/node as a dependency.
 
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { IncomingMessage, ServerResponse } from "node:http";
 
 const BACKEND_URL = process.env.VITE_API_URL || "https://ggx-quepon.onrender.com";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
   try {
-    const path = (req.query.path as string[])?.join("/") ?? "";
-    const targetUrl = `${BACKEND_URL}/api/${path}`;
+    // Extract the path from the URL
+    const url = new URL(req.url || "/", `http://${req.headers.host}`);
+    const targetUrl = `${BACKEND_URL}${url.pathname}${url.search}`;
 
     const headers: Record<string, string> = {
       "content-type": req.headers["content-type"] || "application/json",
     };
 
-    // Forward auth headers
     if (req.headers["x-session-token"]) {
       headers["x-session-token"] = req.headers["x-session-token"] as string;
     }
@@ -28,20 +27,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers,
     };
 
-    if (req.method !== "GET" && req.method !== "HEAD" && req.body) {
-      fetchOptions.body = JSON.stringify(req.body);
+    // Read body for non-GET requests
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      const body = await new Promise<string>((resolve) => {
+        let data = "";
+        req.on("data", (chunk: Buffer) => { data += chunk.toString(); });
+        req.on("end", () => resolve(data));
+      });
+      if (body) fetchOptions.body = body;
     }
 
     const upstream = await fetch(targetUrl, fetchOptions);
     const data = await upstream.text();
 
-    // Forward response headers
     const contentType = upstream.headers.get("content-type");
-    if (contentType) res.setHeader("content-type", contentType);
-
-    res.status(upstream.status).send(data);
+    res.writeHead(upstream.status, {
+      "content-type": contentType || "application/json",
+      "access-control-allow-origin": "*",
+    });
+    res.end(data);
   } catch (err: any) {
-    console.error("[vercel-api] Proxy error:", err);
-    res.status(502).json({ error: "Backend proxy error", details: err.message });
+    res.writeHead(502, { "content-type": "application/json" });
+    res.end(JSON.stringify({ error: "Backend proxy error", details: err.message }));
   }
 }

@@ -236,6 +236,15 @@ async function completeSessionRecord(
     }
   }
 
+  // Mark the associated queue entry as completed
+  if (session.queueId) {
+    await db.update(queueEntriesTable).set({
+      status: "completed",
+      completedAt: now,
+      updatedAt: now,
+    }).where(eq(queueEntriesTable.id, session.queueId));
+  }
+
   return updated;
 }
 
