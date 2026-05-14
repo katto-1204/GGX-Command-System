@@ -3,7 +3,9 @@ import {
   useCheckinSession, 
   useGetPcSummary, 
   useGetMyQueueEntry,
-  useGetMySession
+  useGetMySession,
+  useEndSession,
+  getGetMySessionQueryKey
 } from "@workspace/api-client-react";
 import { PlayerLayout } from "@/components/layout/player-layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +27,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocation, Link } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { QrTrackingView } from "@/components/qr-tracking-view";
 
@@ -138,32 +142,61 @@ export default function Checkin() {
   const [showScanner, setShowScanner] = useState(false);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const checkinMutation = useCheckinSession();
+  const endSessionMutation = useEndSession();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const hasAutoEndedRef = useRef(false);
 
   const { data: pcSummary, isLoading: isLoadingSummary } = useGetPcSummary({ query: { refetchInterval: 5000 } as any });
   const { data: queueEntry, isLoading: isLoadingQueue } = useGetMyQueueEntry({ query: { refetchInterval: 5000 } as any });
   const { data: mySession } = useGetMySession({ query: { refetchInterval: 5000 } as any });
 
-  // Sync remaining time from session
-  useEffect(() => {
-    if (mySession?.remainingSeconds != null) {
-      setRemainingTime(mySession.remainingSeconds);
+  const updateRemainingFromSession = useCallback(() => {
+    if (!mySession?.startedAt || !mySession?.durationSeconds) {
+      setRemainingTime(null);
+      return 0;
     }
-  }, [mySession?.remainingSeconds]);
 
-  // Local countdown
+    const startedAtMs = new Date(mySession.startedAt).getTime();
+    const durationSeconds = Number(mySession.durationSeconds || 0);
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startedAtMs) / 1000));
+    const remaining = Math.max(durationSeconds - elapsedSeconds, 0);
+    setRemainingTime(remaining);
+    return remaining;
+  }, [mySession?.startedAt, mySession?.durationSeconds]);
+
+  // Sync remaining time from real active session data
   useEffect(() => {
-    if (remainingTime === null || remainingTime <= 0 || mySession?.status !== "active") return;
-    
+    if (!mySession?.startedAt || !mySession?.durationSeconds || !["active", "extended", "locked"].includes(mySession.status)) {
+      setRemainingTime(null);
+      hasAutoEndedRef.current = false;
+      return;
+    }
+
+    updateRemainingFromSession();
     const interval = setInterval(() => {
-      setRemainingTime(prev => prev ? prev - 1 : 0);
+      const remaining = updateRemainingFromSession();
+      if (remaining === 0 && !hasAutoEndedRef.current && mySession?.id) {
+        hasAutoEndedRef.current = true;
+        endSessionMutation.mutate(
+          { sessionId: mySession.id },
+          {
+            onSuccess: () => {
+              queryClient.invalidateQueries({ queryKey: getGetMySessionQueryKey() });
+              queryClient.invalidateQueries();
+              toast({ title: "SESSION ENDED", description: "Time has expired. Your station is now available." });
+            },
+          }
+        );
+      }
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [remainingTime, mySession?.status]);
+  }, [mySession?.id, mySession?.startedAt, mySession?.durationSeconds, mySession?.status, updateRemainingFromSession]);
 
   // Session state detection
-  const hasActiveSession = !!mySession && ["active", "extended", "pending"].includes(mySession.status);
+  const hasActiveSession = !!mySession && ["active", "extended", "locked", "pending"].includes(mySession.status);
   const isInQueue = !!queueEntry && !["cancelled", "removed", "noShow", "completed"].includes(queueEntry.status);
   const isNextInLine = isInQueue && (queueEntry.position === 1 || queueEntry.status === "approved" || queueEntry.status === "assigned");
   const canScan = isNextInLine;
@@ -203,6 +236,20 @@ export default function Checkin() {
 
   // ACTIVE SESSION STATE: Show QR Tracking Dashboard
   if (hasActiveSession) {
+    if (!mySession?.startedAt || !mySession?.durationSeconds) {
+      return (
+        <PlayerLayout>
+          <div className="pt-4 pb-20">
+            <Card className="bg-card border-border rounded-2xl shadow-lg">
+              <CardContent className="p-8 text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">No active session found</p>
+              </CardContent>
+            </Card>
+          </div>
+        </PlayerLayout>
+      );
+    }
+
     return (
       <PlayerLayout>
         <div className="pt-4 pb-20">

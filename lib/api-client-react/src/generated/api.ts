@@ -25,6 +25,7 @@ import type {
   AuthResponse,
   CheckinInput,
   CheckinResult,
+  CreateSessionInput,
   DashboardStats,
   ExtendSessionInput,
   Feedback,
@@ -1537,6 +1538,92 @@ export function useListSessions<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Create a new session (direct book)
+ */
+export const getCreateSessionUrl = () => {
+  return `/api/sessions`;
+};
+
+export const createSession = async (
+  createSessionInput: CreateSessionInput,
+  options?: RequestInit,
+): Promise<Session> => {
+  return customFetch<Session>(getCreateSessionUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createSessionInput),
+  });
+};
+
+export const getCreateSessionMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSession>>,
+    TError,
+    { data: BodyType<CreateSessionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createSession>>,
+  TError,
+  { data: BodyType<CreateSessionInput> },
+  TContext
+> => {
+  const mutationKey = ["createSession"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createSession>>,
+    { data: BodyType<CreateSessionInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createSession(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateSessionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createSession>>
+>;
+export type CreateSessionMutationBody = BodyType<CreateSessionInput>;
+export type CreateSessionMutationError = ErrorType<void>;
+
+/**
+ * @summary Create a new session (direct book)
+ */
+export const useCreateSession = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSession>>,
+    TError,
+    { data: BodyType<CreateSessionInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createSession>>,
+  TError,
+  { data: BodyType<CreateSessionInput> },
+  TContext
+> => {
+  return useMutation(getCreateSessionMutationOptions(options));
+};
 
 /**
  * @summary Get the current player's active session

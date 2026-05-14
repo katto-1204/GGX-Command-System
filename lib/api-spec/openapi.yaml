@@ -365,6 +365,27 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Session"
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Create a new session (direct book)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          description: Validation error or insufficient balance
+        "409":
+          description: PC already in use
 
   /sessions/my:
     get:
@@ -1260,7 +1281,7 @@ components:
     # --- SESSIONS ---
     Session:
       type: object
-      required: [id, userId, username, pcId, status, ratePerHour, durationMinutes, startedAt, endsAt]
+      required: [id, userId, username, pcId, status, sessionType, ratePerHour, allocatedAmount, maxCost, durationMinutes, durationSeconds, startedAt, endsAt]
       properties:
         id:
           type: string
@@ -1277,9 +1298,20 @@ components:
         status:
           type: string
           enum: [pending, active, locked, extended, completed, cancelled, abandoned]
+        sessionType:
+          type: string
+          enum: [open_time, limit_amount, limited]
         ratePerHour:
           type: number
+        allocatedAmount:
+          type: number
+        maxCost:
+          type: number
+        walletBalanceAtStart:
+          type: number
         durationMinutes:
+          type: integer
+        durationSeconds:
           type: integer
         extendedMinutes:
           type: integer
@@ -1291,6 +1323,8 @@ components:
           type: ["string", "null"]
         remainingSeconds:
           type: ["integer", "null"]
+        elapsedSeconds:
+          type: integer
         costSoFar:
           type: number
         finalCost:
@@ -1303,6 +1337,30 @@ components:
           type: boolean
         createdAt:
           type: string
+ 
+    CreateSessionInput:
+      type: object
+      required: [pcId]
+      properties:
+        pcId:
+          type: string
+        sessionType:
+          type: string
+          enum: [open_time, limit_amount, limited]
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+        durationSeconds:
+          type: integer
+          minimum: 1
+          maximum: 86400
+        allocatedAmount:
+          type: number
+          minimum: 0.01
+        maxCost:
+          type: number
+          minimum: 0.01
 
     ExtendSessionInput:
       type: object

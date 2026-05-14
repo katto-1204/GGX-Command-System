@@ -265,6 +265,15 @@ export const SessionStatus = {
   abandoned: "abandoned",
 } as const;
 
+export type SessionSessionType =
+  (typeof SessionSessionType)[keyof typeof SessionSessionType];
+
+export const SessionSessionType = {
+  open_time: "open_time",
+  limit_amount: "limit_amount",
+  limited: "limited",
+} as const;
+
 export interface Session {
   id: string;
   userId: string;
@@ -275,8 +284,13 @@ export interface Session {
   /** @nullable */
   sessionCode?: string | null;
   status: SessionStatus;
+  sessionType: SessionSessionType;
   ratePerHour: number;
+  allocatedAmount: number;
+  maxCost: number;
+  walletBalanceAtStart?: number;
   durationMinutes: number;
+  durationSeconds: number;
   extendedMinutes?: number;
   startedAt: string;
   endsAt: string;
@@ -284,6 +298,7 @@ export interface Session {
   endedAt?: string | null;
   /** @nullable */
   remainingSeconds?: number | null;
+  elapsedSeconds?: number;
   costSoFar?: number;
   /** @nullable */
   finalCost?: number | null;
@@ -292,6 +307,34 @@ export interface Session {
   queueId?: string | null;
   isLocked?: boolean;
   createdAt?: string;
+}
+
+export type CreateSessionInputSessionType =
+  (typeof CreateSessionInputSessionType)[keyof typeof CreateSessionInputSessionType];
+
+export const CreateSessionInputSessionType = {
+  open_time: "open_time",
+  limit_amount: "limit_amount",
+  limited: "limited",
+} as const;
+
+export interface CreateSessionInput {
+  pcId: string;
+  sessionType?: CreateSessionInputSessionType;
+  /**
+   * @minimum 1
+   * @maximum 1440
+   */
+  durationMinutes?: number;
+  /**
+   * @minimum 1
+   * @maximum 86400
+   */
+  durationSeconds?: number;
+  /** @minimum 0.01 */
+  allocatedAmount?: number;
+  /** @minimum 0.01 */
+  maxCost?: number;
 }
 
 export interface ExtendSessionInput {

@@ -28,7 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: user && !isError ? user : null,
     isLoading,
     isAuthenticated: !!user && !isError,
-    isAdmin: !!user && !isError && (user.role === "admin" || user.role === "superAdmin"),
+    isAdmin: !!user && !isError && (
+      user.role === "admin" || 
+      user.role === "superAdmin" || 
+      String(user.role).toLowerCase() === "admin" || 
+      String(user.role).toLowerCase() === "superadmin"
+    ),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -476,13 +476,19 @@ export const AssignQueueEntryToPcResponse = zod.object({
     "cancelled",
     "abandoned",
   ]),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]),
   ratePerHour: zod.number(),
+  allocatedAmount: zod.number(),
+  maxCost: zod.number(),
+  walletBalanceAtStart: zod.number().optional(),
   durationMinutes: zod.number(),
+  durationSeconds: zod.number(),
   extendedMinutes: zod.number().optional(),
   startedAt: zod.string(),
   endsAt: zod.string(),
   endedAt: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
+  elapsedSeconds: zod.number().optional(),
   costSoFar: zod.number().optional(),
   finalCost: zod.number().nullish(),
   paymentSource: zod.string().optional(),
@@ -514,13 +520,19 @@ export const ListSessionsResponseItem = zod.object({
     "cancelled",
     "abandoned",
   ]),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]),
   ratePerHour: zod.number(),
+  allocatedAmount: zod.number(),
+  maxCost: zod.number(),
+  walletBalanceAtStart: zod.number().optional(),
   durationMinutes: zod.number(),
+  durationSeconds: zod.number(),
   extendedMinutes: zod.number().optional(),
   startedAt: zod.string(),
   endsAt: zod.string(),
   endedAt: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
+  elapsedSeconds: zod.number().optional(),
   costSoFar: zod.number().optional(),
   finalCost: zod.number().nullish(),
   paymentSource: zod.string().optional(),
@@ -529,6 +541,37 @@ export const ListSessionsResponseItem = zod.object({
   createdAt: zod.string().optional(),
 });
 export const ListSessionsResponse = zod.array(ListSessionsResponseItem);
+
+/**
+ * @summary Create a new session (direct book)
+ */
+export const createSessionBodyDurationMinutesMax = 1440;
+
+export const createSessionBodyDurationSecondsMax = 86400;
+
+export const createSessionBodyAllocatedAmountMin = 0.01;
+
+export const createSessionBodyMaxCostMin = 0.01;
+
+export const CreateSessionBody = zod.object({
+  pcId: zod.string(),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]).optional(),
+  durationMinutes: zod
+    .number()
+    .min(1)
+    .max(createSessionBodyDurationMinutesMax)
+    .optional(),
+  durationSeconds: zod
+    .number()
+    .min(1)
+    .max(createSessionBodyDurationSecondsMax)
+    .optional(),
+  allocatedAmount: zod
+    .number()
+    .min(createSessionBodyAllocatedAmountMin)
+    .optional(),
+  maxCost: zod.number().min(createSessionBodyMaxCostMin).optional(),
+});
 
 /**
  * @summary Get the current player's active session
@@ -549,13 +592,19 @@ export const GetMySessionResponse = zod.object({
     "cancelled",
     "abandoned",
   ]),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]),
   ratePerHour: zod.number(),
+  allocatedAmount: zod.number(),
+  maxCost: zod.number(),
+  walletBalanceAtStart: zod.number().optional(),
   durationMinutes: zod.number(),
+  durationSeconds: zod.number(),
   extendedMinutes: zod.number().optional(),
   startedAt: zod.string(),
   endsAt: zod.string(),
   endedAt: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
+  elapsedSeconds: zod.number().optional(),
   costSoFar: zod.number().optional(),
   finalCost: zod.number().nullish(),
   paymentSource: zod.string().optional(),
@@ -587,13 +636,19 @@ export const GetSessionResponse = zod.object({
     "cancelled",
     "abandoned",
   ]),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]),
   ratePerHour: zod.number(),
+  allocatedAmount: zod.number(),
+  maxCost: zod.number(),
+  walletBalanceAtStart: zod.number().optional(),
   durationMinutes: zod.number(),
+  durationSeconds: zod.number(),
   extendedMinutes: zod.number().optional(),
   startedAt: zod.string(),
   endsAt: zod.string(),
   endedAt: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
+  elapsedSeconds: zod.number().optional(),
   costSoFar: zod.number().optional(),
   finalCost: zod.number().nullish(),
   paymentSource: zod.string().optional(),
@@ -631,13 +686,19 @@ export const ExtendSessionResponse = zod.object({
     "cancelled",
     "abandoned",
   ]),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]),
   ratePerHour: zod.number(),
+  allocatedAmount: zod.number(),
+  maxCost: zod.number(),
+  walletBalanceAtStart: zod.number().optional(),
   durationMinutes: zod.number(),
+  durationSeconds: zod.number(),
   extendedMinutes: zod.number().optional(),
   startedAt: zod.string(),
   endsAt: zod.string(),
   endedAt: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
+  elapsedSeconds: zod.number().optional(),
   costSoFar: zod.number().optional(),
   finalCost: zod.number().nullish(),
   paymentSource: zod.string().optional(),
@@ -669,13 +730,19 @@ export const EndSessionResponse = zod.object({
     "cancelled",
     "abandoned",
   ]),
+  sessionType: zod.enum(["open_time", "limit_amount", "limited"]),
   ratePerHour: zod.number(),
+  allocatedAmount: zod.number(),
+  maxCost: zod.number(),
+  walletBalanceAtStart: zod.number().optional(),
   durationMinutes: zod.number(),
+  durationSeconds: zod.number(),
   extendedMinutes: zod.number().optional(),
   startedAt: zod.string(),
   endsAt: zod.string(),
   endedAt: zod.string().nullish(),
   remainingSeconds: zod.number().nullish(),
+  elapsedSeconds: zod.number().optional(),
   costSoFar: zod.number().optional(),
   finalCost: zod.number().nullish(),
   paymentSource: zod.string().optional(),

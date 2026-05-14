@@ -5,6 +5,7 @@
  * QUEPON GGX Command System API
  * OpenAPI spec version: 0.1.0
  */
+import type { SessionSessionType } from "./sessionSessionType";
 import type { SessionStatus } from "./sessionStatus";
 
 export interface Session {
@@ -17,8 +18,13 @@ export interface Session {
   /** @nullable */
   sessionCode?: string | null;
   status: SessionStatus;
+  sessionType: SessionSessionType;
   ratePerHour: number;
+  allocatedAmount: number;
+  maxCost: number;
+  walletBalanceAtStart?: number;
   durationMinutes: number;
+  durationSeconds: number;
   extendedMinutes?: number;
   startedAt: string;
   endsAt: string;
@@ -26,6 +32,7 @@ export interface Session {
   endedAt?: string | null;
   /** @nullable */
   remainingSeconds?: number | null;
+  elapsedSeconds?: number;
   costSoFar?: number;
   /** @nullable */
   finalCost?: number | null;

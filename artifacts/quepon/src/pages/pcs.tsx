@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { apiUrl } from "@/lib/api-url";
+import { useEndSession, useGetMySession, getGetMySessionQueryKey, useCreateSession } from "@workspace/api-client-react";
 
 const STATUS_CONFIG = {
   available: { label: "ONLINE", color: "text-green-400", dot: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]", bar: "bg-green-500", glow: "border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.05)]" },
@@ -36,17 +36,21 @@ export default function Pcs() {
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { data: activeSession } = useGetMySession({ query: { refetchInterval: 5000 } as any });
+  const endSessionMutation = useEndSession();
+  const createSessionMutation = useCreateSession();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
 
   const [selectedPc, setSelectedPc] = useState<any>(null);
   const [sessionMode, setSessionMode] = useState<SessionMode>("limited");
   const [bookingMinutes, setBookingMinutes] = useState(60);
+  const [limitAmount, setLimitAmount] = useState("");
   const [isBooking, setIsBooking] = useState(false);
   const [ownedPcToManage, setOwnedPcToManage] = useState<any>(null);
   const [topUpModalOpen, setTopUpModalOpen] = useState(false);
 
-  const walletBalance = (user as any)?.walletBalance ?? 0;
+  const walletBalance = Number((user as any)?.walletBalance ?? 0);
 
   const availablePcs = pcs?.filter(p => p.status === "available") ?? [];
   const hasAvailable = availablePcs.length > 0;
@@ -59,39 +63,59 @@ export default function Pcs() {
     return matchesSearch && matchesFilter;
   });
 
-  // Calculate max minutes affordable with current balance for "open" mode
-  const getOpenModeMinutes = () => {
-    const rate = (TIER_CONFIG as any)[selectedPc?.tier]?.rate || 25;
-    const maxMinutes = Math.floor((walletBalance / rate) * 60);
-    return Math.max(15, Math.min(maxMinutes, 1440)); // Clamp between 15m and 24h
+  const getSelectedRate = () => (TIER_CONFIG as any)[selectedPc?.tier]?.rate || 25;
+
+  const getOpenModeSeconds = () => {
+    const rate = getSelectedRate();
+    return Math.max(0, Math.floor((walletBalance / rate) * 3600));
   };
 
-  const getEffectiveDuration = () => {
-    return sessionMode === "open" ? getOpenModeMinutes() : bookingMinutes;
+  // Calculate max minutes affordable with current balance for "open" mode
+  const getOpenModeMinutes = () => {
+    const maxMinutes = Math.floor(getOpenModeSeconds() / 60);
+    return Math.max(1, Math.min(maxMinutes, 1440));
   };
+
+  const getSessionPresetAmount = () => (bookingMinutes / 60) * getSelectedRate();
+  const getLimitAmount = () => {
+    const amount = Number(limitAmount);
+    return Number.isFinite(amount) && amount > 0 ? amount : getSessionPresetAmount();
+  };
+  const getEffectiveDurationSeconds = () => {
+    if (sessionMode === "open") return getOpenModeSeconds();
+    return Math.floor((getLimitAmount() / getSelectedRate()) * 3600);
+  };
+  const getEffectiveDuration = () => Math.ceil(getEffectiveDurationSeconds() / 60);
+
+  const getRequestedAmount = () => sessionMode === "open" ? walletBalance : getLimitAmount();
+  const exceedsWalletBalance = sessionMode === "limited" && getRequestedAmount() > walletBalance;
+  const hasNoOpenTimeBalance = sessionMode === "open" && walletBalance <= 0;
 
   const handleDirectBook = async () => {
     if (!selectedPc) return;
     setIsBooking(true);
     try {
-      const token = localStorage.getItem("quepon_token");
-      const response = await fetch(apiUrl("/api/sessions"), {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
+      const requestedAmount = getRequestedAmount();
+
+      if (sessionMode === "open" && walletBalance <= 0) {
+        throw new Error("Insufficient wallet balance. Please top up before starting an open session.");
+      }
+
+      if (sessionMode === "limited" && requestedAmount > walletBalance) {
+        throw new Error(`Insufficient wallet balance. You can only use up to ${walletBalance.toFixed(2)}.`);
+      }
+
+      await createSessionMutation.mutateAsync({
+        data: {
           pcId: selectedPc.id,
+          sessionType: sessionMode === "open" ? "open_time" : "limit_amount",
+          allocatedAmount: requestedAmount,
+          maxCost: requestedAmount,
+          durationSeconds: getEffectiveDurationSeconds(),
           durationMinutes: getEffectiveDuration(),
-        })
+        }
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Failed to start session");
-      }
 
       toast({
         title: "SQUAD ASSIGNED!",
@@ -114,25 +138,22 @@ export default function Pcs() {
   };
 
   const handleEndOwnedSession = async () => {
-    if (!ownedPcToManage) return;
-    try {
-      const token = localStorage.getItem("quepon_token");
-      const response = await fetch(apiUrl("/api/sessions/end-active"), {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-        }
-      });
+    if (!ownedPcToManage || !activeSession) return;
 
-      if (!response.ok) throw new Error("Failed to end session");
-
-      toast({ title: "SESSION TERMINATED", description: `${ownedPcToManage.label} is now available.` });
-      setOwnedPcToManage(null);
-      queryClient.invalidateQueries();
-    } catch (err: any) {
-      toast({ title: "ERROR", description: err.message, variant: "destructive" });
-    }
+    endSessionMutation.mutate(
+      { sessionId: activeSession.id },
+      {
+        onSuccess: () => {
+          toast({ title: "SESSION TERMINATED", description: `${ownedPcToManage.label} is now available.` });
+          setOwnedPcToManage(null);
+          queryClient.invalidateQueries();
+          queryClient.invalidateQueries({ queryKey: getGetMySessionQueryKey() });
+        },
+        onError: (err: any) => {
+          toast({ title: "ERROR", description: err.message, variant: "destructive" });
+        },
+      }
+    );
   };
 
   return (
@@ -393,7 +414,7 @@ export default function Pcs() {
         </Dialog>
 
         {/* Immersive Booking Dialog */}
-        <Dialog open={!!selectedPc} onOpenChange={() => { if (!isBooking) { setSelectedPc(null); setSessionMode("limited"); } }}>
+        <Dialog open={!!selectedPc} onOpenChange={() => { if (!isBooking) { setSelectedPc(null); setSessionMode("limited"); setLimitAmount(""); } }}>
           <DialogContent className="sm:max-w-md bg-zinc-950 border-border rounded-[2rem] p-6 shadow-2xl overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-primary" />
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[80px] -mr-24 -mt-24 pointer-events-none" />
@@ -486,11 +507,13 @@ export default function Pcs() {
                     {[60, 120, 180, 240, 300, 480].map(mins => (
                       <button
                         key={mins}
+                        disabled={(mins / 60) * getSelectedRate() > walletBalance}
                         className={cn(
                           "h-[4.5rem] rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-2 active:scale-95 group relative overflow-hidden shadow-sm",
                           bookingMinutes === mins
                             ? "bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20"
-                            : "bg-muted border-border hover:bg-muted/80 text-muted-foreground"
+                            : "bg-muted border-border hover:bg-muted/80 text-muted-foreground",
+                          (mins / 60) * getSelectedRate() > walletBalance && "opacity-40 cursor-not-allowed hover:bg-muted"
                         )}
                         onClick={() => setBookingMinutes(mins)}
                       >
@@ -498,6 +521,25 @@ export default function Pcs() {
                         <span className={cn("text-[8px] font-black uppercase tracking-[0.1em] opacity-70", bookingMinutes === mins ? "text-primary-foreground" : "text-primary")}>₱{((mins / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(0)}</span>
                       </button>
                     ))}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] ml-1 italic">Limit Amount</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="0.01"
+                      value={limitAmount}
+                      onChange={event => setLimitAmount(event.target.value)}
+                      placeholder={`Max ${walletBalance.toFixed(2)}`}
+                      className="h-12 bg-muted/50 border-border rounded-xl text-sm font-black font-mono tracking-wider"
+                    />
+                  </div>
+                  <div className={cn(
+                    "text-[9px] font-black uppercase tracking-[0.2em] leading-relaxed",
+                    exceedsWalletBalance ? "text-red-400" : "text-muted-foreground/60"
+                  )}>
+                    Wallet: ₱{walletBalance.toFixed(2)}
+                    {exceedsWalletBalance && " · Amount cannot exceed your wallet balance."}
                   </div>
                 </motion.div>
               )}
@@ -509,7 +551,7 @@ export default function Pcs() {
                     {sessionMode === "open" ? "Max Cost" : "Session Cost"}
                   </span>
                   <span className="text-xl font-black text-foreground font-mono tracking-tighter italic">
-                    ₱{((getEffectiveDuration() / 60) * ((TIER_CONFIG as any)[selectedPc?.tier]?.rate || 0)).toFixed(2)}
+                    ₱{getRequestedAmount().toFixed(2)}
                   </span>
                 </div>
                 <div className="h-px bg-border" />
@@ -521,7 +563,7 @@ export default function Pcs() {
                     </span>
                   </div>
                   <span className="text-xs font-black text-primary font-mono italic">
-                    {new Date(Date.now() + getEffectiveDuration() * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {new Date(Date.now() + getEffectiveDurationSeconds() * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
               </div>
@@ -536,7 +578,7 @@ export default function Pcs() {
                     ? "bg-emerald-600 text-white hover:bg-emerald-500 shadow-emerald-600/30"
                     : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/30"
                 )}
-                disabled={isBooking || (sessionMode === "open" && walletBalance <= 0)}
+                disabled={isBooking || hasNoOpenTimeBalance || exceedsWalletBalance || getEffectiveDurationSeconds() <= 0}
               >
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12" />
                 {isBooking ? (

@@ -13,6 +13,12 @@ interface QrTrackingViewProps {
 
 export function QrTrackingView({ session, remainingSeconds }: QrTrackingViewProps) {
   const [, setLocation] = useLocation();
+  const durationSeconds = Number(session.durationSeconds || 0);
+  const elapsedSeconds = durationSeconds > 0 && remainingSeconds != null
+    ? Math.max(0, durationSeconds - remainingSeconds)
+    : Number(session.elapsedSeconds || 0);
+  const allocatedAmount = Number(session.allocatedAmount ?? session.maxCost ?? Infinity);
+  const spent = Math.min((elapsedSeconds / 3600) * Number(session.ratePerHour || 0), allocatedAmount);
 
   const formatTime = (seconds: number) => {
     if (seconds <= 0) return "00:00:00";
@@ -85,7 +91,7 @@ export function QrTrackingView({ session, remainingSeconds }: QrTrackingViewProp
               <div className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1.5 flex items-center gap-1.5">
                 <Wallet className="w-3 h-3" /> Spent
               </div>
-              <div className="font-mono text-xl font-black italic text-green-500 leading-none">₱{session.costSoFar?.toFixed(2) || "0.00"}</div>
+              <div className="font-mono text-xl font-black italic text-green-500 leading-none">₱{spent.toFixed(2)}</div>
             </div>
           </div>
 
