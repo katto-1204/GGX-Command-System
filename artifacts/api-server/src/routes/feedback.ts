@@ -3,7 +3,7 @@ import { db, feedbackTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
-import { getSessionUser } from "./auth";
+import { getSessionUser } from "./auth.js";
 
 const router = Router();
 

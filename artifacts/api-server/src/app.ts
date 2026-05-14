@@ -1,10 +1,19 @@
 import express, { type Express } from "express";
 import cors from "cors";
-import pinoHttp from "pino-http";
-import router from "./routes";
-import { logger } from "./lib/logger";
+import { pinoHttp } from "pino-http";
+import router from "./routes/index.js";
+import { logger } from "./lib/logger.js";
 
 const app: Express = express();
+const allowedOrigins = new Set([
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+  "http://localhost:4173",
+  "http://127.0.0.1:4173",
+  "https://quepon.vercel.app",
+  "https://ggx-quepon.vercel.app",
+]);
+const vercelPreviewOriginPattern = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i;
 
 app.use(
   pinoHttp({
@@ -25,7 +34,26 @@ app.use(
     },
   }),
 );
-app.use(cors());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.has(origin) || vercelPreviewOriginPattern.test(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-session-token"],
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

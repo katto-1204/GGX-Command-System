@@ -1,15 +1,15 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import authRouter from "./auth";
-import pcsRouter from "./pcs";
-import queueRouter from "./queue";
-import sessionsRouter from "./sessions";
-import promosRouter from "./promos";
-import feedbackRouter from "./feedback";
-import playersRouter from "./players";
-import menuRouter from "./menu";
-import dashboardRouter from "./dashboard";
-import settingsRouter from "./settings";
+import healthRouter from "./health.js";
+import authRouter from "./auth.js";
+import pcsRouter from "./pcs.js";
+import queueRouter from "./queue.js";
+import sessionsRouter from "./sessions.js";
+import promosRouter from "./promos.js";
+import feedbackRouter from "./feedback.js";
+import playersRouter from "./players.js";
+import menuRouter from "./menu.js";
+import dashboardRouter from "./dashboard.js";
+import settingsRouter from "./settings.js";
 
 const router: IRouter = Router();
 

@@ -220,6 +220,7 @@ DATABASE_URL=postgresql://<user>:<password>@<host>:5432/<database>?sslmode=requi
 SESSION_SECRET=<random-secret>
 PORT=8080
 WEB_PORT=5174
+VITE_API_URL=https://<your-deployed-backend-host>
 VITE_SUPABASE_URL=https://<your-project>.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon-key>
 ```
@@ -228,6 +229,7 @@ Notes:
 
 - `DATABASE_URL` and `SESSION_SECRET` are required for the API server.
 - The frontend reads `VITE_*` variables at build time if you use Supabase-backed features.
+- `VITE_API_URL` points the frontend to the deployed backend in production.
 - Keep `.env` and any database credentials out of version control.
 
 ## Scripts
@@ -255,7 +257,7 @@ Package-level scripts:
 - The frontend uses auth guards to redirect users into the correct role-specific area.
 - The API uses JSON request bodies and CORS is enabled.
 - Generated API client and schema files should be regenerated from the OpenAPI spec instead of editing generated output directly.
-- The current auth implementation uses signed bearer tokens and is compatible with Vercel serverless execution.
+- The current auth implementation uses signed bearer tokens sent in headers; the frontend should target the deployed backend through `VITE_API_URL`.
 - Session and queue logic are tied to PC availability and active session state, so changing a PC or session can affect several related tables.
 
 ## Reference Files

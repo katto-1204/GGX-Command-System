@@ -3,7 +3,7 @@ import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import { z } from "zod";
-import { logger } from "../lib/logger";
+import { logger } from "../lib/logger.js";
 
 const router = Router();
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;

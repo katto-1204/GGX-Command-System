@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "corepack pnpm --filter @workspace/api-server run build && corepack pnpm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "corepack pnpm --filter @workspace/api-server run build && corepack pnpm --filter @workspace/quepon run build",
+  "outputDirectory": "artifacts/quepon/dist",
+  "installCommand": "corepack pnpm install",
   "rewrites": [
     {
       "source": "/api/(.*)",

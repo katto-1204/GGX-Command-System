@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getSessionUser } from "./auth";
+import { getSessionUser } from "./auth.js";
 
 const router = Router();
 

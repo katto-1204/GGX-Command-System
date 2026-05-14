@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { apiUrl } from "@/lib/api-url";
 
 const STATUS_CONFIG = {
   available: { label: "ONLINE", color: "text-green-400", dot: "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]", bar: "bg-green-500", glow: "border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.05)]" },
@@ -74,7 +75,7 @@ export default function Pcs() {
     setIsBooking(true);
     try {
       const token = localStorage.getItem("quepon_token");
-      const response = await fetch("/api/sessions", {
+      const response = await fetch(apiUrl("/api/sessions"), {
         method: "POST",
         credentials: "include",
         headers: {
@@ -116,7 +117,7 @@ export default function Pcs() {
     if (!ownedPcToManage) return;
     try {
       const token = localStorage.getItem("quepon_token");
-      const response = await fetch(`/api/sessions/end-active`, {
+      const response = await fetch(apiUrl("/api/sessions/end-active"), {
         method: "POST",
         credentials: "include",
         headers: {
@@ -563,4 +564,3 @@ export default function Pcs() {
 
   );
 }
-

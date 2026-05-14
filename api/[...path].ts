@@ -1,1 +1,2 @@
-export { default } from "../artifacts/api-server/src/app";
+// @ts-nocheck
+export { default } from "../artifacts/api-server/dist/app.mjs";

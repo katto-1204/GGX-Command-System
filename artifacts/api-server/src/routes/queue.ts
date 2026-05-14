@@ -3,7 +3,7 @@ import { db, queueEntriesTable, usersTable, pcsTable, sessionsTable } from "@wor
 import { eq, and, or, inArray } from "drizzle-orm";
 import { z } from "zod";
 import crypto from "crypto";
-import { getSessionUser } from "./auth";
+import { getSessionUser } from "./auth.js";
 
 const router = Router();
 

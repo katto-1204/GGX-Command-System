@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, pcsTable, sessionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { getSessionUser } from "./auth";
+import { getSessionUser } from "./auth.js";
 import { randomUUID } from "crypto";
 
 const router = Router();

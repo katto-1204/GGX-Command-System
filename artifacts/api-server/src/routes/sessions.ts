@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, sessionsTable, pcsTable, usersTable, queueEntriesTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { getSessionUser } from "./auth";
+import { getSessionUser } from "./auth.js";
 
 const router = Router();
 
